@@ -19,4 +19,11 @@ Route::post('/request-link-zoom', 'RequestController@storeZoom')->name('request.
 Auth::routes();
 
 // 5. Dashboard Admin (opsional, bisa dikembangkan nanti)
+Auth::routes();
+
 Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/dashboard/search', 'HomeController@search')->name('dashboard.search');
+
+Route::group(['middleware' => 'auth'], function () {
+    
+});

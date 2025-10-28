@@ -272,8 +272,10 @@
                             <select class="form-control" name="items[0][item_id]" required>
                                 <option value="">-- Pilih Barang --</option>
                                 @if(isset($items))
-                                    @foreach($items as $id => $nama_barang)
-                                        <option value="{{ $id }}">{{ $nama_barang }}</option>
+                                    @foreach($items as $item)
+                                        <option value="{{ $item->id }}">
+                                            {{ $item->nama_barang }} — (Stok: {{ $item->jumlah }})
+                                        </option>
                                     @endforeach
                                 @else
                                     <option value="1">Contoh Barang A</option>
