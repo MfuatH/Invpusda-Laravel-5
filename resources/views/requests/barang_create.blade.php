@@ -226,7 +226,7 @@
                 @endif
 
                 <form action="{{ route('request.barang.store') }}" method="POST">
-
+                    {{ csrf_field() }}
                     <div class="form-group">
                         <i class="fas fa-user form-icon"></i>
                         <input type="text" class="form-control" id="nama_pemohon" name="nama_pemohon" value="{{ old('nama_pemohon') }}" placeholder="Nama Pemohon" required>

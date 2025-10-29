@@ -182,7 +182,7 @@
                 @endif
 
                 <form action="{{ route('request.zoom.store') }}" method="POST"> 
-
+                    {{ csrf_field() }}
                     <div class="form-group">
                         <i class="fas fa-user form-icon"></i>
                         <input type="text" class="form-control" id="nama_pemohon" name="nama_pemohon" value="{{ old('nama_pemohon') }}" placeholder="Nama Pemohon" required>
@@ -238,6 +238,11 @@
                                        onblur="(if(!this.value) this.type='text')">
                             </div>
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <i class="fas fa-video form-icon"></i>
+                        <input type="text" class="form-control" id="nama_rapat" name="nama_rapat" value="{{ old('nama_rapat') }}" placeholder="Nama / Topik Rapat" required>
                     </div>
 
                     <div class="form-group">

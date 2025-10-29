@@ -6,6 +6,7 @@ use App\Bidang;
 use App\Item;
 use App\ItemRequest;
 use App\Transaction;
+use App\RequestLinkZoom; // Using the correct Zoom request model
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,12 +17,14 @@ class RequestController extends Controller
 {
     public function landingPage()
     {
+        // Assuming this view contains links to createBarang and createZoom
         return view('landing_page');
     }
 
     public function index()
     {
         $user = Auth::user();
+        // This index typically shows ItemRequests, ZoomRequests may need a separate index
         $requestsQuery = ItemRequest::with(['item', 'bidang'])->latest();
 
         if ($user->role === 'admin_barang') {
@@ -36,8 +39,6 @@ class RequestController extends Controller
 
     public function createBarang()
     {
-        // $items = Item::where('jumlah', '>', 0)->orderBy('nama_barang')->get();
-        // $bidang = Bidang::orderBy('nama')->get();
         $items = Item::where('jumlah', '>', 0)
             ->orderBy('nama_barang')
             ->get();
@@ -81,6 +82,56 @@ class RequestController extends Controller
 
         return redirect()->route('landing-page')->with('success', 'Permintaan barang berhasil dikirim.');
     }
+    
+    // --- ZOOM REQUEST METHODS ---
+
+    public function createZoom()
+    {
+        // Load the list of Bidang (Departments) for the form
+        $bidang = Bidang::orderBy('nama')->pluck('nama', 'id');
+        // Render the view for Zoom Request form
+        return view('requests.zoom_create', compact('bidang')); 
+    }
+
+    public function storeZoom(Request $request)
+    {
+        $validated = $request->validate([
+            'nama_pemohon'  => 'required|string|max:255',
+            'nip'           => 'nullable|string|max:255',
+            'no_hp'         => 'required|string|max:25',
+            'bidang_id'     => 'required|exists:bidang,id',
+            // --- BARIS TAMBAHAN INI ---
+            'nama_rapat'    => 'required|string|max:255', // Validasi field baru
+            // --- END BARIS TAMBAHAN ---
+            'jadwal_mulai'  => 'required|date',
+            'jadwal_selesai'=> 'nullable|date|after_or_equal:jadwal_mulai',
+            'keterangan'    => 'nullable|string',
+        ]);
+
+        try {
+            DB::transaction(function () use ($validated) {
+                RequestLinkZoom::create([ 
+                    'nama_pemohon'   => $validated['nama_pemohon'],
+                    'nip'            => $validated['nip'],
+                    'no_hp'          => $validated['no_hp'],
+                    'bidang_id'      => $validated['bidang_id'],
+                    // --- BARIS TAMBAHAN INI ---
+                    'nama_rapat'     => $validated['nama_rapat'], // Simpan field baru
+                    // --- END BARIS TAMBAHAN ---
+                    'jadwal_mulai'   => $validated['jadwal_mulai'],
+                    'jadwal_selesai' => $validated['jadwal_selesai'] ?? null,
+                    'keterangan'     => $validated['keterangan'],
+                    'status'         => 'pending',
+                ]);
+            });
+        } catch (Exception $e) {
+            return back()->withErrors(['error' => 'Gagal menyimpan request Zoom: ' . $e->getMessage()])->withInput();
+        }
+
+        return redirect()->route('landing-page')->with('success', 'Permintaan link Zoom berhasil dikirim. Silakan tunggu konfirmasi.');
+    }
+    
+    // --- END ZOOM REQUEST METHODS ---
 
     public function approve(ItemRequest $request)
     {
@@ -157,4 +208,3 @@ class RequestController extends Controller
         return redirect()->route('requests.index')->with('success', 'Permintaan berhasil ditolak.');
     }
 }
-
