@@ -37,6 +37,8 @@ Route::middleware(['auth', 'role:super_admin,admin_barang'])
 
     // Manajemen Barang
     Route::resource('barang', 'ItemController');
+    // Tambah Stok (aksi dari halaman daftar barang)
+    Route::post('barang/add-stock', 'ItemController@addStock')->name('barang.addStock');
 
     // Approval Section
     Route::prefix('approvals')->group(function () {
@@ -55,6 +57,7 @@ Route::middleware(['auth', 'role:super_admin,admin_barang'])
     // Pengaturan (Settings)
     Route::prefix('settings')->group(function () {
         Route::get('template', 'SettingController@templateIndex')->name('template.index');
+        Route::post('template/update', 'SettingController@updateTemplate')->name('template.update');
         Route::get('response', 'SettingController@responseIndex')->name('response.index');
     });
 

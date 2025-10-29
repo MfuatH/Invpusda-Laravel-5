@@ -15,13 +15,14 @@ class ItemController extends Controller
 
     public function index()
     {
-        $requests = Item::all();
-        return view('admin_page.items.index', compact('requests'));
+        // Use pagination and consistent variable name expected by the view
+        $items = Item::orderBy('nama_barang')->paginate(15);
+        return view('admin_page.items.index', compact('items'));
     }
 
     public function create()
     {
-        return view('barang.create');
+        return view('admin_page.items.create');
     }
 
     public function store(Request $request)
@@ -41,12 +42,12 @@ class ItemController extends Controller
 
     public function show(Item $barang)
     {
-        return view('barang.show', compact('barang'));
+        return view('admin_page.items.show', compact('barang'));
     }
 
     public function edit(Item $barang)
     {
-        return view('barang.edit', compact('barang'));
+        return view('admin_page.items.edit', compact('barang'));
     }
 
     public function update(Request $request, Item $barang)
@@ -70,5 +71,27 @@ class ItemController extends Controller
 
         return redirect()->route('barang.index')
             ->with('success', 'Barang berhasil dihapus.');
+    }
+
+    /**
+     * Tambah stok barang (aksi dari halaman index)
+     */
+    public function addStock(Request $request)
+    {
+        $data = $request->validate([
+            'item_id' => 'required|integer|exists:items,id',
+            'add_amount' => 'required|integer|min:1',
+            'note' => 'nullable|string|max:255',
+        ]);
+
+        $item = Item::findOrFail($data['item_id']);
+
+        // Tambah stok
+        $item->jumlah = $item->jumlah + $data['add_amount'];
+        $item->save();
+
+        // Optional: you may want to record this change in a transaction/log table
+
+        return redirect()->route('barang.index')->with('success', "Stok untuk '{$item->nama_barang}' berhasil ditambah.");
     }
 }

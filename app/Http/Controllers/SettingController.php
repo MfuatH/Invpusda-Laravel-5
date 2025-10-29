@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Bidang;
+use Illuminate\Support\Facades\Auth;
 
 class SettingController extends Controller
 {
@@ -13,8 +15,15 @@ class SettingController extends Controller
 
     public function templateIndex()
     {
-        // Add your template settings logic here
-        return view('admin_page.settings.master_pesan');
+        // Load bidang templates depending on the logged in user's role
+        if (Auth::user()->role === 'super_admin') {
+            $bidangs = Bidang::orderBy('nama')->get();
+        } else {
+            $bidang = Auth::user()->bidang;
+            $bidangs = $bidang ? collect([$bidang]) : collect();
+        }
+
+        return view('admin_page.settings.master_pesan', compact('bidangs'));
     }
 
     public function responseIndex()
@@ -26,11 +35,13 @@ class SettingController extends Controller
     public function updateTemplate(Request $request)
     {
         $validated = $request->validate([
-            'template_name' => 'required|string',
-            'content' => 'required|string',
+            'bidang_id' => 'required|integer|exists:bidang,id',
+            'content' => 'nullable|string',
         ]);
 
-        // Add your template update logic here
+        $bidang = Bidang::findOrFail($validated['bidang_id']);
+        $bidang->pesan_template = $validated['content'];
+        $bidang->save();
 
         return back()->with('success', 'Template berhasil diperbarui.');
     }
