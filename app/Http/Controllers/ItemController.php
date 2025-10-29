@@ -16,7 +16,7 @@ class ItemController extends Controller
     public function index()
     {
         $requests = Item::all();
-        return view('admin_page.approvals.items', compact('requests'));
+        return view('admin_page.items.index', compact('requests'));
     }
 
     public function create()

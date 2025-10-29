@@ -34,7 +34,7 @@ class RequestController extends Controller
         }
 
         $requests = $requestsQuery->paginate(10);
-        return view('admin_page.items.index', compact('requests'));
+        return view('admin_page.approvals.items', compact('requests'));
     }
 
     public function createBarang()
