@@ -34,7 +34,7 @@ class RequestController extends Controller
         }
 
         $requests = $requestsQuery->paginate(10);
-        return view('requests.index', compact('requests'));
+        return view('admin_page.items.index', compact('requests'));
     }
 
     public function createBarang()
@@ -43,7 +43,7 @@ class RequestController extends Controller
             ->orderBy('nama_barang')
             ->get();
         $bidang = Bidang::orderBy('nama')->pluck('nama', 'id');
-        return view('requests.barang_create', compact('items', 'bidang'));
+        return view('admin_page.items.create', compact('items', 'bidang'));
     }
 
     public function storeBarang(Request $request)
