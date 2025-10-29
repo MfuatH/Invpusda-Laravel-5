@@ -133,8 +133,10 @@ class RequestController extends Controller
     
     // --- END ZOOM REQUEST METHODS ---
 
-    public function approve(ItemRequest $request)
+    // Ubah signature agar nama parameter cocok dengan route {reqBarang}
+    public function approve(ItemRequest $reqBarang)
     {
+        $request = $reqBarang; // opsional: buat alias agar kode lama tetap bekerja
         $admin = Auth::user();
 
         if ($admin->role === 'admin_barang') {
@@ -164,12 +166,11 @@ class RequestController extends Controller
 
             if ($request->no_hp) {
                 try {
-                    // Pastikan service 'WhatsAppService' ada di 'app/Services/'
                     $wa = app(\App\Services\WhatsAppService::class);
                     $message = "[Request Barang Disetujui]\nRequest barang Anda telah disetujui.\nBarang: {$request->item->nama_barang}\nJumlah: {$request->jumlah_request}\nTanggal: " . $request->created_at->format('d-m-Y H:i');
                     $wa->sendMessage($request->no_hp, $message);
                 } catch (Exception $wae) {
-                    // Log::error('Gagal kirim WA notif approve: ' . $wae->getMessage()); // Opsional
+                    // optional log
                 }
             }
         } catch (Exception $e) {
@@ -179,8 +180,10 @@ class RequestController extends Controller
         return redirect()->route('requests.index')->with('success', 'Permintaan berhasil disetujui.');
     }
 
-    public function reject(ItemRequest $request)
+    // Ubah juga reject agar nama parameter cocok
+    public function reject(ItemRequest $reqBarang)
     {
+        $request = $reqBarang; // alias
         $admin = Auth::user();
 
         if ($admin->role === 'admin_barang') {
@@ -198,7 +201,7 @@ class RequestController extends Controller
                     $message = "[Request Barang Ditolak]\nMaaf, request barang Anda ditolak.\nBarang: {$request->item->nama_barang}\nJumlah: {$request->jumlah_request}\nTanggal: " . $request->created_at->format('d-m-Y H:i');
                     $wa->sendMessage($request->no_hp, $message);
                 } catch (Exception $wae) {
-                    // Log::error('Gagal kirim WA notif reject: ' . $wae->getMessage()); // Opsional
+                    // optional log
                 }
             }
         } catch (Exception $e) {

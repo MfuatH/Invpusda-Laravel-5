@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-// 1. Salin semua 'use' statements dari DashboardController Anda
 use App\Item;
 use App\ItemRequest;
 use App\RequestLinkZoom;
@@ -13,135 +12,145 @@ use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('auth');
     }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index(Request $request)
+    public function index()
     {
-        $user = Auth::user();
-        $search = $request->get('search');
-
-        if (in_array($user->role, ['super_admin', 'admin_barang'])) {
-            $totalItems = Item::count();
-
-            if ($user->role === 'super_admin') {
-                $pendingRequests = ItemRequest::where('status', 'pending')->count();
-                $pendingZoomRequests = RequestLinkZoom::where('status', 'pending')->count();
-                $totalBarangMasuk = Transaction::where('tipe', 'masuk')->count();
-                $totalBarangKeluar = Transaction::where('tipe', 'keluar')->count();
-            } else {
-                $pendingRequests = ItemRequest::where('status', 'pending')
-                    ->whereHas('bidang', function ($q) use ($user) {
-                        $q->where('nama', $user->bidang);
-                    })
-                    ->count();
-
-                $pendingZoomRequests = RequestLinkZoom::where('status', 'pending')
-                    ->whereHas('bidang', function ($q) use ($user) {
-                        $q->where('nama', $user->bidang);
-                    })
-                    ->count();
-
-                $totalBarangMasuk = Transaction::where('tipe', 'masuk')
-                    ->whereHas('user', function ($q) use ($user) {
-                        $q->where('bidang', $user->bidang);
-                    })
-                    ->count();
-
-                $totalBarangKeluar = Transaction::where('tipe', 'keluar')
-                    ->whereHas('request', function ($rq) use ($user) {
-                        $rq->whereHas('bidang', function ($bq) use ($user) {
-                            $bq->where('nama', $user->bidang);
-                        });
-                    })
-                    ->count();
-            }
-
-            $stockQuery = Item::where('jumlah', '<', 10)->orderBy('jumlah', 'asc')->orderBy('nama_barang');
-            if ($search) {
-                $stockQuery->where('nama_barang', 'like', '%' . $search . '%');
-            }
-            $stockItems = $stockQuery->limit(10)->get();
-            $stockChartData = [
-                'labels' => $stockItems->pluck('nama_barang'),
-                'data' => $stockItems->pluck('jumlah'),
-                'satuan' => $stockItems->pluck('satuan'),
-            ];
-
-            $viewData = compact('totalItems', 'pendingRequests', 'pendingZoomRequests', 'totalBarangMasuk', 'totalBarangKeluar', 'stockChartData', 'search');
-            if ($user->role === 'super_admin') {
-                $viewData['totalUsers'] = User::count();
-            }
-
-            return view('dashboard', $viewData);
+        if (Auth::check() && in_array(Auth::user()->role, ['super_admin', 'admin_barang'])) {
+            return redirect()->route('dashboard.index');
         }
-
-        if ($user->role === 'user') {
-            $totalItems = Item::count();
-            $pendingRequests = ItemRequest::where('user_id', $user->id)->where('status', 'pending')->count();
-            $availableQuery = Item::where('jumlah', '>', 0)->orderBy('nama_barang');
-            if ($search) {
-                $availableQuery->where('nama_barang', 'like', '%' . $search . '%');
-            }
-            $availableItems = $availableQuery->limit(15)->get();
-            
-            $chartDataUser = [
-                'labels' => $availableItems->pluck('nama_barang'),
-                'data' => $availableItems->pluck('jumlah'),
-            ];
-            
-            return view('dashboard', compact('totalItems', 'pendingRequests', 'chartDataUser', 'search'));
-        }
+        return redirect()->route('landing-page');
     }
 
-    public function search(Request $request)
+    private function getAdminData($user, $search = null)
     {
-        $user = Auth::user();
-        $search = $request->get('search');
+        $data = [
+            'totalItems' => Item::count(),
+            'pendingRequests' => $this->getPendingRequests($user),
+            'pendingZoomRequests' => $this->getPendingZoomRequests($user),
+            'totalBarangMasuk' => $this->getTotalBarangMasuk($user),
+            'totalBarangKeluar' => $this->getTotalBarangKeluar($user),
+            'stockChartData' => $this->getStockChartData($search),
+        ];
 
-        if (in_array($user->role, ['super_admin', 'admin_barang'])) {
-            $stockQuery = Item::where('jumlah', '<', 10)->orderBy('jumlah', 'asc')->orderBy('nama_barang');
-            
-            if (!empty($search) && trim($search) !== '') {
-                $stockQuery->where('nama_barang', 'like', '%' . trim($search) . '%');
-            }
-            
-            $stockItems = $stockQuery->limit(10)->get();
-            
-            return response()->json([
-                'labels' => $stockItems->pluck('nama_barang'),
-                'data' => $stockItems->pluck('jumlah'),
-                'satuan' => $stockItems->pluck('satuan'),
-            ]);
+        if ($user->role === 'super_admin') {
+            $data['totalUsers'] = User::count();
         }
 
-        if ($user->role === 'user') {
-            $availableQuery = Item::where('jumlah', '>', 0)->orderBy('nama_barang');
-            
-            if (!empty($search) && trim($search) !== '') {
-                $availableQuery->where('nama_barang', 'like', '%' . trim($search) . '%');
-            }
-            
-            $availableItems = $availableQuery->limit(15)->get();
-            
-            return response()->json([
-                'labels' => $availableItems->pluck('nama_barang'),
-                'data' => $availableItems->pluck('jumlah'),
-            ]);
-        }
-
-        return response()->json(['labels' => [], 'data' => []]);
+        return $data;
     }
+
+    private function getUserData($user, $search = null)
+    {
+        return [
+            'totalItems' => Item::count(),
+            'pendingRequests' => ItemRequest::where('user_id', $user->id)
+                ->where('status', 'pending')
+                ->count(),
+            'chartDataUser' => $this->getUserChartData($search)
+        ];
+    }
+
+    private function getPendingRequests($user)
+    {
+        $query = ItemRequest::where('status', 'pending');
+        
+        if ($user->role !== 'super_admin') {
+            $query->whereHas('bidang', function ($q) use ($user) {
+                $q->where('nama', $user->bidang);
+            });
+        }
+
+        return $query->count();
+    }
+
+    private function getPendingZoomRequests($user)
+    {
+        $query = RequestLinkZoom::where('status', 'pending');
+        
+        if ($user->role !== 'super_admin') {
+            $query->whereHas('bidang', function ($q) use ($user) {
+                $q->where('nama', $user->bidang);
+            });
+        }
+
+        return $query->count();
+    }
+
+    private function getTotalBarangMasuk($user)
+    {
+        $query = Transaction::where('tipe', 'masuk');
+        
+        if ($user->role !== 'super_admin') {
+            $query->whereHas('user', function ($q) use ($user) {
+                $q->where('bidang', $user->bidang);
+            });
+        }
+
+        return $query->count();
+    }
+
+    private function getTotalBarangKeluar($user)
+    {
+        $query = Transaction::where('tipe', 'keluar');
+        
+        if ($user->role !== 'super_admin') {
+            $query->whereHas('request', function ($rq) use ($user) {
+                $rq->whereHas('bidang', function ($bq) use ($user) {
+                    $bq->where('nama', $user->bidang);
+                });
+            });
+        }
+
+        return $query->count();
+    }
+
+    private function getStockChartData($search = null)
+    {
+        $query = Item::where('jumlah', '<', 10)
+            ->orderBy('jumlah', 'asc')
+            ->orderBy('nama_barang');
+
+        if ($search) {
+            $query->where('nama_barang', 'like', '%' . $search . '%');
+        }
+
+        $items = $query->limit(10)->get();
+
+        return [
+            'labels' => $items->pluck('nama_barang'),
+            'data' => $items->pluck('jumlah'),
+            'satuan' => $items->pluck('satuan'),
+        ];
+    }
+
+    private function getUserChartData($search = null)
+    {
+        $query = Item::where('jumlah', '>', 0)
+            ->orderBy('nama_barang');
+
+        if ($search) {
+            $query->where('nama_barang', 'like', '%' . $search . '%');
+        }
+
+        $items = $query->limit(15)->get();
+
+        return [
+            'labels' => $items->pluck('nama_barang'),
+            'data' => $items->pluck('jumlah'),
+        ];
+    }
+
+    public function redirectHome()
+    {
+        if (auth()->check() && in_array(auth()->user()->role, ['super_admin', 'admin_barang'])) {
+            return redirect()->route('dashboard.index');
+        }
+
+        return redirect()->route('landing-page');
+    }
+
 }
