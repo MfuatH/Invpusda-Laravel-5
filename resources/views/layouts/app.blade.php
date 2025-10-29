@@ -234,9 +234,12 @@
                 <a href="{{ route('template.index') }}" class="list-group-item {{ request()->routeIs('template.*') ? 'active' : '' }}">
                     <i class="fas fa-file-alt"></i> Template
                 </a>
-                <a href="{{ route('response.index') }}" class="list-group-item {{ request()->routeIs('response.*') ? 'active' : '' }}">
-                    <i class="fas fa-reply"></i> Response
-                </a>
+                <form id="logout-form-sidebar" action="{{ route('logout') }}" method="POST">
+                    {{ csrf_field() }}
+                    <button type="submit" class="list-group-item text-left border-0 bg-transparent text-white w-100" style="cursor:pointer;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
             </div>
         </div>
         @endauth
@@ -297,14 +300,14 @@
                                         Dashboard
                                     </a>
                                     <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
+                                    <!-- <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                         <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                         Logout
                                     </a>
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
                                         {{ csrf_field() }}
-                                    </form>
+                                    </form> -->
                                 </div>
                             </li>
                             @endguest

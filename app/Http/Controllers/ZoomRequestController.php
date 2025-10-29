@@ -24,7 +24,7 @@ class ZoomRequestController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('zoom.requests.index', compact('requests'));
+        return view('admin_page.approvals.zoom', compact('requests'));
     }
 
     public function approve(RequestLinkZoom $reqZoom)

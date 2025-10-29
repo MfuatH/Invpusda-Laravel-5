@@ -14,13 +14,13 @@ class SettingController extends Controller
     public function templateIndex()
     {
         // Add your template settings logic here
-        return view('settings.template');
+        return view('admin_page.settings.master_pesan');
     }
 
     public function responseIndex()
     {
         // Add your response settings logic here
-        return view('settings.response');
+        return view('admin_page.settings.index');
     }
 
     public function updateTemplate(Request $request)
