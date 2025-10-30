@@ -47,7 +47,7 @@ class RequestController extends Controller
             ->orderBy('nama_barang')
             ->get();
         $bidang = Bidang::orderBy('nama')->pluck('nama', 'id');
-        return view('admin_page.items.create', compact('items', 'bidang'));
+        return view('requests.barang_create', compact('items', 'bidang'));
     }
 
     public function storeBarang(Request $request)
@@ -79,6 +79,57 @@ class RequestController extends Controller
                         'status'         => 'pending',
                     ]);
                 }
+                // Notifikasi ke admin barang sesuai bidang
+                $admin = \App\User::where('role', 'admin_barang')
+                    ->where('bidang_id', $validated['bidang_id'])
+                    ->first();
+                if ($admin && $admin->no_hp) {
+                    $fontte = app(\App\Services\FontteService::class);
+                    $msg = "[Permintaan Barang Baru]\nAda permintaan barang baru dari {$validated['nama_pemohon']} (Bidang ID: {$validated['bidang_id']}). Silakan cek aplikasi.";
+                    $fontte->sendMessage($admin->no_hp, $msg);
+                }
+            });
+        } catch (Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()])->withInput();
+        }
+
+        return redirect()->route('landing-page')->with('success', 'Permintaan barang berhasil dikirim.');
+        $validated = $request->validate([
+            'nama_pemohon' => 'required|string|max:255',
+            'nip' => 'nullable|string|max:255',
+            'no_hp' => 'required|string|max:25',
+            'bidang_id' => 'required|exists:bidang,id',
+            'items' => 'required|array|min:1',
+            'items.*.item_id' => 'required|exists:items,id',
+            'items.*.jumlah_request' => 'required|integer|min:1',
+        ]);
+
+        try {
+            DB::transaction(function () use ($validated) {
+                foreach ($validated['items'] as $reqItem) {
+                    $item = Item::findOrFail($reqItem['item_id']);
+                    if ($reqItem['jumlah_request'] > $item->jumlah) {
+                        throw new Exception('Stok untuk barang "' . $item->nama_barang . '" tidak mencukupi.');
+                    }
+                    ItemRequest::create([
+                        'nama_pemohon'   => $validated['nama_pemohon'],
+                        'nip'            => $validated['nip'],
+                        'no_hp'          => $validated['no_hp'],
+                        'bidang_id'      => $validated['bidang_id'],
+                        'item_id'        => $reqItem['item_id'],
+                        'jumlah_request' => $reqItem['jumlah_request'],
+                        'status'         => 'pending',
+                    ]);
+                }
+                // Notifikasi ke admin barang sesuai bidang
+                $admin = \App\User::where('role', 'admin_barang')
+                    ->where('bidang_id', $validated['bidang_id'])
+                    ->first();
+                if ($admin && $admin->no_hp) {
+                    $fontte = app(\App\Services\FontteService::class);
+                    $msg = "[Permintaan Barang Baru]\nAda permintaan barang baru dari {$validated['nama_pemohon']} (Bidang ID: {$validated['bidang_id']}). Silakan cek aplikasi.";
+                    $fontte->sendMessage($admin->no_hp, $msg);
+                }
             });
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()])->withInput();
@@ -104,9 +155,7 @@ class RequestController extends Controller
             'nip'           => 'nullable|string|max:255',
             'no_hp'         => 'required|string|max:25',
             'bidang_id'     => 'required|exists:bidang,id',
-            // --- BARIS TAMBAHAN INI ---
-            'nama_rapat'    => 'required|string|max:255', // Validasi field baru
-            // --- END BARIS TAMBAHAN ---
+            'nama_rapat'    => 'required|string|max:255',
             'jadwal_mulai'  => 'required|date',
             'jadwal_selesai'=> 'nullable|date|after_or_equal:jadwal_mulai',
             'keterangan'    => 'nullable|string',
@@ -114,19 +163,26 @@ class RequestController extends Controller
 
         try {
             DB::transaction(function () use ($validated) {
-                RequestLinkZoom::create([ 
+                $created = RequestLinkZoom::create([
                     'nama_pemohon'   => $validated['nama_pemohon'],
                     'nip'            => $validated['nip'],
                     'no_hp'          => $validated['no_hp'],
                     'bidang_id'      => $validated['bidang_id'],
-                    // --- BARIS TAMBAHAN INI ---
-                    'nama_rapat'     => $validated['nama_rapat'], // Simpan field baru
-                    // --- END BARIS TAMBAHAN ---
+                    'nama_rapat'     => $validated['nama_rapat'],
                     'jadwal_mulai'   => $validated['jadwal_mulai'],
                     'jadwal_selesai' => $validated['jadwal_selesai'] ?? null,
                     'keterangan'     => $validated['keterangan'],
                     'status'         => 'pending',
                 ]);
+                // Notifikasi ke admin barang sesuai bidang
+                $admin = \App\User::where('role', 'admin_barang')
+                    ->where('bidang_id', $validated['bidang_id'])
+                    ->first();
+                if ($admin && $admin->no_hp) {
+                    $fontte = app(\App\Services\FontteService::class);
+                    $msg = "[Permintaan Zoom Baru]\nAda permintaan link Zoom baru dari {$validated['nama_pemohon']} (Bidang ID: {$validated['bidang_id']}). Silakan cek aplikasi.";
+                    $fontte->sendMessage($admin->no_hp, $msg);
+                }
             });
         } catch (Exception $e) {
             return back()->withErrors(['error' => 'Gagal menyimpan request Zoom: ' . $e->getMessage()])->withInput();

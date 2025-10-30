@@ -185,7 +185,7 @@
                             <tbody>
                                 @foreach($data['recentTransactions'] as $transaction)
                                 <tr>
-                                    <td>{{ $transaction->tanggal->format('d/m/Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($transaction->tanggal)->format('d/m/Y') }}</td>
                                     <td>{{ $transaction->item->nama_barang }}</td>
                                     <td>{{ $transaction->jumlah }}</td>
                                     <td>

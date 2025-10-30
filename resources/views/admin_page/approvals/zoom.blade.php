@@ -121,7 +121,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <form action="" method="POST" id="approveForm">
-                @csrf
+                {{ csrf_field() }}
                 <div class="modal-header">
                     <h5 class="modal-title" id="approveModalLabel">Konfirmasi Persetujuan</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -161,7 +161,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <form action="" method="POST" id="rejectForm">
-                @csrf
+                {{ csrf_field() }}
                 <div class="modal-header">
                     <h5 class="modal-title" id="rejectModalLabel">Konfirmasi Penolakan</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
