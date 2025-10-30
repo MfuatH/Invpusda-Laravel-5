@@ -12,6 +12,27 @@
         </h4>
     </div>
 
+    {{-- Session Alert (PENTING: Pastikan ini ada untuk notifikasi sukses/error) --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @foreach ($errors->all() as $error)
+                {{ $error }}<br>
+            @endforeach
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
     {{-- Card daftar permintaan --}}
     <div class="card shadow-sm w-100">
         <div class="card-body">
@@ -55,7 +76,13 @@
                                         @endif
                                     </div>
                                 </td>
-                                <td><span class="text-dark font-weight-bold">{{ ucfirst($r->status) }}</span></td>
+                                <td>
+                                    <span class="badge 
+                                        @if($r->status === 'approved') badge-success
+                                        @elseif($r->status === 'rejected') badge-danger
+                                        @else badge-warning @endif
+                                        font-weight-bold">{{ ucfirst($r->status) }}</span>
+                                </td>
                                 <td>
                                     @if($r->status === 'pending')
                                         <div class="d-flex justify-content-center">
@@ -76,7 +103,13 @@
                                             </button>
                                         </div>
                                     @else
-                                        <span class="text-secondary">-</span>
+                                        @if($r->status === 'approved' && $r->link_zoom)
+                                            <a href="{{ $r->link_zoom }}" target="_blank" class="btn btn-sm btn-info">
+                                                <i class="fas fa-link"></i> Link Tersedia
+                                            </a>
+                                        @else
+                                            <span class="text-secondary">-</span>
+                                        @endif
                                     @endif
                                 </td>
                             </tr>
@@ -88,9 +121,8 @@
                 {{-- Pagination --}}
                 @if($requests->hasPages())
                 <div class="d-flex justify-content-between align-items-center mt-3">
-                    <div>
-                        Menampilkan {{ $requests->firstItem() }} sampai {{ $requests->lastItem() }} 
-                        dari {{ $requests->total() }} permintaan
+                    <div class="small text-muted">
+                        Menampilkan **{{ $requests->firstItem() }}** sampai **{{ $requests->lastItem() }}** dari total **{{ $requests->total() }}** permintaan
                     </div>
                     {{ $requests->links() }}
                 </div>
@@ -100,15 +132,15 @@
     </div>
 </div>
 
-<!-- Approve Modal -->
 <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="approveModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <form id="approveForm" method="POST">
                 {{ csrf_field() }}
-                <div class="modal-header">
+                {{-- PENTING: Hapus @method('PUT') karena Anda menggunakan Route::post --}}
+                <div class="modal-header bg-success text-white">
                     <h5 class="modal-title" id="approveModalLabel">Konfirmasi Persetujuan</h5>
-                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
                     <p>Anda akan menyetujui permintaan Link Zoom berikut:</p>
@@ -119,11 +151,7 @@
                     </div>
                     <div class="form-group">
                         <label>Link Zoom Meeting <span class="text-danger">*</span></label>
-                        <input type="text" name="link_zoom" class="form-control" required placeholder="https://zoom.us/j/...">
-                    </div>
-                    <div class="form-group">
-                        <label>Catatan (Opsional)</label>
-                        <textarea name="note" class="form-control" rows="3"></textarea>
+                        <input type="url" name="link_zoom" class="form-control" required placeholder="https://zoom.us/j/...">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -135,15 +163,15 @@
     </div>
 </div>
 
-<!-- Reject Modal -->
 <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <form id="rejectForm" method="POST">
                 {{ csrf_field() }}
-                <div class="modal-header">
+                {{-- PENTING: Hapus @method('PUT') karena Anda menggunakan Route::post --}}
+                <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title" id="rejectModalLabel">Konfirmasi Penolakan</h5>
-                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
                     <p>Anda akan menolak permintaan Link Zoom berikut:</p>
@@ -169,9 +197,25 @@
 @push('scripts')
 <script>
 $(function(){
+    
+    // Gunakan fungsi untuk mendapatkan URL APPROVE final
+    // Kita akan biarkan route helper menghasilkan URL lengkap, dan kita hanya perlu ID-nya.
+    // Contoh template URL: http://127.0.0.1:8000/dashboard/zoom/PLACEHOLDER/approve
+    const approveTemplate = '{{ route("zoom.requests.approve", ["reqZoom" => "PLACEHOLDER"]) }}';
+    
+    // Gunakan fungsi untuk mendapatkan URL REJECT final
+    // Contoh template URL: http://127.0.0.1:8000/dashboard/zoom/requests/PLACEHOLDER/reject
+    const rejectTemplate = '{{ route("zoom.requests.reject", ["reqZoom" => "PLACEHOLDER"]) }}';
+
     $('.approve-btn').on('click', function(){
         var id = $(this).data('id');
-        $('#approveForm').attr('action', '/dashboard/approvals/zoom/' + id + '/approve');
+        
+        // Ganti PLACEHOLDER dengan ID yang sebenarnya
+        const finalApproveUrl = approveTemplate.replace('PLACEHOLDER', id);
+        
+        // Mengatur action form
+        $('#approveForm').attr('action', finalApproveUrl);
+        
         $('#approve-meeting-name').text($(this).data('meeting'));
         $('#approve-meeting-time').text($(this).data('time'));
         $('#approve-requester-name').text($(this).data('name'));
@@ -179,7 +223,13 @@ $(function(){
 
     $('.reject-btn').on('click', function(){
         var id = $(this).data('id');
-        $('#rejectForm').attr('action', '/dashboard/approvals/zoom/' + id + '/reject');
+        
+        // Ganti PLACEHOLDER dengan ID yang sebenarnya
+        const finalRejectUrl = rejectTemplate.replace('PLACEHOLDER', id);
+        
+        // Mengatur action form
+        $('#rejectForm').attr('action', finalRejectUrl);
+        
         $('#reject-meeting-name').text($(this).data('meeting'));
         $('#reject-requester-name').text($(this).data('name'));
     });
@@ -189,44 +239,20 @@ $(function(){
 
 @push('styles')
 <style>
-.table {
-    font-size: 14px;
-    background: #fff;
-}
-.table thead th {
-    background-color: #1f2937; /* Header gelap */
-    color: #fff;
-    font-weight: 600;
-    text-align: center;
-}
-.table tbody tr td {
-    background-color: #ffffff; /* Isi putih */
-    color: #333; /* Teks isi abu gelap */
-    vertical-align: middle;
-}
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: #f8f9fa; /* Baris abu muda */
-}
-.btn-sm {
-    font-size: 13px;
-    padding: 5px 10px;
-}
-.alert-info, .alert-warning {
-    font-size: 14px;
-    margin-bottom: 10px;
-}
-.text-dark {
-    color: #444 !important; /* Warna status abu gelap */
-}
-.card {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-}
-.card-body {
-    padding: 20px;
-}
-h4 {
-    color: #1f2937;
-}
+/* ... (Style CSS Anda) ... */
+.table { font-size: 14px; background: #fff; }
+.table thead th { background-color: #2c3e50; color: #fff; font-weight: 600; text-align: center; }
+.table tbody tr td { vertical-align: middle; }
+.table-striped tbody tr:nth-of-type(odd) { background-color: #f8f9fa; }
+.badge { border-radius: 10px; font-size: 0.8rem; padding: 6px 10px; }
+
+.badge-warning { background-color: #ffc107; color: #333; }
+.badge-success { background-color: #28a745; color: #fff; }
+.badge-danger { background-color: #dc3545; color: #fff; }
+.badge-info { background-color: #17a2b8; color: #fff; }
+
+.modal-header.bg-success { background-color: #28a745 !important; }
+.modal-header.bg-danger { background-color: #dc3545 !important; }
+.modal-content { border-radius: 10px; }
 </style>
 @endpush

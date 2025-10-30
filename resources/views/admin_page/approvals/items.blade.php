@@ -146,9 +146,22 @@
 @push('scripts')
 <script>
 $(function(){
+    // Mengambil template URL dari route helper.
+    // Ini akan menghasilkan URL lengkap dari Laravel (misalnya: http://.../dashboard/approvals/barang/PLACEHOLDER/approve)
+    const approveTemplate = '{{ route("requests.approve", ["reqBarang" => "PLACEHOLDER"]) }}';
+    const rejectTemplate = '{{ route("requests.reject", ["reqBarang" => "PLACEHOLDER"]) }}';
+    
+    // Fungsi untuk mendapatkan URL final dengan mengganti placeholder dengan ID
+    function getFinalUrl(template, id) {
+        return template.replace('PLACEHOLDER', id);
+    }
+
     $('.approve-btn').on('click', function(){
         var id = $(this).data('id');
-        $('#approveForm').attr('action', '/dashboard/approvals/barang/' + id + '/approve');
+        
+        // PENTING: Menggunakan route helper untuk mendapatkan URL yang benar
+        $('#approveForm').attr('action', getFinalUrl(approveTemplate, id));
+        
         $('#approve-item-name').text($(this).data('item'));
         $('#approve-item-qty').text($(this).data('qty'));
         $('#approve-requester-name').text($(this).data('name'));
@@ -156,7 +169,10 @@ $(function(){
 
     $('.reject-btn').on('click', function(){
         var id = $(this).data('id');
-        $('#rejectForm').attr('action', '/dashboard/approvals/barang/' + id + '/reject');
+        
+        // PENTING: Menggunakan route helper untuk mendapatkan URL yang benar
+        $('#rejectForm').attr('action', getFinalUrl(rejectTemplate, id));
+        
         $('#reject-item-name').text($(this).data('item'));
         $('#reject-requester-name').text($(this).data('name'));
     });

@@ -48,12 +48,12 @@ Route::middleware(['auth', 'role:super_admin,admin_barang'])
 
         // Approval Barang
         Route::get('barang', 'RequestController@index')->name('requests.index');
-        Route::post('/requests/{reqBarang}/reject', 'RequestController@reject')->name('requests.reject');
+        Route::post('barang/{reqBarang}/reject', 'RequestController@reject')->name('requests.reject');
         Route::post('barang/{reqBarang}/approve', 'RequestController@approve')->name('requests.approve');
 
         // Approval Zoom
         Route::get('zoom', 'ZoomRequestController@index')->name('zoom.requests.index');
-        Route::post('/zoom/requests/{reqZoom}/reject', 'RequestLinkZoomController@reject')->name('zoom.requests.reject');
+        Route::post('/zoom/requests/{reqZoom}/reject', 'ZoomRequestController@reject')->name('zoom.requests.reject');
         Route::post('zoom/{reqZoom}/approve', 'ZoomRequestController@approve')->name('zoom.requests.approve');
     });
 

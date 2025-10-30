@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Item;
+use App\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class ItemController extends Controller
 {
@@ -81,17 +83,30 @@ class ItemController extends Controller
         $data = $request->validate([
             'item_id' => 'required|integer|exists:items,id',
             'add_amount' => 'required|integer|min:1',
-            'note' => 'nullable|string|max:255',
+            'note' => 'required|string|max:255', 
         ]);
 
-        $item = Item::findOrFail($data['item_id']);
+        try {
+            $item = Item::findOrFail($data['item_id']);
 
-        // Tambah stok
-        $item->jumlah = $item->jumlah + $data['add_amount'];
-        $item->save();
+            $item->increment('jumlah', $data['add_amount']);
 
-        // Optional: you may want to record this change in a transaction/log table
+            Transaction::create([
+                'item_id'    => $item->id,
+                'jumlah'     => $data['add_amount'],
+                'tipe'       => 'masuk', 
+                'tanggal'    => Carbon::now(),
+                'user_id'    => Auth::id(), 
+                'keterangan' => $data['note'], 
+            ]);
 
-        return redirect()->route('barang.index')->with('success', "Stok untuk '{$item->nama_barang}' berhasil ditambah.");
+            return redirect()->route('barang.index')
+                             ->with('success', "Stok untuk '{$item->nama_barang}' berhasil ditambah.");
+                             
+        } catch (\Exception $e) {
+            return redirect()->route('barang.index')
+                             ->withErrors(['error' => 'Gagal memproses stok: ' . $e->getMessage()])
+                             ->withInput();
+        }
     }
 }

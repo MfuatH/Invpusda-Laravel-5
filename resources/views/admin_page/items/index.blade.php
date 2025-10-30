@@ -5,6 +5,32 @@
 @section('content')
 <div class="container-fluid px-4">
 
+    {{-- 💡 PERBAIKAN: SESSION ALERTS (Untuk menampilkan pesan sukses/gagal dari Controller) --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle mr-1"></i> {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+    
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle mr-1"></i> Gagal memproses permintaan. Silakan periksa formulir Anda.
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {{-- Skrip untuk menampilkan kembali modal jika terjadi error validasi --}}
+        <script> 
+            $(document).ready(function() { 
+                // Asumsi error hanya terjadi di modal addStock, jika ada error dari form lain, ini bisa menyebabkan masalah.
+                $('#modalAddStock').modal('show'); 
+            }); 
+        </script>
+    @endif
+
     {{-- Header --}}
     <div class="mb-3">
         <h4 class="font-weight-bold mb-3 d-flex align-items-center">
@@ -30,7 +56,7 @@
                 {{-- Search --}}
                 <form action="{{ route('barang.index') }}" method="GET" class="form-inline mb-2">
                     <input type="text" name="search" class="form-control form-control-sm mr-2"
-                           placeholder="Cari barang..." value="{{ request('search') }}">
+                            placeholder="Cari barang..." value="{{ request('search') }}">
                     <button type="submit" class="btn btn-primary btn-sm">Cari</button>
                 </form>
             </div>
@@ -65,6 +91,8 @@
                                     {{-- Tombol Stok --}}
                                     <button type="button" 
                                             class="btn btn-link text-primary p-0 btn-sm btn-add-stock d-flex align-items-center"
+                                            data-toggle="modal" {{-- 💡 PERBAIKAN: Tambahkan toggle modal --}}
+                                            data-target="#modalAddStock" {{-- 💡 PERBAIKAN: Target ke ID Modal --}}
                                             data-id="{{ $item->id }}" 
                                             data-name="{{ $item->nama_barang }}" 
                                             data-amount="{{ $item->jumlah }}">
@@ -79,8 +107,10 @@
 
                                     {{-- Tombol Hapus --}}
                                     <form action="{{ route('barang.destroy', $item->id) }}" 
-                                          method="POST" 
-                                          class="d-inline m-0 p-0">
+                                            method="POST" 
+                                            class="d-inline m-0 p-0">
+                                        {{ csrf_field() }}
+                                        {{ method_field('DELETE') }} {{-- Pastikan Anda menggunakan DELETE method spoofing --}}
                                         <button type="submit" 
                                                 class="btn btn-link text-danger p-0 btn-sm" 
                                                 onclick="return confirm('Yakin ingin menghapus barang ini?')">
@@ -118,7 +148,9 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <form action="{{ route('barang.addStock') }}" method="POST">
-                @csrf
+                {{-- Gunakan metode ini untuk memastikan token ada dan tidak terganggu --}}
+                <input type="hidden" name="_token" value="{{ csrf_token() }}"> 
+                
                 <input type="hidden" name="item_id" id="modal_item_id">
 
                 <div class="modal-header bg-primary text-white">
@@ -138,12 +170,22 @@
 
                     <div class="form-group">
                         <label>Jumlah yang Ditambahkan</label>
-                        <input type="number" name="add_amount" id="add_amount" class="form-control" min="1" required>
+                        {{-- 💡 PERBAIKAN: Tambahkan value error lama jika ada --}}
+                        <input type="number" name="add_amount" id="add_amount" class="form-control @if($errors->has('add_amount')) is-invalid @endif" 
+                                min="1" required value="{{ old('add_amount') }}">
+                        @if($errors->has('add_amount'))
+                            <div class="invalid-feedback">{{ $errors->first('add_amount') }}</div>
+                        @endif
                     </div>
 
                     <div class="form-group">
-                        <label>Catatan (Opsional)</label>
-                        <input type="text" name="note" id="note" class="form-control">
+                        <label>Catatan (Wajib Diisi untuk Log)</label>
+                        {{-- 💡 PERBAIKAN: Catatan dibuat REQUIRED untuk log transaksi --}}
+                        <input type="text" name="note" id="note" class="form-control @if($errors->has('note')) is-invalid @endif" 
+                                required value="{{ old('note') }}">
+                        @if($errors->has('note'))
+                            <div class="invalid-feedback">{{ $errors->first('note') }}</div>
+                        @endif
                     </div>
                 </div>
 
@@ -160,18 +202,56 @@
 @push('scripts')
 <script>
 $(function() {
+    // 💡 PERBAIKAN: Menambahkan toggle modal di JS agar lebih rapi
     $('.btn-add-stock').on('click', function() {
         var id = $(this).data('id');
         var name = $(this).data('name');
         var amount = $(this).data('amount');
 
         $('#modal_item_id').val(id);
-        $('#modal_item_name').text(name);
+        $('#modal_item_name').text('Menambah Stok untuk: ' + name);
         $('#current_amount').val(amount);
-        $('#add_amount').val('');
+        $('#add_amount').val(''); // Kosongkan input jumlah
+        $('#note').val(''); // Kosongkan input catatan
 
         $('#modalAddStock').modal('show');
     });
+    
+    // 💡 PERBAIKAN: Jika ada error validasi saat submit, kita isi ulang data modal
+    @if ($errors->any() && old('item_id'))
+        $(document).ready(function() {
+            var id = "{{ old('item_id') }}";
+            var amount = $('.btn-add-stock[data-id="' + id + '"]').data('amount');
+            var name = $('.btn-add-stock[data-id="' + id + '"]').data('name');
+
+            $('#modal_item_id').val(id);
+            $('#modal_item_name').text('Menambah Stok untuk: ' + name);
+            $('#current_amount').val(amount);
+            // Nilai add_amount dan note diisi otomatis oleh old() di form
+            
+            $('#modalAddStock').modal('show');
+        });
+    @endif
 });
 </script>
+@endpush
+
+@push('styles')
+<style>
+/* ... (Style CSS Anda) ... */
+.table {
+    font-size: 14px;
+    background: #fff;
+}
+.table thead th {
+    background-color: #1f2937; /* Tetap gelap */
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+}
+/* ... (sisa style) ... */
+.invalid-feedback {
+    display: block; /* Memastikan feedback error muncul */
+}
+</style>
 @endpush
