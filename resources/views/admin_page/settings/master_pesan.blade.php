@@ -1,120 +1,101 @@
 @extends('layouts.app')
 
-@section('title', 'Master Template Pesan')
+@section('title', 'Master Pesan')
 
 @section('content')
-<div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Master Template Pesan</h1>
+<div class="container-fluid px-4">
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Pengaturan Template Notifikasi Sistem</h6>
+    {{-- Judul Halaman --}}
+    <div class="mb-3">
+        <h4 class="font-weight-bold mb-3 d-flex align-items-center">
+            <i class="fas fa-envelope text-primary mr-2"></i> Master Pesan
+        </h4>
+    </div>
+
+    {{-- Card Panduan --}}
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body bg-light" style="border-left: 5px solid #2563eb;">
+            <h6 class="font-weight-bold mb-3">
+                💡 Cara Menggunakan Template
+            </h6>
+            <p class="mb-2">Gunakan placeholder di bawah ini di dalam pesan Anda. Sistem akan otomatis menggantinya dengan data sesuai saat request disetujui.</p>
+            <ul class="list-unstyled mb-0 text-secondary">
+                <li><code>@nama</code> : Nama pemohon.</li>
+                <li><code>@kegiatan</code> : Nama kegiatan/keterangan.</li>
+                <li><code>@tanggal</code> : Tanggal pelaksanaan.</li>
+                <li><code>@link</code> : Link Zoom yang disetujui.</li>
+            </ul>
         </div>
+    </div>
+
+    {{-- Card Form Master Pesan --}}
+    <div class="card shadow-sm border-0">
         <div class="card-body">
-            @if (Auth::user()->role === 'admin_barang')
-            <div class="alert alert-info">Anda hanya dapat melihat dan mengelola template pesan Bidang Anda (jika diizinkan).</div>
-            @endif
-            {{-- Form dan Daftar Template Pesan --}}
-            <p>Super Admin melihat semua template. Admin Barang hanya melihat template untuk bidang mereka.</p>
+            <h6 class="font-weight-bold text-primary mb-3">Kelola Master Pesan</h6>
 
             @if(session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
 
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead>
-                        <tr>
-                            <th style="width:40px">No</th>
-                            <th>Bidang</th>
-                            <th>Deskripsi Template</th>
-                            <th style="width:120px">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($bidangs as $i => $bidang)
-                        <tr>
-                            <td>{{ $i + 1 }}</td>
-                            <td>{{ $bidang->nama }}</td>
-                            <td>
-                                @if($bidang->pesan_template)
-                                    <div class="text-truncate" style="max-width:600px;">{!! nl2br(e(\Illuminate\Support\Str::limit($bidang->pesan_template, 250))) !!}</div>
-                                @else
-                                    <span class="text-muted">Belum ada template</span>
-                                @endif
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-primary btn-edit-template" 
-                                        data-id="{{ $bidang->id }}" data-name="{{ $bidang->nama }}" data-content="{{ e($bidang->pesan_template) }}">
-                                    <i class="fas fa-edit mr-1"></i> Edit
-                                </button>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="4" class="text-center text-muted">Tidak ada data bidang.</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
+            <form action= method="POST">
+                {{ csrf_field() }}
 
-<!-- Edit Template Modal -->
-<div class="modal fade" id="editTemplateModal" tabindex="-1" role="dialog" aria-labelledby="editTemplateModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <form action="{{ route('template.update') }}" method="POST" id="templateForm">
-                @csrf
-                <input type="hidden" name="bidang_id" id="modal_bidang_id">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editTemplateModalLabel">Edit Template Pesan</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                {{-- Pilih Bidang --}}
+                <div class="form-group">
+                    <label class="font-weight-bold">Pilih Bidang</label>
+                    <select name="bidang_id" class="form-control" required>
+                        <option value="">-- Pilih Bidang --</option>
+                        @foreach($bidangs as $bidang)
+                            <option value="{{ $bidang->id }}">{{ $bidang->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Textarea Template --}}
+                <div class="form-group">
+                    <label class="font-weight-bold">Master Pesan</label>
+                    <textarea name="pesan_template" rows="4" class="form-control" placeholder="Contoh: Halo @nama, permintaan link Zoom untuk kegiatan '@kegiatan' pada tanggal @tanggal telah disetujui. Berikut linknya: @link. Terima kasih." required>{{ old('pesan_template') }}</textarea>
+                </div>
+
+                {{-- Tombol Simpan --}}
+                <div class="text-right">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fas fa-save mr-1"></i> Simpan Master Pesan
                     </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Bidang</label>
-                        <input type="text" id="modal_bidang_name" class="form-control" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="modal_content">Isi Template</label>
-                        <textarea name="content" id="modal_content" rows="8" class="form-control" placeholder="Gunakan placeholder seperti {nama}, {tanggal}, dsb."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                 </div>
             </form>
         </div>
     </div>
-    </div>
-
-@push('scripts')
-<script>
-$(function(){
-    $('.btn-edit-template').click(function(){
-        var id = $(this).data('id');
-        var name = $(this).data('name');
-        var content = $(this).data('content');
-
-        $('#modal_bidang_id').val(id);
-        $('#modal_bidang_name').val(name);
-        $('#modal_content').val(content);
-
-        $('#editTemplateModal').modal('show');
-    });
-});
-</script>
-@endpush
+</div>
+@endsection
 
 @push('styles')
 <style>
-    .text-truncate { white-space: normal; }
+h4 {
+    color: #1f2937;
+}
+.card {
+    border-radius: 10px;
+}
+.card-body {
+    background-color: #ffffff;
+    padding: 20px;
+}
+.bg-light {
+    background-color: #f8faff !important;
+}
+ul li code {
+    background-color: #e9ecef;
+    padding: 3px 6px;
+    border-radius: 4px;
+}
+.btn-primary {
+    background-color: #6366f1;
+    border-color: #6366f1;
+}
+.btn-primary:hover {
+    background-color: #4f46e5;
+    border-color: #4f46e5;
+}
 </style>
 @endpush
-@endsection

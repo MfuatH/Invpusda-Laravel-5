@@ -1,79 +1,91 @@
 @extends('layouts.app')
 
-@section('title', 'Riwayat Transaksi & Aktivitas')
+@section('title', 'Riwayat Transaksi')
 
 @section('content')
 <div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Riwayat Transaksi & Aktivitas</h1>
 
-    <ul class="nav nav-tabs" id="myTab" role="tablist">
-        <li class="nav-item">
-            <a class="nav-link active" id="barang-tab" data-toggle="tab" href="#barang" role="tab">Riwayat Barang</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" id="zoom-tab" data-toggle="tab" href="#zoom" role="tab">Riwayat Zoom</a>
-        </li>
-    </ul>
-    
-    <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="barang" role="tabpanel" aria-labelledby="barang-tab">
-            <div class="card shadow mb-4 mt-3">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Log Keluar/Masuk Barang</h6>
-                </div>
-                <div class="card-body">
-                    @if (Auth::user()->role === 'admin_barang')
-                    <div class="alert alert-info">Hanya menampilkan log transaksi barang Bidang Anda.</div>
-                    @endif
-                    
-                    <div class="table-responsive">
-                        <table class="table table-bordered" width="100%" cellspacing="0">
-                            <thead>
-                                <tr>
-                                    <th>Tanggal</th>
-                                    <th>Tipe</th>
-                                    <th>Nama Barang</th>
-                                    <th>Jumlah</th>
-                                    <th>Oleh</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{-- Isi data riwayat transaksi barang --}}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+    {{-- 🔹 Judul Halaman --}}
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h4 class="font-weight-bold text-dark">Riwayat Transaksi</h4>
+    </div>
+
+    {{-- 🔹 Card Utama --}}
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+
+            {{-- Tombol Export --}}
+            <div class="d-flex justify-content-between mb-3">
+                <button class="btn btn-success btn-sm">
+                    <i class="fas fa-file-excel"></i> Export ke Excel
+                </button>
             </div>
-        </div>
-        
-        <div class="tab-pane fade" id="zoom" role="tabpanel" aria-labelledby="zoom-tab">
-            <div class="card shadow mb-4 mt-3">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Riwayat Aktivitas Link Zoom</h6>
-                </div>
-                <div class="card-body">
-                     @if (Auth::user()->role === 'admin_barang')
-                    <div class="alert alert-info">Hanya menampilkan log zoom Bidang Anda.</div>
-                    @endif
-                    
-                    <div class="table-responsive">
-                        <table class="table table-bordered" width="100%" cellspacing="0">
-                            <thead>
-                                <tr>
-                                    <th>Tanggal Request</th>
-                                    <th>Topik</th>
-                                    <th>Status</th>
-                                    <th>Approval Oleh</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{-- Isi data riwayat zoom --}}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+
+            {{-- 🔹 Tabel Riwayat Barang --}}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle" style="width:100%;">
+                    <thead class="bg-dark text-white">
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Kode Barang</th>
+                            <th>Nama Barang</th>
+                            <th>Jumlah</th>
+                            <th>Tipe</th>
+                            <th>Peminta/Admin</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($barangLogs ?? [] as $log)
+                            <tr>
+                                <td>{{ $log->tanggal ?? '-' }}</td>
+                                <td>{{ $log->kode_barang ?? '-' }}</td>
+                                <td>{{ $log->nama_barang ?? '-' }}</td>
+                                <td>{{ $log->jumlah ?? '-' }}</td>
+                                <td>
+                                    @if(isset($log->tipe) && strtolower($log->tipe) == 'masuk')
+                                        <span class="badge bg-success text-white px-3 py-2">Masuk</span>
+                                    @elseif(isset($log->tipe) && strtolower($log->tipe) == 'keluar')
+                                        <span class="badge bg-danger text-white px-3 py-2">Keluar</span>
+                                    @else
+                                        <span class="badge bg-secondary text-white px-3 py-2">-</span>
+                                    @endif
+                                </td>
+                                <td>{{ $log->oleh ?? '-' }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-3">
+                                    Tidak ada data transaksi barang.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+
 </div>
+
+{{-- 🔹 Styling tambahan --}}
+@push('styles')
+<style>
+    .table th, .table td {
+        vertical-align: middle !important;
+    }
+    .table thead th {
+        background-color: #2c3e50 !important;
+        color: white !important;
+        border: none;
+    }
+    .table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+    .badge {
+        border-radius: 10px;
+        font-size: 0.85rem;
+    }
+</style>
+@endpush
+
 @endsection
