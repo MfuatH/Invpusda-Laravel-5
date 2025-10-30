@@ -28,9 +28,13 @@ class RequestController extends Controller
         $requestsQuery = ItemRequest::with(['item', 'bidang'])->latest();
 
         if ($user->role === 'admin_barang') {
-            $requestsQuery->whereHas('bidang', function ($query) use ($user) {
-                $query->where('nama', $user->bidang);
-            });
+            // Filter requests to the user's bidang via bidang_id
+            if ($user->bidang_id) {
+                $requestsQuery->where('bidang_id', $user->bidang_id);
+            } else {
+                // no bidang assigned -> no requests
+                $requestsQuery->whereRaw('1 = 0');
+            }
         }
 
         $requests = $requestsQuery->paginate(10);
@@ -140,7 +144,7 @@ class RequestController extends Controller
         $admin = Auth::user();
 
         if ($admin->role === 'admin_barang') {
-            if (!$request->bidang || $admin->bidang !== $request->bidang->nama) {
+            if (!$request->bidang_id || $admin->bidang_id !== $request->bidang_id) {
                 abort(403, 'Anda tidak berhak menyetujui request dari bidang ini.');
             }
         }
@@ -187,7 +191,7 @@ class RequestController extends Controller
         $admin = Auth::user();
 
         if ($admin->role === 'admin_barang') {
-            if (!$request->bidang || $admin->bidang !== $request->bidang->nama) {
+            if (!$request->bidang_id || $admin->bidang_id !== $request->bidang_id) {
                 abort(403, 'Anda tidak berhak menolak request dari bidang ini.');
             }
         }

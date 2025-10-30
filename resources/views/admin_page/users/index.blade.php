@@ -36,7 +36,7 @@
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->role }}</td>
-                            <td>{{ $user->bidang }}</td>
+                            <td>{{ $user->bidang->nama ?? '-' }}</td>
                             <td>
                                 <a href="{{ route('super.users.edit', $user->id) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
                                 <form action="{{ route('super.users.destroy', $user->id) }}" method="POST" style="display:inline;">

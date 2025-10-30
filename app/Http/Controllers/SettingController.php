@@ -19,7 +19,8 @@ class SettingController extends Controller
         if (Auth::user()->role === 'super_admin') {
             $bidangs = Bidang::orderBy('nama')->get();
         } else {
-            $bidang = Auth::user()->bidang;
+            // For admin_barang show only their bidang (via relation)
+            $bidang = Auth::user()->bidang; // relation will return Bidang model or null
             $bidangs = $bidang ? collect([$bidang]) : collect();
         }
 

@@ -18,7 +18,7 @@ class TransactionController extends Controller
         $transactions = Transaction::with(['item', 'user', 'request'])
             ->when(Auth::user()->role !== 'super_admin', function($query) {
                 return $query->whereHas('user', function($q) {
-                    $q->where('bidang', Auth::user()->bidang);
+                    $q->where('bidang_id', Auth::user()->bidang_id);
                 });
             })
             ->latest()

@@ -59,9 +59,13 @@ class HomeController extends Controller
         $query = ItemRequest::where('status', 'pending');
         
         if ($user->role !== 'super_admin') {
-            $query->whereHas('bidang', function ($q) use ($user) {
-                $q->where('nama', $user->bidang);
-            });
+            if ($user->bidang_id) {
+                $query->whereHas('bidang', function ($q) use ($user) {
+                    $q->where('id', $user->bidang_id);
+                });
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         }
 
         return $query->count();
@@ -72,9 +76,13 @@ class HomeController extends Controller
         $query = RequestLinkZoom::where('status', 'pending');
         
         if ($user->role !== 'super_admin') {
-            $query->whereHas('bidang', function ($q) use ($user) {
-                $q->where('nama', $user->bidang);
-            });
+            if ($user->bidang_id) {
+                $query->whereHas('bidang', function ($q) use ($user) {
+                    $q->where('id', $user->bidang_id);
+                });
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         }
 
         return $query->count();
@@ -86,7 +94,7 @@ class HomeController extends Controller
         
         if ($user->role !== 'super_admin') {
             $query->whereHas('user', function ($q) use ($user) {
-                $q->where('bidang', $user->bidang);
+                $q->where('bidang_id', $user->bidang_id);
             });
         }
 
@@ -100,7 +108,7 @@ class HomeController extends Controller
         if ($user->role !== 'super_admin') {
             $query->whereHas('request', function ($rq) use ($user) {
                 $rq->whereHas('bidang', function ($bq) use ($user) {
-                    $bq->where('nama', $user->bidang);
+                    $bq->where('id', $user->bidang_id);
                 });
             });
         }
@@ -146,11 +154,21 @@ class HomeController extends Controller
 
     public function redirectHome()
     {
-        if (auth()->check() && in_array(auth()->user()->role, ['super_admin', 'admin_barang'])) {
-            return redirect()->route('dashboard.index');
+        if (!auth()->check()) {
+            return redirect()->route('landing-page');
+        }
+
+        $role = auth()->user()->role;
+
+        // Pastikan tidak redirect berulang
+        if (in_array($role, ['super_admin', 'admin_barang'])) {
+            if (!request()->is('dashboard')) {
+                return redirect()->route('dashboard.index');
+            }
         }
 
         return redirect()->route('landing-page');
     }
+
 
 }

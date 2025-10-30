@@ -46,6 +46,17 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($users as $user) {
+            // If bidang is provided as name, try to map to bidang_id
+            if (isset($user['bidang']) && $user['bidang']) {
+                $bidangId = DB::table('bidang')->where('nama', $user['bidang'])->value('id');
+                $user['bidang_id'] = $bidangId ?: null;
+            } else {
+                $user['bidang_id'] = null;
+            }
+
+            // Remove old bidang key if present
+            unset($user['bidang']);
+
             DB::table('users')->insert($user);
         }
     }

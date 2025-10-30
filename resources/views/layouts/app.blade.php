@@ -237,7 +237,7 @@
                 </a>
                  <a href="{{ route('requests.index') }}" class="list-group-item {{ request()->routeIs('requests.*') ? 'active' : '' }}">
                     <i class="fas fa-check-circle menu-icon"></i> Approval Barang
-                    <span class="badge-notification">5</span>
+
                 </a>
 
                 @php
@@ -249,7 +249,6 @@
                     Approval Zoom
 
                     <span class="ml-auto">
-                        <span class="badge-notification">2</span>
                         <i class="fas fa-chevron-down dropdown-arrow ml-2"></i>
                     </span>
                 </a>

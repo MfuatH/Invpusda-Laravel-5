@@ -14,37 +14,53 @@ class LoginController extends Controller
     | Login Controller
     |--------------------------------------------------------------------------
     |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
+    | Mengatur autentikasi user dan redirect sesuai role.
     |
     */
 
     use AuthenticatesUsers;
 
     /**
-     * Where to redirect users after login.
+     * Lokasi redirect default setelah login (fallback).
      *
      * @var string
      */
     protected $redirectTo = '/home';
 
     /**
-     * Create a new controller instance.
-     *
-     * @return void
+     * Konstruktor
      */
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
     }
 
+    /**
+     * Override bawaan setelah user berhasil login.
+     */
+    protected function authenticated(Request $request, $user)
+    {
+        // Redirect berdasarkan role
+        if (in_array($user->role, ['super_admin', 'admin_barang'])) {
+            return redirect()->route('dashboard.index');
+        }
+
+        // Jika role lain (misalnya user biasa), ke landing page
+        return redirect()->route('landing-page');
+    }
+
+    /**
+     * Logout dan hapus session dengan aman
+     */
     public function logout(Request $request)
     {
-        Auth::logout(); 
+        Auth::logout();
+
+        // Hapus semua session
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        // Kembali ke halaman utama
         return redirect('/');
     }
 }

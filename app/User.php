@@ -15,7 +15,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'role', 'bidang_id',
     ];
 
     /**
@@ -29,6 +29,11 @@ class User extends Authenticatable
 
     public function bidang()
     {
-        return $this->belongsTo(bidang::class);
+        return $this->belongsTo(Bidang::class, 'bidang_id');
     }
+    public function user()
+    {
+        return $this->belongsTo(\App\User::class);
+    }
+
 }

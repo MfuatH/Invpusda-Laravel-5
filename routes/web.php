@@ -20,7 +20,7 @@ Route::post('/request-barang', 'RequestController@storeBarang')->name('request.b
 Route::get('/request-link-zoom', 'RequestController@createZoom')->name('request.zoom.create');
 Route::post('/request-link-zoom', 'RequestController@storeZoom')->name('request.zoom.store');
 
-// Route Otentikasi Laravel (Login, Register, Logout)
+# Route Otentikasi Laravel (Login, Register, Logout)
 Auth::routes();
 
 
@@ -28,12 +28,15 @@ Auth::routes();
 // 2. ROUTE DASHBOARD ADMIN (SUPER ADMIN & ADMIN BARANG)
 // ==========================================================
 
+// Dashboard route accessible by both super_admin and admin_barang
+Route::get('dashboard', 'AdminDashboardController@index')
+    ->middleware(['auth', 'role:super_admin,admin_barang'])
+    ->name('dashboard.index');
+
+// Other admin routes
 Route::middleware(['auth', 'role:super_admin,admin_barang'])
     ->prefix('dashboard')
     ->group(function () {
-
-    // Dashboard Utama
-    Route::get('/', 'AdminDashboardController@index')->name('dashboard.index');
 
     // Manajemen Barang
     Route::resource('barang', 'ItemController');
@@ -84,4 +87,15 @@ Route::middleware(['auth', 'role:super_admin'])
 // 4. ROUTE FALLBACK (Redirect ke Home)
 // ==========================================================
 
-Route::get('/home', 'HomeController@redirectHome')->name('home');
+Route::get('/home', function () {
+    // Jika login dan role cocok, arahkan ke dashboard
+    if (Auth::check()) {
+        $role = Auth::user()->role;
+        if (in_array($role, ['super_admin', 'admin_barang'])) {
+            return redirect()->route('dashboard.index');
+        }
+    }
+
+    // Kalau belum login atau bukan admin, tampilkan landing page biasa
+    return redirect()->route('landing-page');
+})->name('home');

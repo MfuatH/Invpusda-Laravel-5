@@ -13,18 +13,29 @@ class AdminDashboardController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'role:super_admin,admin_barang']);
+        $this->middleware('auth');
+        $this->middleware('role:super_admin,admin_barang');
     }
 
     public function index()
     {
         $user = Auth::user();
-        
+
+        // Base query untuk menghitung item (tidak terikat bidang)
+        $totalItems = Item::count();
+
+        // Hitung total request sesuai bidang
+        $totalRequests = $this->getPendingRequests($user);
+        $totalZoomRequests = $this->getPendingZoomRequests($user);
+
+        // Ambil transaksi terbaru
+        $recentTransactions = $this->getRecentTransactions($user);
+
         $data = [
-            'totalItems' => Item::count(),
-            'totalRequests' => $this->getPendingRequests(),
-            'totalZoomRequests' => $this->getPendingZoomRequests(),
-            'recentTransactions' => $this->getRecentTransactions()
+            'totalItems' => $totalItems,
+            'totalRequests' => $totalRequests,
+            'totalZoomRequests' => $totalZoomRequests,
+            'recentTransactions' => $recentTransactions,
         ];
 
         if ($user->role === 'super_admin') {
@@ -34,39 +45,37 @@ class AdminDashboardController extends Controller
         return view('admin_page.dashboard', compact('data'));
     }
 
-    private function getPendingRequests()
+    private function getPendingRequests($user)
     {
         $query = ItemRequest::where('status', 'pending');
-        
-        if (Auth::user()->role !== 'super_admin') {
-            $query->whereHas('bidang', function($q) {
-                $q->where('nama', Auth::user()->bidang);
-            });
+
+        // Jika admin_barang, filter berdasarkan bidang_id miliknya
+        if ($user->role === 'admin_barang' && $user->bidang_id) {
+            $query->where('bidang_id', $user->bidang_id);
         }
 
         return $query->count();
     }
 
-    private function getPendingZoomRequests()
+    private function getPendingZoomRequests($user)
     {
         $query = RequestLinkZoom::where('status', 'pending');
-        
-        if (Auth::user()->role !== 'super_admin') {
-            $query->whereHas('bidang', function($q) {
-                $q->where('nama', Auth::user()->bidang);
-            });
+
+        if ($user->role === 'admin_barang' && $user->bidang_id) {
+            $query->where('bidang_id', $user->bidang_id);
         }
 
         return $query->count();
     }
 
-    private function getRecentTransactions()
+    private function getRecentTransactions($user)
     {
         $query = Transaction::with(['item', 'user']);
-        
-        if (Auth::user()->role !== 'super_admin') {
-            $query->whereHas('user', function($q) {
-                $q->where('bidang', Auth::user()->bidang);
+
+        // Filter transaksi berdasarkan bidang user (via relasi user)
+        if ($user->role === 'admin_barang' && $user->bidang_id) {
+            $query->whereHas('user', function ($q) use ($user) {
+                $q->where('bidang_id', $user->bidang_id);
             });
         }
 

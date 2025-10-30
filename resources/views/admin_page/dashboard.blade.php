@@ -33,6 +33,7 @@
             </div>
         </div>
 
+        @if(Auth::user()->role === 'super_admin' || Auth::user()->role === 'admin_barang')
         <!-- Permintaan Barang Pending Card -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2">
@@ -68,6 +69,7 @@
                 <a href="{{ route('zoom.requests.index') }}" class="stretched-link"></a>
             </div>
         </div>
+        @endif
 
         <!-- Total Users Card (Super Admin Only) -->
         @if (Auth::user()->role === 'super_admin')
@@ -217,14 +219,10 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <a href="{{ route('template.index') }}" class="btn btn-light btn-block text-left">
-                            <i class="fas fa-file-alt fa-sm mr-2"></i>Template Dokumen
+                            <i class="fas fa-file-alt fa-sm mr-2"></i>Template Pesan
                         </a>
                     </div>
-                    <div class="mb-3">
-                        <a href="{{ route('response.index') }}" class="btn btn-light btn-block text-left">
-                            <i class="fas fa-reply fa-sm mr-2"></i>Response Template
-                        </a>
-                    </div>
+                    
                     @if(Auth::user()->role === 'super_admin')
                     <div class="mb-3">
                         <a href="{{ route('super.users.index') }}" class="btn btn-light btn-block text-left">

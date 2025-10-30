@@ -47,7 +47,7 @@
                                 <td>{{ $request->nama_pemohon }}</td>
                                 <td>{{ $request->nip ?? '-' }}</td>
                                 <td>{{ $request->no_hp }}</td>
-                                <td>{{ $request->bidang->nama_bidang ?? '-' }}</td>
+                                <td>{{ $request->bidang->nama ?? '-' }}</td>
                                 <td>
                                     {{ $request->nama_rapat }}
                                     @if($request->keterangan)

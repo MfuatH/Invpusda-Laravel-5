@@ -17,9 +17,7 @@ class ZoomRequestController extends Controller
     {
         $requests = RequestLinkZoom::with('bidang')
             ->when(Auth::user()->role !== 'super_admin', function($query) {
-                return $query->whereHas('bidang', function($q) {
-                    $q->where('nama', Auth::user()->bidang);
-                });
+                return $query->where('bidang_id', Auth::user()->bidang_id);
             })
             ->latest()
             ->paginate(10);
@@ -30,7 +28,7 @@ class ZoomRequestController extends Controller
     public function approve(RequestLinkZoom $reqZoom)
     {
         if (Auth::user()->role === 'admin_barang' && 
-            (!$reqZoom->bidang || Auth::user()->bidang !== $reqZoom->bidang->nama)) {
+            (!$reqZoom->bidang_id || Auth::user()->bidang_id !== $reqZoom->bidang_id)) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -49,7 +47,7 @@ class ZoomRequestController extends Controller
     public function reject(RequestLinkZoom $reqZoom)
     {
         if (Auth::user()->role === 'admin_barang' && 
-            (!$reqZoom->bidang || Auth::user()->bidang !== $reqZoom->bidang->nama)) {
+            (!$reqZoom->bidang_id || Auth::user()->bidang_id !== $reqZoom->bidang_id)) {
             abort(403, 'Unauthorized action.');
         }
 

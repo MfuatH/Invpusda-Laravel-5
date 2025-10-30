@@ -48,9 +48,13 @@ class ItemRequest extends Model
         return $this->belongsTo(Item::class);
     }
 
+    
+
     public function bidang()
     {
-        // Ini akan merujuk ke App\Models\Bidang, sudah benar.
-        return $this->belongsTo(Bidang::class);
+        return $this->belongsTo(Bidang::class, 'bidang_id');
     }
+
+    
+
 }

@@ -12,4 +12,9 @@ class RequestLinkZoom extends Model
     {
         return $this->belongsTo(Bidang::class, 'bidang_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(\App\User::class);
+    }
 }
