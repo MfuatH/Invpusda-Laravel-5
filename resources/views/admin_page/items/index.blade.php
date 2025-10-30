@@ -48,7 +48,7 @@
                     <a href="{{ route('barang.create') }}" class="btn btn-success btn-sm mr-2 mb-2">
                         <i class="fas fa-plus-circle mr-1"></i> Tambah Barang Baru
                     </a>
-                    <a href="#" class="btn btn-outline-success btn-sm mb-2">
+                    <a href="{{ route('export.barang') }}" class="btn btn-outline-success btn-sm mb-2">
                         <i class="fas fa-file-excel mr-1"></i> Export Excel
                     </a>
                 </div>

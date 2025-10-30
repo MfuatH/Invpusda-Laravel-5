@@ -99,3 +99,9 @@ Route::get('/home', function () {
     // Kalau belum login atau bukan admin, tampilkan landing page biasa
     return redirect()->route('landing-page');
 })->name('home');
+
+
+
+// EXPORT EXCEL
+Route::get('/export/barang', 'ExportController@exportBarang')->name('export.barang');
+Route::get('/export/transaksi', 'ExportController@exportTransaksi')->name('export.transactions');

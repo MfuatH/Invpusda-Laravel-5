@@ -17,7 +17,7 @@
             {{-- Tombol Export --}}
             <div class="d-flex justify-content-between mb-3">
                 {{-- Anda harus mendefinisikan route 'export.transactions' di web.php --}}
-                <a href="#" class="btn btn-success btn-sm">
+                <a href="{{ route('export.transactions') }}" class="btn btn-success btn-sm">
                     <i class="fas fa-file-excel"></i> Export ke Excel
                 </a>
             </div>
