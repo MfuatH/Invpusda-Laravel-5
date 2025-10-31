@@ -25,7 +25,7 @@ class UserController extends Controller
     {
         $bidangs = Bidang::all();
         $roles = ['super_admin', 'admin_barang', 'user'];
-        return view('users.create', compact('bidangs', 'roles'));
+        return view('admin_page.users.create', compact('bidangs', 'roles'));
     }
 
     public function store(Request $request)
@@ -55,7 +55,7 @@ class UserController extends Controller
     {
         $bidangs = Bidang::all();
         $roles = ['super_admin', 'admin_barang', 'user'];
-        return view('users.edit', compact('user', 'bidangs', 'roles'));
+        return view('admin_page.users.edit', compact('user', 'bidangs', 'roles'));
     }
 
     public function update(Request $request, User $user)
