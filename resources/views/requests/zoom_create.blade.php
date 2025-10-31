@@ -91,6 +91,7 @@
             padding: 25px; /* <-- DIKECILKAN */
             overflow-y: auto; 
             max-height: 80vh; /* Tetap ada max-height untuk jaga-jaga */
+            border-radius: 15px;
         }
         .right-panel h3 {
             text-align: left; 

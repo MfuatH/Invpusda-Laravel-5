@@ -39,7 +39,7 @@
                                 <tr>
                                     <td>{{ $user->name }}</td>
                                     <td>{{ $user->email }}</td>
-                                    <td>{{ $user->phone ?? '-' }}</td>
+                                    <td>{{ $user->no_hp ?? '-' }}</td>
                                     <td>{{ $user->role }}</td>
                                     <td>{{ isset($user->bidang->nama) ? $user->bidang->nama : '-' }}</td>
                                     <td>

@@ -3,59 +3,54 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Bidang;
+use App\Bidang; // model bidang
 use Illuminate\Support\Facades\Auth;
 
 class SettingController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'role:super_admin,admin_barang']);
+        $this->middleware('auth');
     }
 
+    // ================================
+    // HALAMAN MASTER PESAN
+    // ================================
     public function templateIndex()
     {
-        // Load bidang templates depending on the logged in user's role
+        // semua bidang untuk super_admin, hanya bidang sendiri untuk admin_barang
         if (Auth::user()->role === 'super_admin') {
             $bidangs = Bidang::orderBy('nama')->get();
         } else {
-            // For admin_barang show only their bidang (via relation)
-            $bidang = Auth::user()->bidang; // relation will return Bidang model or null
-            $bidangs = $bidang ? collect([$bidang]) : collect();
+            $bidangs = Bidang::where('id', Auth::user()->bidang_id)->get();
         }
 
-        return view('admin_page.settings.master_pesan', compact('bidangs'));
+        // semua data template (ambil dari tabel bidang)
+        $templates = Bidang::select('id', 'nama', 'pesan_template')->get();
+
+        return view('admin_page.settings.master_pesan', compact('bidangs', 'templates'));
     }
 
-    public function responseIndex()
-    {
-        // Add your response settings logic here
-        return view('admin_page.settings.index');
-    }
-
+    // ================================
+    // UPDATE / SIMPAN TEMPLATE PESAN
+    // ================================
     public function updateTemplate(Request $request)
     {
-        $validated = $request->validate([
-            'bidang_id' => 'required|integer|exists:bidang,id',
-            'content' => 'nullable|string',
+        $request->validate([
+            'bidang_id' => 'required|exists:bidang,id',
+            'pesan_template' => 'required|string|max:5000',
         ]);
 
-        $bidang = Bidang::findOrFail($validated['bidang_id']);
-        $bidang->pesan_template = $validated['content'];
+        $bidang = Bidang::findOrFail($request->bidang_id);
+        $bidang->pesan_template = $request->pesan_template;
         $bidang->save();
 
-        return back()->with('success', 'Template berhasil diperbarui.');
+        return redirect()->route('template.index')->with('success', 'Template pesan berhasil diperbarui!');
     }
 
-    public function updateResponse(Request $request)
+    // (opsional) Jika ingin halaman response tambahan
+    public function responseIndex()
     {
-        $validated = $request->validate([
-            'response_type' => 'required|string',
-            'content' => 'required|string',
-        ]);
-
-        // Add your response update logic here
-
-        return back()->with('success', 'Response berhasil diperbarui.');
+        return view('admin_page.settings.response');
     }
 }

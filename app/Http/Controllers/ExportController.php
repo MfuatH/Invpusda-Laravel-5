@@ -8,6 +8,9 @@ use App\Transaction;
 use Illuminate\Support\Facades\Auth;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Carbon\Carbon;
 
 class ExportController extends Controller
@@ -17,29 +20,40 @@ class ExportController extends Controller
         $this->middleware('auth');
     }
 
-    /** 
-     * EXPORT DATA BARANG KE EXCEL 
+    /**
+     * EXPORT DATA BARANG KE EXCEL
      */
     public function exportBarang()
     {
         $user = Auth::user();
-        $items = Item::query();
-
-        // if ($user->role === 'admin_barang' && $user->bidang_id) {
-        //     $items->where('bidang_id', $user->bidang_id);
-        // }
-
-        $items = $items->get();
+        $items = Item::all();
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Data Barang');
 
         // Header
-        $sheet->fromArray([
-            ['No', 'Kode Barang', 'Nama Barang', 'Satuan', 'Jumlah', 'Lokasi', 'Keterangan']
-        ]);
+        $headers = ['No', 'Kode Barang', 'Nama Barang', 'Satuan', 'Jumlah', 'Lokasi', 'Keterangan'];
+        $sheet->fromArray([$headers], null, 'A1');
 
+        // Styling header
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF']
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '4F81BD']
+            ],
+        ];
+        $sheet->getStyle('A1:G1')->applyFromArray($headerStyle);
+
+        // Isi data
         $row = 2;
         foreach ($items as $index => $item) {
             $sheet->fromArray([
@@ -56,24 +70,34 @@ class ExportController extends Controller
             $row++;
         }
 
+        // Auto size kolom
+        foreach (range('A', 'G') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Border seluruh tabel
+        $sheet->getStyle('A1:G' . ($row - 1))->applyFromArray([
+            'borders' => [
+                'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+            ]
+        ]);
+
+        // Simpan dan download
         $fileName = 'data_barang_' . date('Y-m-d_His') . '.xlsx';
-        $writer = new Xlsx($spreadsheet);
-
-        // Simpan sementara di storage/temp
         $tempFile = storage_path($fileName);
-        $writer->save($tempFile);
+        (new Xlsx($spreadsheet))->save($tempFile);
 
-        // Kirim ke browser (Laravel 5.5)
         return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
     }
 
-    /** 
-     * EXPORT DATA TRANSAKSI KE EXCEL 
+    /**
+     * EXPORT DATA TRANSAKSI KE EXCEL
      */
     public function exportTransaksi()
     {
         $user = Auth::user();
-        $transactions = Transaction::with(['item', 'user', 'request'])->orderBy('tanggal', 'desc');
+        $transactions = Transaction::with(['item', 'user.bidang', 'request.bidang'])
+            ->orderBy('tanggal', 'desc');
 
         if ($user->role === 'admin_barang' && $user->bidang_id) {
             $transactions->whereHas('user', function ($q) use ($user) {
@@ -88,8 +112,17 @@ class ExportController extends Controller
         $sheet->setTitle('Riwayat Transaksi');
 
         // Header
-        $sheet->fromArray([
-            ['No', 'Tanggal', 'Nama Barang', 'Jumlah', 'Tipe', 'Dicatat Oleh', 'Bidang Admin', 'Pemohon', 'Bidang Pemohon']
+        $headers = [
+            'No', 'Tanggal', 'Nama Barang', 'Jumlah', 'Tipe',
+            'Dicatat Oleh', 'Bidang Admin', 'Pemohon', 'Bidang Pemohon'
+        ];
+        $sheet->fromArray([$headers], null, 'A1');
+
+        // Styling header
+        $sheet->getStyle('A1:I1')->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4BACC6']],
         ]);
 
         $row = 2;
@@ -110,14 +143,29 @@ class ExportController extends Controller
             $row++;
         }
 
+        // Auto size
+        foreach (range('A', 'I') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Border seluruh tabel
+        $sheet->getStyle('A1:I' . ($row - 1))->applyFromArray([
+            'borders' => [
+                'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+            ]
+        ]);
+
+        // Rata tengah untuk kolom tertentu
+        $sheet->getStyle('A1:A' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('D1:D' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('E1:E' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('B2:B' . ($row - 1))->getNumberFormat()->setFormatCode('dd-mm-yyyy hh:mm');
+
+        // Simpan & kirim
         $fileName = 'riwayat_transaksi_' . date('Y-m-d_His') . '.xlsx';
-        $writer = new Xlsx($spreadsheet);
-
-        // Simpan sementara
         $tempFile = storage_path($fileName);
-        $writer->save($tempFile);
+        (new Xlsx($spreadsheet))->save($tempFile);
 
-        // Download dan hapus file setelah dikirim
         return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
     }
 }
