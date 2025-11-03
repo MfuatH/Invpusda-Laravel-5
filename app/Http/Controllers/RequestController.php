@@ -226,7 +226,7 @@ class RequestController extends Controller
 
             if ($request->no_hp) {
                 try {
-                    $wa = app(\App\Services\WhatsAppService::class);
+                    $wa = app(\App\Services\FontteService::class);
                     $message = "[Request Barang Disetujui]\nRequest barang Anda telah disetujui.\nBarang: {$request->item->nama_barang}\nJumlah: {$request->jumlah_request}\nTanggal: " . $request->created_at->format('d-m-Y H:i');
                     $wa->sendMessage($request->no_hp, $message);
                 } catch (Exception $wae) {
@@ -257,7 +257,7 @@ class RequestController extends Controller
             
             if ($request->no_hp) {
                 try {
-                    $wa = app(\App\Services\WhatsAppService::class);
+                    $wa = app(\App\Services\FontteService::class);
                     $message = "[Request Barang Ditolak]\nMaaf, request barang Anda ditolak.\nBarang: {$request->item->nama_barang}\nJumlah: {$request->jumlah_request}\nTanggal: " . $request->created_at->format('d-m-Y H:i');
                     $wa->sendMessage($request->no_hp, $message);
                 } catch (Exception $wae) {
