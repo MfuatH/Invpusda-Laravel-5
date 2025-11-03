@@ -17,7 +17,7 @@ class ItemController extends Controller
 
     public function index()
     {
-        // Use pagination and consistent variable name expected by the view
+        // Ambil semua barang dengan pagination
         $items = Item::orderBy('nama_barang')->paginate(15);
         return view('admin_page.items.index', compact('items'));
     }
@@ -33,9 +33,16 @@ class ItemController extends Controller
             'nama_barang' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:0',
             'satuan' => 'required|string|max:50',
+            'lokasi' => 'nullable|string|max:255',
             'keterangan' => 'nullable|string'
         ]);
 
+        // 🔹 Generate kode_barang unik (misalnya BRG-20251103-001)
+        $lastItem = Item::orderBy('id', 'desc')->first();
+        $nextNumber = $lastItem ? $lastItem->id + 1 : 1;
+        $validated['kode_barang'] = 'BRG-' . date('Ymd') . '-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+
+        // Simpan data ke database
         Item::create($validated);
 
         return redirect()->route('barang.index')
@@ -58,6 +65,7 @@ class ItemController extends Controller
             'nama_barang' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:0',
             'satuan' => 'required|string|max:50',
+            'lokasi' => 'nullable|string|max:255',
             'keterangan' => 'nullable|string'
         ]);
 
@@ -83,7 +91,7 @@ class ItemController extends Controller
         $data = $request->validate([
             'item_id' => 'required|integer|exists:items,id',
             'add_amount' => 'required|integer|min:1',
-            'note' => 'required|string|max:255', 
+            'note' => 'required|string|max:255',
         ]);
 
         try {
@@ -94,15 +102,14 @@ class ItemController extends Controller
             Transaction::create([
                 'item_id'    => $item->id,
                 'jumlah'     => $data['add_amount'],
-                'tipe'       => 'masuk', 
+                'tipe'       => 'masuk',
                 'tanggal'    => Carbon::now(),
-                'user_id'    => Auth::id(), 
-                'keterangan' => $data['note'], 
+                'user_id'    => Auth::id(),
+                'keterangan' => $data['note'],
             ]);
 
             return redirect()->route('barang.index')
                              ->with('success', "Stok untuk '{$item->nama_barang}' berhasil ditambah.");
-                             
         } catch (\Exception $e) {
             return redirect()->route('barang.index')
                              ->withErrors(['error' => 'Gagal memproses stok: ' . $e->getMessage()])
