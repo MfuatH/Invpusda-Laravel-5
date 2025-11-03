@@ -40,29 +40,32 @@
 
                 <!-- Form Edit User -->
                 <form action="{{ route('super.users.update', $user->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
+                    {{-- WAJIB: Token CSRF (menggunakan helper function) --}}
+                    {{ csrf_field() }}
+                    
+                    {{-- WAJIB: Method Spoofing untuk Update (menggunakan helper function 'PUT') --}}
+                    {{ method_field('PUT') }}
 
                     <div class="row">
                         <!-- Nama -->
                         <div class="col-md-6 mb-3">
                             <label for="name" class="form-label fw-semibold">Nama</label>
                             <input type="text" name="name" id="name" class="form-control" 
-                                   value="{{ old('name', $user->name) }}" required>
+                                value="{{ old('name', $user->name) }}" required>
                         </div>
 
                         <!-- Email -->
                         <div class="col-md-6 mb-3">
                             <label for="email" class="form-label fw-semibold">Email</label>
                             <input type="email" name="email" id="email" class="form-control" 
-                                   value="{{ old('email', $user->email) }}" required>
+                                value="{{ old('email', $user->email) }}" required>
                         </div>
 
-                        <!-- Nomor HP (Baru Ditambahkan) -->
+                        <!-- Nomor HP -->
                         <div class="col-md-6 mb-3">
-                            <label for="nomor_hp" class="form-label fw-semibold">Nomor HP</label>
-                            <input type="text" name="nomor_hp" id="nomor_hp" class="form-control" 
-                                   value="{{ old('nomor_hp', $user->nomor_hp) }}" placeholder="Masukkan nomor HP">
+                            <label for="no_hp" class="form-label fw-semibold">Nomor HP</label>
+                            <input type="text" name="no_hp" id="no_hp" class="form-control" 
+                                value="{{ old('no_hp', $user->nomor_hp) }}" placeholder="Masukkan nomor HP">
                         </div>
 
                         <!-- Password -->
@@ -82,7 +85,7 @@
                             <label for="role" class="form-label fw-semibold">Nama Role</label>
                             <select name="role" id="role" class="form-select" required>
                                 <option value="" disabled>Pilih role</option>
-                                <option value="admin barang" {{ old('role', $user->role) == 'admin barang' ? 'selected' : '' }}>Admin Barang</option>
+                                <option value="admin_barang" {{ old('role') == 'admin_barang' ? 'selected' : '' }}>Admin Barang</option>
                             </select>
                         </div>
 

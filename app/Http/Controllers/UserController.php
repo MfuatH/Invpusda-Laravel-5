@@ -35,7 +35,8 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'role' => ['required', Rule::in(['super_admin', 'admin_barang', 'user'])],
-            'bidang_id' => 'required|exists:bidangs,id'
+            'bidang_id' => 'required|exists:bidang,id',
+            'no_hp' => 'nullable|string|max:15',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
@@ -65,7 +66,8 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
             'role' => ['required', Rule::in(['super_admin', 'admin_barang', 'user'])],
-            'bidang_id' => 'required|exists:bidangs,id'
+            'bidang_id' => 'required|exists:bidang,id',
+            'no_hp' => 'nullable|string|max:15',
         ]);
 
         if (isset($validated['password'])) {

@@ -4,7 +4,6 @@
 
 @section('content')
 <div class="container-fluid">
-    <!-- Judul Halaman -->
     <h1 class="h3 mb-4 text-gray-800">Tambah Pengguna Baru</h1>
 
     {{-- Cek Hak Akses --}}
@@ -13,7 +12,6 @@
             Anda tidak memiliki izin untuk mengakses halaman ini.
         </div>
     @else
-        <!-- Card Utama -->
         <div class="card shadow-sm border-0">
             <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
                 <h6 class="m-0 font-weight-bold text-primary">Form Tambah Pengguna</h6>
@@ -27,7 +25,7 @@
                 @if (session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 @endif
 
@@ -43,11 +41,8 @@
                     </div>
                 @endif
 
-                <!-- Form Tambah Pengguna -->
                 <form action="{{ route('super.users.store') }}" method="POST" class="needs-validation" novalidate>
-                    @csrf {{-- penting agar tidak expired page --}}
-                    <div class="row">
-                        <!-- Nama -->
+                    {{ csrf_field() }} <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="name" class="form-label fw-semibold">Nama</label>
                             <input type="text" name="name" id="name" class="form-control" 
@@ -55,7 +50,6 @@
                             <div class="invalid-feedback">Nama wajib diisi.</div>
                         </div>
 
-                        <!-- Email -->
                         <div class="col-md-6 mb-3">
                             <label for="email" class="form-label fw-semibold">Email</label>
                             <input type="email" name="email" id="email" class="form-control" 
@@ -63,39 +57,33 @@
                             <div class="invalid-feedback">Email wajib diisi.</div>
                         </div>
 
-                        <!-- Nomor HP -->
                         <div class="col-md-6 mb-3">
-                            <label for="nomor_hp" class="form-label fw-semibold">Nomor HP</label>
-                            <input type="text" name="nomor_hp" id="nomor_hp" class="form-control" 
-                                value="{{ old('nomor_hp') }}" placeholder="Masukkan nomor HP">
-                            <div class="invalid-feedback">Nomor HP wajib diisi.</div>
+                            <label for="no_hp" class="form-label fw-semibold">Nomor HP</label>
+                            <input type="text" name="no_hp" id="no_hp" class="form-control" 
+                                **value="{{ old('no_hp') }}"** placeholder="Masukkan nomor HP">
                         </div>
 
-                        <!-- Password -->
                         <div class="col-md-6 mb-3">
                             <label for="password" class="form-label fw-semibold">Kata Sandi</label>
                             <input type="password" name="password" id="password" class="form-control" required>
                             <div class="invalid-feedback">Kata sandi wajib diisi.</div>
                         </div>
 
-                        <!-- Konfirmasi Password -->
                         <div class="col-md-6 mb-3">
                             <label for="password_confirmation" class="form-label fw-semibold">Konfirmasi Kata Sandi</label>
                             <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required>
                             <div class="invalid-feedback">Konfirmasi kata sandi wajib diisi.</div>
                         </div>
 
-                        <!-- Role -->
                         <div class="col-md-6 mb-3">
                             <label for="role" class="form-label fw-semibold">Nama Role</label>
                             <select name="role" id="role" class="form-select" required>
                                 <option value="" disabled selected>Pilih role</option>
-                                <option value="admin barang" {{ old('role') == 'admin barang' ? 'selected' : '' }}>Admin Barang</option>
+                                <option value="admin_barang" {{ old('role') == 'admin_barang' ? 'selected' : '' }}>Admin Barang</option>
                             </select>
                             <div class="invalid-feedback">Role wajib dipilih.</div>
                         </div>
 
-                        <!-- Bidang -->
                         <div class="col-md-6 mb-3">
                             <label for="bidang_id" class="form-label fw-semibold">Bidang</label>
                             <select name="bidang_id" id="bidang_id" class="form-select" required>
@@ -110,7 +98,6 @@
                         </div>
                     </div>
 
-                    <!-- Tombol Simpan -->
                     <div class="mt-4 text-end">
                         <button type="submit" class="btn btn-primary px-4">
                             Simpan Pengguna
