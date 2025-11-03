@@ -18,7 +18,7 @@ class CreateTransactionsTable extends Migration
             $table->unsignedInteger('item_id');
             $table->unsignedInteger('user_id')->nullable();
             $table->integer('jumlah');
-            $table->enum('tipe', ['masuk', 'keluar']);
+            $table->enum('tipe', ['masuk', 'keluar', 'rejected']);
             $table->date('tanggal');
             $table->timestamps();
             

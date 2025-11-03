@@ -255,6 +255,15 @@ class RequestController extends Controller
         try {
             $request->update(['status' => 'rejected']);
             
+            Transaction::create([
+                'request_id' => $request->id,
+                'item_id'    => $request->item_id,
+                'jumlah'     => $request->jumlah_request,
+                'tipe'       => 'rejected',
+                'tanggal'    => Carbon::now(),
+                'user_id'    => Auth::id(), 
+            ]);
+            
             if ($request->no_hp) {
                 try {
                     $wa = app(\App\Services\FontteService::class);

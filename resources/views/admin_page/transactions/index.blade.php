@@ -54,6 +54,8 @@
                                         <span class="badge bg-success text-white px-3 py-2">Masuk</span>
                                     @elseif(strtolower($t->tipe) == 'keluar')
                                         <span class="badge bg-danger text-white px-3 py-2">Keluar</span>
+                                    @elseif(strtolower($t->tipe) == 'rejected')
+                                        <span class="badge bg-info text-white px-3 py-2">Ditolak</span>
                                     @else
                                         <span class="badge bg-secondary text-white px-3 py-2">-</span>
                                     @endif
