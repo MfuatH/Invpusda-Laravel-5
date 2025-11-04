@@ -95,7 +95,6 @@
              padding-left: calc(1.5rem - 0.75rem);
         }
 
-
         #sidebar-wrapper .list-group-item i.menu-icon {
             margin-right: 0.8rem;
             width: 22px;
@@ -163,26 +162,24 @@
             background: rgba(0, 0, 0, 0.15);
         }
         .submenu-collapse .list-group-item {
-            padding-left: 3.5rem; /* <-- DIKECILKAN SUBMENU: Indentasi sedikit ditambah */
-            padding-top: 0.5rem; /* <-- DIKECILKAN SUBMENU */
-            padding-bottom: 0.5rem; /* <-- DIKECILKAN SUBMENU */
-            font-size: 0.8rem; /* <-- DIKECILKAN SUBMENU */
+            padding-left: 3.5rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            font-size: 0.8rem;
             margin: 0;
-            font-weight: 400; /* <-- DIKECILKAN SUBMENU: Font lebih tipis */
+            font-weight: 400;
         }
-        /* Style active submenu dibuat lebih simpel */
         .submenu-collapse .list-group-item.active {
             background: none;
             color: #fff;
-            font-weight: 600; /* <-- DIKECILKAN SUBMENU: Bold biasa */
+            font-weight: 600;
             margin: 0;
             box-shadow: none;
-            padding-left: 3.5rem; /* <-- DIKECILKAN SUBMENU: Samakan indentasi */
+            padding-left: 3.5rem;
         }
         .submenu-collapse .list-group-item:hover {
              background: rgba(255, 255, 255, 0.15);
         }
-
 
         #page-content-wrapper {
             min-width: 100vw;
@@ -232,12 +229,16 @@
                 <a href="{{ route('dashboard.index') }}" class="list-group-item {{ request()->routeIs('dashboard.index') ? 'active' : '' }}">
                     <i class="fas fa-th-large menu-icon"></i> Dashboard
                 </a>
+
                 <a href="{{ route('barang.index') }}" class="list-group-item {{ request()->routeIs('barang.*') ? 'active' : '' }}">
                     <i class="fas fa-box menu-icon"></i> Manajemen Barang
                 </a>
-                 <a href="{{ route('requests.index') }}" class="list-group-item {{ request()->routeIs('requests.*') ? 'active' : '' }}">
-                    <i class="fas fa-check-circle menu-icon"></i> Approval Barang
 
+                <a href="{{ route('requests.index') }}" class="list-group-item {{ request()->routeIs('requests.*') ? 'active' : '' }}">
+                    <i class="fas fa-check-circle menu-icon"></i> Approval Barang
+                    @if(isset($data['totalRequests']) && $data['totalRequests'] > 0)
+                        <span class="badge-notification">{{ $data['totalRequests'] }}</span>
+                    @endif
                 </a>
 
                 @php
@@ -247,11 +248,14 @@
                 <a href="#zoomSubmenu" data-toggle="collapse" aria-expanded="{{ $isZoomMenuActive ? 'true' : 'false' }}" class="list-group-item {{ $isZoomMenuActive ? 'active' : '' }}">
                     <i class="fas fa-video menu-icon"></i>
                     Approval Zoom
-
+                    @if(isset($data['totalZoomRequests']) && $data['totalZoomRequests'] > 0)
+                        <span class="badge-notification">{{ $data['totalZoomRequests'] }}</span>
+                    @endif
                     <span class="ml-auto">
                         <i class="fas fa-chevron-down dropdown-arrow ml-2"></i>
                     </span>
                 </a>
+
                 <div class="collapse submenu-collapse {{ $isZoomMenuActive ? 'show' : '' }}" id="zoomSubmenu">
                     <div class="list-group list-group-flush">
                         <a href="{{ route('zoom.requests.index') }}" class="list-group-item {{ request()->routeIs('zoom.requests.index') ? 'active' : '' }}">
@@ -263,7 +267,7 @@
                     </div>
                 </div>
 
-                 <a href="{{ route('transaksi.index') }}" class="list-group-item {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
+                <a href="{{ route('transaksi.index') }}" class="list-group-item {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
                     <i class="fas fa-history menu-icon"></i> Riwayat Transaksi
                 </a>
 
