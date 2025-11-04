@@ -91,8 +91,9 @@
             margin-right: 0.75rem;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
         #sidebar-wrapper .list-group-item.active {
-             padding-left: calc(1.5rem - 0.75rem);
+            padding-left: calc(1.5rem - 0.75rem);
         }
 
         #sidebar-wrapper .list-group-item i.menu-icon {
@@ -102,9 +103,10 @@
             font-size: 1.1rem;
             color: rgba(255, 255, 255, 0.9);
         }
-         #sidebar-wrapper .list-group-item.active i.menu-icon {
-             color: #fff;
-         }
+
+        #sidebar-wrapper .list-group-item.active i.menu-icon {
+            color: #fff;
+        }
 
         .badge-notification {
             background-color: #e74a3b;
@@ -146,6 +148,7 @@
             text-align: left;
             cursor: pointer;
         }
+
         .logout-button:hover {
             color: #fff;
             background: rgba(255, 255, 255, 0.1);
@@ -155,12 +158,15 @@
         #sidebar-wrapper .list-group-item[data-toggle="collapse"] {
             justify-content: space-between;
         }
+
         #sidebar-wrapper .list-group-item[aria-expanded="true"] .dropdown-arrow {
             transform: rotate(180deg);
         }
+
         .submenu-collapse {
             background: rgba(0, 0, 0, 0.15);
         }
+
         .submenu-collapse .list-group-item {
             padding-left: 3.5rem;
             padding-top: 0.5rem;
@@ -169,6 +175,7 @@
             margin: 0;
             font-weight: 400;
         }
+
         .submenu-collapse .list-group-item.active {
             background: none;
             color: #fff;
@@ -177,8 +184,9 @@
             box-shadow: none;
             padding-left: 3.5rem;
         }
+
         .submenu-collapse .list-group-item:hover {
-             background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.15);
         }
 
         #page-content-wrapper {
@@ -204,17 +212,18 @@
             #sidebar-wrapper { margin-left: 0; }
             #page-content-wrapper { min-width: 0; margin-left: var(--sidebar-width); }
         }
+
         @media (max-width: 767.98px) {
             #page-content-wrapper { margin-left: 0 !important; }
         }
-   </style>
+    </style>
 
     @stack('styles')
     @yield('head')
 </head>
 <body class="{{ Auth::check() ? 'sidebar-toggled' : '' }}">
-    <div id="app" class="d-flex">
-        @if (Auth::check())
+<div id="app" class="d-flex">
+    @if (Auth::check())
         <div id="sidebar-wrapper">
             <div class="sidebar-header">
                 <img src="{{ asset('images/logo.png') }}" alt="Logo PUSDA" class="sidebar-logo">
@@ -222,10 +231,6 @@
             </div>
 
             <div class="list-group list-group-flush">
-                @php
-                    $routePrefix = Auth::user()->role === 'super_admin' ? 'superadmin.' : 'adminbarang.';
-                @endphp
-
                 <a href="{{ route('dashboard.index') }}" class="list-group-item {{ request()->routeIs('dashboard.index') ? 'active' : '' }}">
                     <i class="fas fa-th-large menu-icon"></i> Dashboard
                 </a>
@@ -234,22 +239,27 @@
                     <i class="fas fa-box menu-icon"></i> Manajemen Barang
                 </a>
 
+                {{-- ✅ Approval Barang Notif --}}
                 <a href="{{ route('requests.index') }}" class="list-group-item {{ request()->routeIs('requests.*') ? 'active' : '' }}">
                     <i class="fas fa-check-circle menu-icon"></i> Approval Barang
-                    @if(isset($data['totalRequests']) && $data['totalRequests'] > 0)
-                        <span class="badge-notification">{{ $data['totalRequests'] }}</span>
+                    @php
+                        $totalReq = $notifCounts['requests'] ?? ($data['totalRequests'] ?? 0);
+                    @endphp
+                    @if($totalReq > 0)
+                        <span class="badge-notification">{{ $totalReq }}</span>
                     @endif
                 </a>
 
+                {{-- ✅ Approval Zoom Notif --}}
                 @php
                     $isZoomMenuActive = request()->routeIs('zoom.requests.index') || request()->routeIs('template.index');
+                    $totalZoom = $notifCounts['zoom'] ?? ($data['totalZoomRequests'] ?? 0);
                 @endphp
-
                 <a href="#zoomSubmenu" data-toggle="collapse" aria-expanded="{{ $isZoomMenuActive ? 'true' : 'false' }}" class="list-group-item {{ $isZoomMenuActive ? 'active' : '' }}">
                     <i class="fas fa-video menu-icon"></i>
                     Approval Zoom
-                    @if(isset($data['totalZoomRequests']) && $data['totalZoomRequests'] > 0)
-                        <span class="badge-notification">{{ $data['totalZoomRequests'] }}</span>
+                    @if($totalZoom > 0)
+                        <span class="badge-notification">{{ $totalZoom }}</span>
                     @endif
                     <span class="ml-auto">
                         <i class="fas fa-chevron-down dropdown-arrow ml-2"></i>
@@ -285,35 +295,35 @@
                 </button>
             </form>
         </div>
-        @endif
+    @endif
 
-        <div id="page-content-wrapper">
-            <main>
-                <div class="container-fluid">
-                    @if(session('success'))
+    <div id="page-content-wrapper">
+        <main>
+            <div class="container-fluid">
+                @if(session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="fas fa-check-circle mr-1"></i> {{ session('success') }}
                         <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span></button>
                     </div>
-                    @endif
-                    @if(session('error'))
+                @endif
+                @if(session('error'))
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="fas fa-exclamation-circle mr-1"></i> {{ session('error') }}
                         <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span></button>
                     </div>
-                    @endif
+                @endif
 
-                    @yield('content')
-                </div>
-            </main>
-        </div>
+                @yield('content')
+            </div>
+        </main>
     </div>
+</div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    @stack('scripts')
-    @yield('js')
+@stack('scripts')
+@yield('js')
 </body>
 </html>

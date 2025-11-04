@@ -10,45 +10,34 @@ use App\RequestLinkZoom;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
     public function boot()
     {
-        // Bagikan data notifikasi ke semua view
+        // View Composer hanya aktif untuk user yang login
         View::composer('*', function ($view) {
             if (Auth::check()) {
                 $user = Auth::user();
 
-                // Query jumlah request pending (barang dan zoom)
-                $totalRequests = ItemRequest::where('status', 'pending');
-                $totalZoomRequests = RequestLinkZoom::where('status', 'pending');
+                // Ambil jumlah permintaan barang & zoom pending
+                $totalRequests = ItemRequest::where('status', 'pending')
+                    ->when($user->role === 'admin_barang' && $user->bidang_id, function ($query) use ($user) {
+                        $query->where('bidang_id', $user->bidang_id);
+                    })
+                    ->count();
 
-                // Jika role admin_barang, filter berdasarkan bidang
-                if ($user->role === 'admin_barang' && !empty($user->bidang_id)) {
-                    $totalRequests->where('bidang_id', $user->bidang_id);
-                    $totalZoomRequests->where('bidang_id', $user->bidang_id);
-                }
+                $totalZoomRequests = RequestLinkZoom::where('status', 'pending')
+                    ->when($user->role === 'admin_barang' && $user->bidang_id, function ($query) use ($user) {
+                        $query->where('bidang_id', $user->bidang_id);
+                    })
+                    ->count();
 
-                $data = [
-                    'totalRequests' => $totalRequests->count(),
-                    'totalZoomRequests' => $totalZoomRequests->count(),
-                ];
-
-                $view->with('data', $data);
+                // Kirim ke semua view yang pakai layout admin
+                $view->with('notifCounts', [
+                    'requests' => $totalRequests,
+                    'zoom' => $totalZoomRequests,
+                ]);
             }
         });
     }
 
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        //
-    }
+    public function register() {}
 }

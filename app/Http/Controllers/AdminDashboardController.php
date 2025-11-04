@@ -8,7 +8,6 @@ use App\RequestLinkZoom;
 use App\Transaction;
 use App\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\View;
 
 class AdminDashboardController extends Controller
 {
@@ -16,38 +15,23 @@ class AdminDashboardController extends Controller
     {
         $this->middleware('auth');
         $this->middleware('role:super_admin,admin_barang');
-
-        // 🔹 Tambahkan View Composer agar notif muncul di semua halaman admin
-        View::composer('*', function ($view) {
-            $user = Auth::user();
-            if ($user) {
-                $totalRequests = $this->getPendingRequests($user);
-                $totalZoomRequests = $this->getPendingZoomRequests($user);
-
-                // Kirim data global ke semua view
-                $view->with('notifCounts', [
-                    'requests' => $totalRequests,
-                    'zoom' => $totalZoomRequests,
-                ]);
-            }
-        });
     }
 
     public function index()
     {
         $user = Auth::user();
 
-        // Hitung total barang
+        // 🔹 Hitung total barang
         $totalItems = Item::count();
 
-        // Hitung request pending barang & zoom
+        // 🔹 Hitung total permintaan pending
         $totalRequests = $this->getPendingRequests($user);
         $totalZoomRequests = $this->getPendingZoomRequests($user);
 
-        // Ambil transaksi terbaru
+        // 🔹 Ambil 5 transaksi terbaru
         $recentTransactions = $this->getRecentTransactions($user);
 
-        // Data utama dashboard
+        // 🔹 Kumpulkan data untuk dashboard
         $data = [
             'totalItems'         => $totalItems,
             'totalRequests'      => $totalRequests,
@@ -55,7 +39,7 @@ class AdminDashboardController extends Controller
             'recentTransactions' => $recentTransactions,
         ];
 
-        // Tambahkan total user jika super_admin
+        // 🔹 Tambahkan total pengguna jika super_admin
         if ($user->role === 'super_admin') {
             $data['totalUsers'] = User::count();
         }
