@@ -196,9 +196,10 @@ class RequestController extends Controller
     // Ubah signature agar nama parameter cocok dengan route {reqBarang}
     public function approve(ItemRequest $reqBarang)
     {
-        $request = $reqBarang; // opsional: buat alias agar kode lama tetap bekerja
+        $request = $reqBarang; // alias
         $admin = Auth::user();
 
+        // Cek otorisasi admin_barang
         if ($admin->role === 'admin_barang') {
             if (!$request->bidang_id || $admin->bidang_id !== $request->bidang_id) {
                 abort(403, 'Anda tidak berhak menyetujui request dari bidang ini.');
@@ -208,75 +209,143 @@ class RequestController extends Controller
         try {
             DB::transaction(function () use ($request) {
                 $item = $request->item;
+
+                // Cek stok barang
                 if ($request->jumlah_request > $item->jumlah) {
-                    throw new Exception('Stok tidak mencukupi untuk menyetujui permintaan ini.');
+                    throw new \Exception('Stok tidak mencukupi untuk menyetujui permintaan ini.');
                 }
+
+                // Kurangi stok dan ubah status
                 $item->decrement('jumlah', $request->jumlah_request);
                 $request->update(['status' => 'approved']);
-                
+
+                // Catat transaksi
                 Transaction::create([
                     'request_id' => $request->id,
                     'item_id'    => $item->id,
                     'jumlah'     => $request->jumlah_request,
                     'tipe'       => 'keluar',
                     'tanggal'    => Carbon::now(),
-                    'user_id'    => Auth::id(), 
+                    'user_id'    => Auth::id(),
                 ]);
             });
 
-            if ($request->no_hp) {
+            // --- Kirim Notifikasi WA ---
+            if (!empty($request->no_hp)) {
                 try {
+                    // Format nomor HP jadi standar internasional (62)
+                    $noHp = preg_replace('/[^0-9]/', '', trim($request->no_hp));
+                    if (substr($noHp, 0, 1) === '0') {
+                        $noHp = '62' . substr($noHp, 1);
+                    } elseif (substr($noHp, 0, 3) === '+62') {
+                        $noHp = substr($noHp, 1);
+                    } elseif (substr($noHp, 0, 2) !== '62') {
+                        $noHp = '62' . $noHp;
+                    }
+
+                    // Format tanggal readable (tanpa isoFormat)
+                    setlocale(LC_TIME, 'id_ID.UTF-8');
+                    $tanggal = $request->created_at->formatLocalized('%d %B %Y %H:%M');
+
+                    // Buat pesan WA
+                    $pesan = "[Request Barang Disetujui]\n\n"
+                        . "Halo {$request->nama_pemohon},\n"
+                        . "Request barang Anda telah *DISETUJUI*.\n\n"
+                        . "Barang: {$request->item->nama_barang}\n"
+                        . "Jumlah: {$request->jumlah_request}\n"
+                        . "Tanggal: {$tanggal}\n\n"
+                        . "Silakan ambil barang di bagian terkait. Terima kasih.";
+
+                    // Kirim via Fonnte
                     $wa = app(\App\Services\FontteService::class);
-                    $message = "[Request Barang Disetujui]\nRequest barang Anda telah disetujui.\nBarang: {$request->item->nama_barang}\nJumlah: {$request->jumlah_request}\nTanggal: " . $request->created_at->format('d-m-Y H:i');
-                    $wa->sendMessage($request->no_hp, $message);
-                } catch (Exception $wae) {
-                    // optional log
+                    $wa->sendMessage($noHp, $pesan);
+                } catch (\Exception $wae) {
+                    // \Log::error('Gagal kirim WA approve: ' . $wae->getMessage());
                 }
             }
-        } catch (Exception $e) {
+
+        } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
 
-        return redirect()->route('requests.index')->with('success', 'Permintaan berhasil disetujui.');
+        return redirect()->route('requests.index')
+            ->with('success', 'Permintaan berhasil disetujui dan notifikasi telah dikirim.');
     }
 
     // Ubah juga reject agar nama parameter cocok
-    public function reject(ItemRequest $reqBarang)
+    public function reject(ItemRequest $reqBarang, Request $request)
     {
-        $request = $reqBarang; // alias
         $admin = Auth::user();
 
+        // Cek otorisasi admin_barang
         if ($admin->role === 'admin_barang') {
-            if (!$request->bidang_id || $admin->bidang_id !== $request->bidang_id) {
+            if (!$reqBarang->bidang_id || $admin->bidang_id !== $reqBarang->bidang_id) {
                 abort(403, 'Anda tidak berhak menolak request dari bidang ini.');
             }
         }
 
+        // Validasi alasan opsional (boleh kosong)
+        $this->validate($request, [
+            'note' => 'nullable|string|max:255',
+        ]);
+
         try {
-            $request->update(['status' => 'rejected']);
-            
+            // Update status jadi rejected
+            $reqBarang->update(['status' => 'rejected']);
+
+            // Buat catatan transaksi (log)
             Transaction::create([
-                'request_id' => $request->id,
-                'item_id'    => $request->item_id,
-                'jumlah'     => $request->jumlah_request,
+                'request_id' => $reqBarang->id,
+                'item_id'    => $reqBarang->item_id,
+                'jumlah'     => $reqBarang->jumlah_request,
                 'tipe'       => 'rejected',
                 'tanggal'    => Carbon::now(),
-                'user_id'    => Auth::id(), 
+                'user_id'    => Auth::id(),
             ]);
-            
-            if ($request->no_hp) {
+
+            // Kirim notifikasi WhatsApp
+            if (!empty($reqBarang->no_hp)) {
                 try {
+                    // Format nomor HP biar aman
+                    $noHp = preg_replace('/[^0-9]/', '', trim($reqBarang->no_hp));
+                    if (substr($noHp, 0, 1) === '0') {
+                        $noHp = '62' . substr($noHp, 1);
+                    } elseif (substr($noHp, 0, 3) === '+62') {
+                        $noHp = substr($noHp, 1);
+                    } elseif (substr($noHp, 0, 2) !== '62') {
+                        $noHp = '62' . $noHp;
+                    }
+
+                    // Format tanggal lokal
+                    setlocale(LC_TIME, 'id_ID.UTF-8');
+                    $tanggal = $reqBarang->created_at->formatLocalized('%d %B %Y %H:%M');
+
+                    // Buat pesan WA (termasuk alasan jika ada)
+                    $pesan = "[Request Barang Ditolak]\n\n"
+                        . "Halo {$reqBarang->nama_pemohon},\n"
+                        . "Maaf, request barang Anda telah *DITOLAK*.\n\n"
+                        . "Barang: {$reqBarang->item->nama_barang}\n"
+                        . "Jumlah: {$reqBarang->jumlah_request}\n"
+                        . "Tanggal: {$tanggal}";
+
+                    if ($request->note) {
+                        $pesan .= "\nAlasan: _{$request->note}_";
+                    }
+
+                    $pesan .= "\n\nSilakan hubungi admin jika ingin mengajukan ulang.";
+
+                    // Kirim via Fonnte
                     $wa = app(\App\Services\FontteService::class);
-                    $message = "[Request Barang Ditolak]\nMaaf, request barang Anda ditolak.\nBarang: {$request->item->nama_barang}\nJumlah: {$request->jumlah_request}\nTanggal: " . $request->created_at->format('d-m-Y H:i');
-                    $wa->sendMessage($request->no_hp, $message);
-                } catch (Exception $wae) {
-                    // optional log
+                    $wa->sendMessage($noHp, $pesan);
+                } catch (\Exception $wae) {
+                    // \Log::error('Gagal kirim WA reject: ' . $wae->getMessage());
                 }
             }
-        } catch (Exception $e) {
+
+        } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
 
-        return redirect()->route('requests.index')->with('success', 'Permintaan berhasil ditolak.');
+        return redirect()->route('requests.index')->with('success', 'Permintaan berhasil ditolak dan notifikasi telah dikirim.');
     }
 }
