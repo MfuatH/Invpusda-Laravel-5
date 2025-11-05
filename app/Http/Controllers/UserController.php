@@ -35,12 +35,17 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'role' => ['required', Rule::in(['super_admin', 'admin_barang', 'user'])],
-            'bidang_id' => 'required|exists:bidang,id',
+            'bidang_id' => 'nullable|exists:bidang,id',
             'no_hp' => 'nullable|string|max:15',
         ]);
 
+        // Jika role super_admin, bidang_id diset null
+        if ($validated['role'] === 'super_admin') {
+            $validated['bidang_id'] = null;
+        }
+
         $validated['password'] = Hash::make($validated['password']);
-        
+
         User::create($validated);
 
         return redirect()->route('super.users.index')
@@ -66,14 +71,20 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
             'role' => ['required', Rule::in(['super_admin', 'admin_barang', 'user'])],
-            'bidang_id' => 'required|exists:bidang,id',
+            'bidang_id' => 'nullable|exists:bidang,id',
             'no_hp' => 'nullable|string|max:15',
         ]);
 
-        if (isset($validated['password'])) {
+        // Password hanya diupdate jika diisi
+        if (!empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
         } else {
             unset($validated['password']);
+        }
+
+        // Jika super admin, bidang_id diset null
+        if ($validated['role'] === 'super_admin') {
+            $validated['bidang_id'] = null;
         }
 
         $user->update($validated);
