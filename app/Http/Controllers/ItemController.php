@@ -15,11 +15,31 @@ class ItemController extends Controller
         $this->middleware(['auth', 'role:super_admin,admin_barang']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        // Ambil semua barang dengan pagination
-        $items = Item::orderBy('nama_barang')->paginate(15);
-        return view('admin_page.items.index', compact('items'));
+        // 🔹 Tambahan: ambil kata kunci dari input pencarian
+        $search = $request->get('search');
+
+        // 🔹 Query dasar: urut berdasarkan nama_barang
+        $query = Item::orderBy('nama_barang');
+
+        // 🔹 Jika ada input pencarian, filter berdasarkan nama_barang, kode_barang, atau lokasi
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_barang', 'like', '%' . $search . '%')
+                  ->orWhere('kode_barang', 'like', '%' . $search . '%')
+                  ->orWhere('lokasi', 'like', '%' . $search . '%');
+            });
+        }
+
+        // 🔹 Pagination
+        $items = $query->paginate(15);
+
+        // 🔹 Supaya keyword tetap muncul di input pencarian dan pagination tetap membawa keyword
+        $items->appends(['search' => $search]);
+
+        // 🔹 Kirim data ke view
+        return view('admin_page.items.index', compact('items', 'search'));
     }
 
     public function create()
@@ -37,12 +57,11 @@ class ItemController extends Controller
             'keterangan' => 'nullable|string'
         ]);
 
-        // 🔹 Generate kode_barang unik (misalnya BRG-20251103-001)
+        // 🔹 Generate kode_barang unik
         $lastItem = Item::orderBy('id', 'desc')->first();
         $nextNumber = $lastItem ? $lastItem->id + 1 : 1;
         $validated['kode_barang'] = 'BRG-' . date('Ymd') . '-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
 
-        // Simpan data ke database
         Item::create($validated);
 
         return redirect()->route('barang.index')
