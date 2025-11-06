@@ -1,58 +1,324 @@
-<p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
+# Invpusda - Sistem Inventory Management
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+![Invpusda Banner](docs/banner.png)
 
-## About Laravel
+<div align="center">
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as:
+[![Laravel Version](https://img.shields.io/badge/Laravel-5.x-red.svg)](https://laravel.com)
+[![PHP Version](https://img.shields.io/badge/PHP-7.0+-blue.svg)](https://php.net)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+**Sistem Manajemen Inventory berbasis web menggunakan Laravel 5**
 
-Laravel is accessible, yet powerful, providing tools needed for large, robust applications.
+[Fitur](#fitur) • [Instalasi](#instalasi) • [Dokumentasi](#dokumentasi) • [Screenshot](#screenshot)
 
-## Learning Laravel
+</div>
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of any modern web application framework, making it a breeze to get started learning the framework.
+---
 
-If you're not in the mood to read, [Laracasts](https://laracasts.com) contains over 1100 video tutorials on a range of topics including Laravel, modern PHP, unit testing, JavaScript, and more. Boost the skill level of yourself and your entire team by digging into our comprehensive video library.
+## 📋 Tentang Project
 
-## Laravel Sponsors
+**Invpusda** adalah aplikasi manajemen inventory (inventaris) yang dibangun menggunakan framework Laravel 5. Aplikasi ini dirancang untuk memudahkan pengelolaan data barang, stok, transaksi masuk/keluar, dan pelaporan inventory secara real-time.
 
-We would like to extend our thanks to the following sponsors for helping fund on-going Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell):
+## ✨ Fitur
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[British Software Development](https://www.britishsoftware.co)**
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Pulse Storm](http://www.pulsestorm.net/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
+- 📦 **Manajemen Barang**
+  - CRUD data barang
+  - Kategori barang
+  - Upload foto barang
+  - Barcode/QR Code generation
 
-## Contributing
+- 📊 **Manajemen Stok**
+  - Monitoring stok real-time
+  - Notifikasi stok minimum
+  - History pergerakan stok
+  - Adjustment stok
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- 📥 **Transaksi Masuk**
+  - Pencatatan barang masuk
+  - Supplier management
+  - Print bukti transaksi
 
-## Security Vulnerabilities
+- 📤 **Transaksi Keluar**
+  - Pencatatan barang keluar
+  - Permintaan barang
+  - Approval workflow
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- 📈 **Laporan**
+  - Laporan stok barang
+  - Laporan transaksi masuk/keluar
+  - Laporan per periode
+  - Export PDF & Excel
 
-## License
+- 👥 **Manajemen User**
+  - Multi-level user (Admin, Staff, Viewer)
+  - Role & Permission management
+  - User activity log
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- 🎨 **Dashboard**
+  - Dashboard interaktif
+  - Grafik & Statistik
+  - Quick access menu
+
+## 🛠️ Teknologi yang Digunakan
+
+- **Backend:** Laravel 5.x
+- **Frontend:** Bootstrap, jQuery, DataTables
+- **Database:** MySQL
+- **Server:** Apache/Nginx
+- **PHP Version:** 7.0+
+
+## 📦 Requirement
+
+Pastikan sistem Anda memenuhi requirement berikut:
+
+- PHP >= 7.0
+- MySQL >= 5.7
+- Composer
+- Apache/Nginx Web Server
+- PHP Extensions:
+  - OpenSSL
+  - PDO
+  - Mbstring
+  - Tokenizer
+  - XML
+  - GD Library
+
+## 🚀 Instalasi
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/MfuatH/Invpusda-Laravel-5.git
+cd Invpusda-Laravel-5
+```
+
+### 2. Install Dependencies
+
+```bash
+composer install
+```
+
+### 3. Konfigurasi Environment
+
+```bash
+cp .env.example .env
+```
+
+Edit file `.env` dan sesuaikan konfigurasi database dan Token Wa-Blast:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=invpusda
+DB_USERNAME=root
+DB_PASSWORD=
+
+FONTTE_API_KEY=
+```
+
+### 4. Generate Application Key
+
+```bash
+php artisan key:generate
+```
+
+### 5. Jalankan Migration & Seeder
+
+```bash
+php artisan migrate
+php artisan db:seed
+```
+
+### 6. Create Storage Link
+
+```bash
+php artisan storage:link
+```
+
+### 7. Set Permission (Linux/Mac)
+
+```bash
+chmod -R 777 storage bootstrap/cache
+```
+
+### 8. Jalankan Aplikasi
+
+```bash
+php artisan serve
+```
+
+Aplikasi akan berjalan di `http://localhost:8000`
+
+## 🔐 Default Login
+
+Setelah instalasi, gunakan kredensial berikut untuk login:
+
+**Admin:**
+- Email: `admin@invpusda.com`
+- Password: `password`
+
+**Staff:**
+- Email: `sekretariat@invpusda.com`
+- Password: `password`
+
+> ⚠️ **Penting:** Segera ubah password default setelah login pertama kali!
+
+## 📸 Screenshot
+
+### Dashboard
+![Dashboard](/docs/Dashboard_admin.png)
+*Dashboard utama *
+
+### Data Barang
+![Data Barang](/docs/Halaman_manajemen_barang.png)
+*Halaman manajemen data barang*
+
+### Transaksi Masuk
+![Transaksi Masuk](/docs/Form_req_barang.png)
+*Form pencatatan barang masuk*
+
+### Transaksi Keluar
+![Transaksi Keluar](/docs/Halaman_riwayat%20transaksi.png)
+*Form pencatatan barang keluar*
+
+### Request Zoom Masuk
+![Request Zoom](/docs/Form_req_link_zoom.png)
+*Halaman Pencatatan Request zoom*
+
+## 📖 Dokumentasi
+
+### Struktur Folder
+
+```
+Invpusda-Laravel-5/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   └── Middleware/
+│   └── Models/
+├── config/
+├── database/
+│   ├── migrations/
+│   └── seeds/
+├── docs/              
+├── public/
+│   ├── css/
+│   ├── js/
+│   └── images/
+├── resources/
+│   └── views/
+├── routes/
+│   └── web.php
+└── storage/
+```
+
+
+## 🎯 Penggunaan
+
+### Menambah Barang Baru
+
+1. Login ke sistem
+2. Navigasi ke menu **Barang** > **Tambah Barang**
+3. Isi form data barang
+4. Upload foto (opsional)
+5. Klik **Simpan**
+
+### Transaksi Barang Masuk
+
+1. Menu **Transaksi** > **Barang Masuk**
+2. Pilih supplier
+3. Tambah item barang dan jumlah
+4. Klik **Proses Transaksi**
+5. Print bukti transaksi
+
+### Transaksi Barang Keluar
+
+1. Menu **Transaksi** > **Barang Keluar**
+2. Pilih tujuan/pemohon
+3. Tambah item barang dan jumlah
+4. Klik **Proses Transaksi**
+5. Print bukti pengeluaran
+
+### Generate Laporan
+
+1. Menu **Laporan**
+2. Pilih jenis laporan
+3. Set periode tanggal
+4. Klik **Tampilkan**
+5. Export ke PDF atau Excel
+
+## 🔧 Troubleshooting
+
+### Error "Class not found"
+
+```bash
+composer dump-autoload
+```
+
+### Error Permission Denied
+
+```bash
+sudo chmod -R 777 storage bootstrap/cache
+```
+
+### Error Database Connection
+
+- Pastikan MySQL service running
+- Cek kredensial database di file `.env`
+- Pastikan database sudah dibuat
+
+### Cache Issue
+
+```bash
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
+```
+
+## 🤝 Kontribusi
+
+Kontribusi selalu diterima! Berikut cara berkontribusi:
+
+1. Fork repository ini
+2. Buat branch fitur baru (`git checkout -b fitur-baru`)
+3. Commit perubahan (`git commit -am 'Menambah fitur baru'`)
+4. Push ke branch (`git push origin fitur-baru`)
+5. Buat Pull Request
+
+## 📝 Changelog
+
+### Version 1.0.0 (Current)
+- ✅ CRUD Barang
+- ✅ Transaksi Masuk/Keluar
+- ✅ Laporan PDF & Excel
+- ✅ Multi-user management
+- ✅ Dashboard analytics
+
+
+
+## 👨‍💻 Author
+
+**Mfuat H**
+
+- GitHub: [@MfuatH](https://github.com/MfuatH)
+- Email: [h4asanfu4at@gmail.com](mailto:h4asanfu4at@gmail.com)
+
+## 🙏 Acknowledgments
+
+- Laravel Framework
+- Bootstrap
+- DataTables
+- Chart.js
+- Dan semua open source libraries yang digunakan
+
+## 📞 Support
+
+Jika Anda memiliki pertanyaan atau membutuhkan bantuan:
+
+- 🐛 [Report Bug](https://github.com/MfuatH/Invpusda-Laravel-5/issues)
+- 💡 [Request Feature](https://github.com/MfuatH/Invpusda-Laravel-5/issues)
+- 📧 Email: h4asanfu4at@gmail.com
+
+---
