@@ -31,12 +31,18 @@ class AdminDashboardController extends Controller
         // 🔹 Ambil 5 transaksi terbaru
         $recentTransactions = $this->getRecentTransactions($user);
 
-        // 🔹 Kumpulkan data untuk dashboard
+        // 🔹 🔸 Tambahkan kode ini: ambil 5 barang terbaru
+        $recentItems = Item::orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // 🔹 Kumpulkan semua data untuk dashboard
         $data = [
             'totalItems'         => $totalItems,
             'totalRequests'      => $totalRequests,
             'totalZoomRequests'  => $totalZoomRequests,
             'recentTransactions' => $recentTransactions,
+            'recentItems'        => $recentItems, // ✅ tambahkan ini
         ];
 
         // 🔹 Tambahkan total pengguna jika super_admin

@@ -114,16 +114,20 @@
                             <tbody>
                                 @foreach($data['recentItems'] ?? [] as $item)
                                 <tr>
-                                    <td>{{ $item->nama_barang }}</td>
-                                    <td>{{ $item->stok }}</td>
+                                    <td>{{ $item->nama_barang ?? '-' }}</td>
+                                    <td>{{ $item->jumlah ?? 0 }}</td>
                                     <td>
-                                        <span class="badge badge-{{ $item->stok > 0 ? 'success' : 'danger' }}">
-                                            {{ $item->stok > 0 ? 'Tersedia' : 'Kosong' }}
+                                        @php
+                                            $jumlah = $item->jumlah ?? 0;
+                                        @endphp
+                                        <span class="badge badge-{{ $jumlah > 0 ? 'success' : 'danger' }}">
+                                            {{ $jumlah > 0 ? 'Tersedia' : 'Kosong' }}
                                         </span>
                                     </td>
                                 </tr>
                                 @endforeach
                             </tbody>
+
                         </table>
                     </div>
                     @else
