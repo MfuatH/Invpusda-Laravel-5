@@ -48,7 +48,7 @@
   - Laporan stok barang
   - Laporan transaksi masuk/keluar
   - Laporan per periode
-  - Export PDF & Excel
+  - Export Excel
 
 - 👥 **Manajemen User**
   - Multi-level user (Admin, Staff, Viewer)
@@ -247,7 +247,7 @@ Invpusda-Laravel-5/
 2. Pilih jenis laporan
 3. Set periode tanggal
 4. Klik **Tampilkan**
-5. Export ke PDF atau Excel
+5. Export Excel
 
 ## 🔧 Troubleshooting
 
@@ -292,7 +292,7 @@ Kontribusi selalu diterima! Berikut cara berkontribusi:
 ### Version 1.0.0 (Current)
 - ✅ CRUD Barang
 - ✅ Transaksi Masuk/Keluar
-- ✅ Laporan PDF & Excel
+- ✅ Laporan Excel
 - ✅ Multi-user management
 - ✅ Dashboard analytics
 
