@@ -4,17 +4,15 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Form Request Link Zoom - PUSDA Jatim</title>
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <style>
@@ -22,41 +20,36 @@
             height: 100%;
             margin: 0;
             font-family: 'Poppins', Arial, sans-serif;
-            overflow: hidden;
-        }
-
-        body {
+            overflow-x: hidden; /* Hanya nonaktifkan scroll horizontal */
             background-image: url('{{ asset('images/background.jpeg') }}');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            position: relative;
+            padding: 20px;
         }
 
         /* Container Luar */
         .outer-container {
             max-width: 950px;
-            width: 90%;
+            width: 100%;
             background: rgba(0, 0, 0, 0.25);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
             padding: 15px;
-            z-index: 1;
         }
 
         .inner-container {
             display: flex;
             border-radius: 15px;
             overflow: hidden;
-            align-items: center;
+            align-items: stretch;
+            flex-wrap: wrap;
         }
 
         /* Panel Kiri */
@@ -90,9 +83,9 @@
             flex: 1.2;
             background: #fff;
             padding: 25px;
-            overflow-y: auto;
-            max-height: 80vh;
             border-radius: 15px;
+            max-height: none; /* biarkan tinggi menyesuaikan isi */
+            overflow: visible; /* biar form tidak terpotong */
         }
         .right-panel h3 {
             text-align: left;
@@ -161,8 +154,13 @@
 
         /* RESPONSIVE */
         @media (max-width: 768px) {
-            body {
+            html, body {
+                display: block; /* Biar konten bisa scroll vertikal */
                 overflow-y: auto;
+                padding: 10px;
+            }
+            .outer-container {
+                padding: 10px;
             }
             .inner-container {
                 flex-direction: column;
@@ -172,7 +170,7 @@
                 padding: 15px 10px;
             }
             .left-panel .illustration {
-                display: none; /* <-- gambar disembunyikan di HP */
+                display: none; /* gambar disembunyikan di HP */
             }
             .left-panel .logo {
                 max-width: 120px;
@@ -184,10 +182,9 @@
             .right-panel {
                 width: 100%;
                 padding: 20px 15px;
-                max-height: none;
+                overflow: visible; /* biar isi form panjang bisa tampil semua */
             }
         }
-
     </style>
 </head>
 <body>
@@ -205,17 +202,25 @@
                 <h3>Form Request Link Zoom</h3>
 
                 @if ($errors->any())
-                    <div class="alert alert-danger"><ul class="mb-0">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 @endif
                 @if (session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
 
-                <form action="{{ route('request.zoom.store') }}" method="POST"> 
+                <form action="{{ route('request.zoom.store') }}" method="POST">
                     {{ csrf_field() }}
+
                     <div class="form-group">
                         <i class="fas fa-user form-icon"></i>
-                        <input type="text" class="form-control" id="nama_pemohon" name="nama_pemohon" value="{{ old('nama_pemohon') }}" placeholder="Nama Pemohon" required>
+                        <input type="text" class="form-control" id="nama_pemohon" name="nama_pemohon"
+                               value="{{ old('nama_pemohon') }}" placeholder="Nama Pemohon" required>
                     </div>
 
                     <div class="form-group">
@@ -232,39 +237,43 @@
                             @endif
                         </select>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <i class="fas fa-id-card form-icon"></i>
-                                <input type="text" class="form-control" id="nip" name="nip" value="{{ old('nip') }}" placeholder="NIP (opsional)">
+                                <input type="text" class="form-control" id="nip" name="nip"
+                                       value="{{ old('nip') }}" placeholder="NIP (opsional)">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <i class="fas fa-phone form-icon"></i>
-                                <input type="text" class="form-control" id="no_hp" name="no_hp" value="{{ old('no_hp') }}" placeholder="Nomor Hp" required>
+                                <input type="text" class="form-control" id="no_hp" name="no_hp"
+                                       value="{{ old('no_hp') }}" placeholder="Nomor Hp" required>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <i class="fas fa-calendar-alt form-icon"></i>
-                                <input type="text" class="form-control" id="jadwal_mulai" name="jadwal_mulai" value="{{ old('jadwal_mulai') }}" 
-                                       placeholder="mm/dd/yyyy --:--" 
-                                       onfocus="(this.type='datetime-local')" 
-                                       onblur="(if(!this.value) this.type='text')" 
+                                <input type="text" class="form-control" id="jadwal_mulai" name="jadwal_mulai"
+                                       value="{{ old('jadwal_mulai') }}"
+                                       placeholder="mm/dd/yyyy --:--"
+                                       onfocus="(this.type='datetime-local')"
+                                       onblur="(if(!this.value) this.type='text')"
                                        required>
                             </div>
                         </div>
-                         <div class="col-md-6">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <i class="fas fa-calendar-alt form-icon"></i>
-                                <input type="text" class="form-control" id="jadwal_selesai" name="jadwal_selesai" value="{{ old('jadwal_selesai') }}"
-                                       placeholder="mm/dd/yyyy --:--" 
-                                       onfocus="(this.type='datetime-local')" 
+                                <input type="text" class="form-control" id="jadwal_selesai" name="jadwal_selesai"
+                                       value="{{ old('jadwal_selesai') }}"
+                                       placeholder="mm/dd/yyyy --:--"
+                                       onfocus="(this.type='datetime-local')"
                                        onblur="(if(!this.value) this.type='text')">
                             </div>
                         </div>
@@ -272,12 +281,14 @@
 
                     <div class="form-group">
                         <i class="fas fa-video form-icon"></i>
-                        <input type="text" class="form-control" id="nama_rapat" name="nama_rapat" value="{{ old('nama_rapat') }}" placeholder="Nama / Topik Rapat" required>
+                        <input type="text" class="form-control" id="nama_rapat" name="nama_rapat"
+                               value="{{ old('nama_rapat') }}" placeholder="Nama / Topik Rapat" required>
                     </div>
 
                     <div class="form-group">
                         <i class="fas fa-file-alt form-icon" style="top: 20px; transform: none;"></i>
-                        <textarea class="form-control textarea-icon" id="keterangan" name="keterangan" rows="2" placeholder="Keterangan Rapat (opsional)">{{ old('keterangan') }}</textarea> 
+                        <textarea class="form-control textarea-icon" id="keterangan" name="keterangan" rows="2"
+                                  placeholder="Keterangan Rapat (opsional)">{{ old('keterangan') }}</textarea>
                     </div>
 
                     <div class="button-group">
@@ -288,15 +299,15 @@
             </div>
         </div>
     </div>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var jadwalMulai = document.getElementById('jadwal_mulai');
-            if (jadwalMulai.value) jadwalMulai.type = 'datetime-local';
-            
-            var jadwalSelesai = document.getElementById('jadwal_selesai');
-            if (jadwalSelesai.value) jadwalSelesai.type = 'datetime-local';
+            var mulai = document.getElementById('jadwal_mulai');
+            if (mulai.value) mulai.type = 'datetime-local';
+            var selesai = document.getElementById('jadwal_selesai');
+            if (selesai.value) selesai.type = 'datetime-local';
         });
     </script>
+
 </body>
 </html>

@@ -23,24 +23,40 @@
       font-family: 'Poppins', Arial, sans-serif;
       overflow-x: hidden;
     }
-    body {
-      background-image: url('{{ asset('images/background.jpeg') }}');
+
+    /* Gunakan CSS variable untuk ganti background */
+    :root {
+      --bg-image: url('{{ asset('images/background.jpeg') }}');
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: var(--bg-image);
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
+      z-index: -1;
+      transition: background-image 0.5s ease-in-out;
+    }
+
+    body {
       display: flex;
       align-items: center;
       justify-content: center;
       flex-direction: column;
       min-height: 100vh;
-      transition: background-image 0.5s ease-in-out;
-      position: relative;
       padding: 20px;
+      position: relative;
     }
 
     /* Tombol Ganti Background */
     .change-bg-button {
-      position: absolute;
+      position: fixed;
       top: 20px;
       right: 20px;
       width: 50px;
@@ -187,7 +203,6 @@
   @endif
 
   <div class="action-button-wrapper">
-    <!-- Baris pertama -->
     <div class="button-row">
       <a class="action-button" href="{{ route('request.barang.create') }}">
         <i class="fas fa-clipboard-list"></i> Permintaan Barang
@@ -203,7 +218,6 @@
       </a>
     </div>
 
-    <!-- Baris kedua -->
     <div class="button-row" style="justify-content: center;">
       <a class="action-button">
         <i class="fas fa-download"></i> Download Presensi
@@ -230,13 +244,12 @@
       const backgroundImages = @json($backgroundPaths);
       let currentBgIndex = 0;
       const changeBgBtn = document.getElementById('change-bg-btn');
-      const bodyElement = document.body;
 
       if (changeBgBtn && backgroundImages.length > 0) {
-        bodyElement.style.backgroundImage = `url('${backgroundImages[currentBgIndex]}')`;
+        document.documentElement.style.setProperty('--bg-image', `url('${backgroundImages[currentBgIndex]}')`);
         changeBgBtn.addEventListener('click', function () {
           currentBgIndex = (currentBgIndex + 1) % backgroundImages.length;
-          bodyElement.style.backgroundImage = `url('${backgroundImages[currentBgIndex]}')`;
+          document.documentElement.style.setProperty('--bg-image', `url('${backgroundImages[currentBgIndex]}')`);
         });
       }
     });

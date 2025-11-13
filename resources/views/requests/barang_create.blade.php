@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Form Permintaan Barang - PUSDA Jatim</title>
 
@@ -19,14 +19,15 @@
             font-family: 'Poppins', Arial, sans-serif;
             overflow-x: hidden;
         }
+
         body {
             background-image: url('{{ asset('images/background.jpeg') }}');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             display: flex;
-            align-items: center; 
-            justify-content: center; 
+            align-items: center;
+            justify-content: center;
             min-height: 100vh;
             position: relative;
             padding: 20px;
@@ -35,7 +36,7 @@
         .outer-container {
             max-width: 950px;
             width: 100%;
-            background: rgba(0, 0, 0, 0.25); 
+            background: rgba(0, 0, 0, 0.25);
             backdrop-filter: blur(12px);
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -45,17 +46,17 @@
 
         .inner-container {
             display: flex;
-            border-radius: 15px; 
-            overflow: hidden; 
+            border-radius: 15px;
+            overflow: hidden;
             align-items: center;
             flex-wrap: wrap;
         }
 
         .left-panel {
-            flex: 1.1; 
-            background: none; 
+            flex: 1.1;
+            background: none;
             padding: 30px;
-            color: white; 
+            color: white;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -68,14 +69,14 @@
         .left-panel .illustration { max-width: 90%; }
 
         .right-panel {
-            flex: 1.2; 
-            background: #fff; 
+            flex: 1.2;
+            background: #fff;
             padding: 25px;
             border-radius: 15px;
         }
 
         .right-panel h3 {
-            text-align: left; 
+            text-align: left;
             font-weight: 600;
             color: #333;
             font-size: 1.25rem;
@@ -92,11 +93,11 @@
             z-index: 2;
         }
         .form-control {
-            background: #f4f7f6; 
+            background: #f4f7f6;
             border: none;
             border-radius: 8px;
             height: 42px;
-            padding-left: 45px; 
+            padding-left: 45px;
             font-size: 0.85rem;
         }
         .form-control:focus {
@@ -128,7 +129,7 @@
 
         .item-row select.form-control {
             flex: 1;
-            padding-left: 15px; 
+            padding-left: 15px;
         }
         .item-row input[type="number"] {
             width: 90px;
@@ -151,7 +152,7 @@
 
         .button-group {
             display: flex;
-            justify-content: space-between; 
+            justify-content: space-between;
             gap: 10px;
             margin-top: 25px;
             flex-wrap: wrap;
@@ -167,17 +168,21 @@
         .btn-custom-secondary { background-color: #e9ecef; color: #333; }
         .btn-custom-primary { background-color: #007bff; color: white; }
 
-        /* === RESPONSIVE DESIGN === */
+        /* === RESPONSIVE === */
         @media (max-width: 768px) {
-            body {
-                overflow-y: auto;
-                align-items: flex-start;
-                padding: 20px 10px;
+            html, body {
+                height: auto;
+                min-height: 100%;
+                display: block;
+                overflow-y: auto; /* ✅ Izinkan scroll di HP */
+                padding: 10px;
             }
 
             .outer-container {
+                margin: 0 auto;
                 padding: 10px;
                 border-radius: 15px;
+                background: rgba(0, 0, 0, 0.3);
             }
 
             .inner-container {
@@ -187,22 +192,21 @@
 
             .left-panel {
                 order: 1;
-                padding: 20px 10px;
+                padding: 15px 10px;
+            }
+
+            .left-panel .illustration {
+                display: none !important; /* ✅ Hilangkan gambar di HP */
             }
 
             .left-panel .logo { max-width: 120px; }
-            .left-panel h2 { font-size: 1.5rem; }
-
-            /* ❌ Sembunyikan ilustrasi hanya di HP */
-            .left-panel .illustration {
-                display: none !important;
-            }
+            .left-panel h2 { font-size: 1.5rem; margin-bottom: 10px; }
 
             .right-panel {
                 order: 2;
                 width: 100%;
                 border-radius: 15px;
-                padding: 20px;
+                padding: 20px 15px;
                 margin-top: 10px;
             }
 
@@ -211,8 +215,8 @@
                 align-items: stretch;
             }
 
-            .item-row input[type="number"], 
-            .btn-add-item, 
+            .item-row input[type="number"],
+            .btn-add-item,
             .btn-remove-item {
                 width: 100%;
             }
