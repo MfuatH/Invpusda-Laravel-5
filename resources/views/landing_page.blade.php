@@ -210,22 +210,22 @@
       <a class="action-button" href="{{ route('request.zoom.create') }}">
         <i class="fas fa-video"></i> Permintaan Link Zoom
       </a>
-      <a class="action-button">
+      <a class="action-button" href="{{ route('request.konsumsi.create') }}">
         <i class="fas fa-utensils"></i> Makanan & Minuman
       </a>
-      <a class="action-button">
+      <a class="action-button" href="{{ route('request.undangan.create') }}">
         <i class="fas fa-file-upload"></i> Upload Nota Dinas / Undangan
       </a>
     </div>
 
     <div class="button-row" style="justify-content: center;">
-      <a class="action-button">
+      <a class="action-button" href="{{ route('request.download.presensi') }}">
         <i class="fas fa-download"></i> Download Presensi
       </a>
-      <a class="action-button">
+      <a class="action-button" href="{{ route('request.download.notulensi') }}">
         <i class="fas fa-file-download"></i> Download Notulen
       </a>
-      <a class="action-button">
+      <a class="action-button" href="{{ route('request.upload.NotulensinPresensi') }}">
         <i class="fas fa-cloud-upload-alt"></i> Upload Presensi, Notulensi & Dokumentasi
       </a>
     </div>

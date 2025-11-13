@@ -348,4 +348,29 @@ class RequestController extends Controller
 
         return redirect()->route('requests.index')->with('success', 'Permintaan berhasil ditolak dan notifikasi telah dikirim.');
     }
+    
+    public function createKonsumsi()
+    {
+        return view('requests.konsumsi_create');
+    }
+
+    public function createUndangan()
+    {
+        return view('requests.Undangan');
+    }
+
+    public function downloadPresensi()
+    {
+        return view('requests.download_presensi');
+    }
+
+    public function downloadNotulensi()
+    {
+        return view('requests.download_notulensi');
+    }
+
+    public function uploadNotulensinPresensi()
+    {
+        return view('requests.upload_notanpresensi');
+    }
 }

@@ -12,6 +12,11 @@ Route::get('/request-barang', 'RequestController@createBarang')->name('request.b
 Route::post('/request-barang', 'RequestController@storeBarang')->name('request.barang.store');
 Route::get('/request-link-zoom', 'RequestController@createZoom')->name('request.zoom.create');
 Route::post('/request-link-zoom', 'RequestController@storeZoom')->name('request.zoom.store');
+Route::get('/request-konsumsi', 'RequestController@createKonsumsi')->name('request.konsumsi.create');
+Route::get('/undangan-upload', 'RequestController@createUndangan')->name('request.undangan.create');
+Route::get('/download-presensi', 'RequestController@downloadPresensi')->name('request.download.presensi');
+Route::get('/download-notulensi', 'RequestController@downloadNotulensi')->name('request.download.notulensi');
+Route::get('/upload-NotulensinPresensi', 'RequestController@uploadNotulensinPresensi')->name('request.upload.NotulensinPresensi');
 
 // ==========================================================
 // 2. ROUTE AUTH (untuk Laravel 5 manual login/register)
