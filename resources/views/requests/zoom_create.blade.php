@@ -22,49 +22,49 @@
             height: 100%;
             margin: 0;
             font-family: 'Poppins', Arial, sans-serif;
-            overflow: hidden; 
+            overflow: hidden;
         }
+
         body {
-            background-image: url('{{ asset('images/background.jpeg') }}'); 
+            background-image: url('{{ asset('images/background.jpeg') }}');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             
             display: flex;
-            align-items: center; 
-            justify-content: center; 
+            align-items: center;
+            justify-content: center;
             min-height: 100vh;
-            position: relative; 
+            position: relative;
         }
 
-        /* Container Luar (Transparan) */
+        /* Container Luar */
         .outer-container {
-            max-width: 950px; /* <-- DIKECILKAN */
+            max-width: 950px;
             width: 90%;
-            background: rgba(0, 0, 0, 0.25); 
+            background: rgba(0, 0, 0, 0.25);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            padding: 15px; /* <-- DIKECILKAN */
+            padding: 15px;
             z-index: 1;
         }
-        
+
         .inner-container {
             display: flex;
-            border-radius: 15px; 
-            overflow: hidden; 
+            border-radius: 15px;
+            overflow: hidden;
             align-items: center;
-            /* min-height: 500px; */ /* <-- DIHAPUS */
         }
 
-        /* Panel Kiri (Ikut Transparan) */
+        /* Panel Kiri */
         .left-panel {
-            flex: 1.1; /* <-- DIUBAH: Disesuaikan rasionya */
-            background: none; 
-            padding: 30px; /* <-- DIKECILKAN */
-            color: white; 
+            flex: 1.1;
+            background: none;
+            padding: 30px;
+            color: white;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -72,39 +72,40 @@
             text-align: center;
         }
         .left-panel .logo {
-            max-width: 160px; /* <-- DIKECILKAN */
-            margin-bottom: 20px; /* <-- DIKECILKAN */
+            max-width: 160px;
+            margin-bottom: 20px;
         }
         .left-panel h2 {
             font-weight: 700;
-            font-size: 2.2rem; /* <-- DIKECILKAN */
-            margin-bottom: 20px; /* <-- DIKECILKAN */
+            font-size: 2.2rem;
+            margin-bottom: 20px;
         }
         .left-panel .illustration {
             max-width: 90%;
+            transition: 0.3s ease;
         }
-        
-        /* Panel Kanan (Form Putih) */
+
+        /* Panel Kanan */
         .right-panel {
-            flex: 1.2; /* <-- DIUBAH: Disesuaikan rasionya */
-            background: #fff; 
-            padding: 25px; /* <-- DIKECILKAN */
-            overflow-y: auto; 
-            max-height: 80vh; /* Tetap ada max-height untuk jaga-jaga */
+            flex: 1.2;
+            background: #fff;
+            padding: 25px;
+            overflow-y: auto;
+            max-height: 80vh;
             border-radius: 15px;
         }
         .right-panel h3 {
-            text-align: left; 
+            text-align: left;
             font-weight: 600;
             color: #333;
-            font-size: 1.25rem; /* <-- DIKECILKAN */
-            margin-bottom: 20px; /* <-- DIKECILKAN */
+            font-size: 1.25rem;
+            margin-bottom: 20px;
         }
 
-        /* Styling Form (Rapi) */
+        /* Form */
         .form-group {
             position: relative;
-            margin-bottom: 0.75rem; /* <-- DIKECILKAN */
+            margin-bottom: 0.75rem;
         }
         .form-icon {
             position: absolute;
@@ -115,16 +116,15 @@
             z-index: 2;
         }
         .form-control {
-            background: #f4f7f6; 
+            background: #f4f7f6;
             border: none;
             border-radius: 8px;
-            height: 42px; /* <-- DIKECILKAN */
-            padding-left: 45px; 
-            font-size: 0.85rem; /* <-- DIKECILKAN */
+            height: 42px;
+            padding-left: 45px;
+            font-size: 0.85rem;
         }
         .form-control::placeholder {
             color: #888;
-            opacity: 1;
         }
         .form-control:focus {
             background: #fff;
@@ -132,23 +132,23 @@
             box-shadow: none;
         }
         .form-control.textarea-icon {
-             height: auto; 
-             padding-top: 12px;
+            height: auto;
+            padding-top: 12px;
         }
 
         /* Tombol */
         .button-group {
             display: flex;
-            justify-content: space-between; 
+            justify-content: space-between;
             gap: 10px;
-            margin-top: 25px; /* <-- DIKECILKAN */
+            margin-top: 25px;
         }
         .btn-custom {
-            padding: 10px 20px; /* <-- DIKECILKAN */
+            padding: 10px 20px;
             border: none;
             border-radius: 8px;
             font-weight: 600;
-            font-size: 0.9rem; /* <-- DIKECILKAN */
+            font-size: 0.9rem;
         }
         .btn-custom-secondary {
             background-color: #e9ecef;
@@ -157,6 +157,35 @@
         .btn-custom-primary {
             background-color: #007bff;
             color: white;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            body {
+                overflow-y: auto;
+            }
+            .inner-container {
+                flex-direction: column;
+                padding: 10px;
+            }
+            .left-panel {
+                padding: 15px 10px;
+            }
+            .left-panel .illustration {
+                display: none; /* <-- gambar disembunyikan di HP */
+            }
+            .left-panel .logo {
+                max-width: 120px;
+            }
+            .left-panel h2 {
+                font-size: 1.5rem;
+                margin-bottom: 10px;
+            }
+            .right-panel {
+                width: 100%;
+                padding: 20px 15px;
+                max-height: none;
+            }
         }
 
     </style>
@@ -261,18 +290,13 @@
     </div>
     
     <script>
-        // Script untuk trik placeholder pada input datetime-local
         document.addEventListener('DOMContentLoaded', function() {
             var jadwalMulai = document.getElementById('jadwal_mulai');
-            if (jadwalMulai.value) {
-                jadwalMulai.type = 'datetime-local';
-            }
+            if (jadwalMulai.value) jadwalMulai.type = 'datetime-local';
             
             var jadwalSelesai = document.getElementById('jadwal_selesai');
-            if (jadwalSelesai.value) {
-                jadwalSelesai.type = 'datetime-local';
-            }
+            if (jadwalSelesai.value) jadwalSelesai.type = 'datetime-local';
         });
-    </SCript>
+    </script>
 </body>
 </html>

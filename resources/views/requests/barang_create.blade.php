@@ -17,10 +17,10 @@
             height: 100%;
             margin: 0;
             font-family: 'Poppins', Arial, sans-serif;
-            overflow: hidden; 
+            overflow-x: hidden;
         }
         body {
-            background-image: url('{{ asset('images/background.jpeg') }}'); 
+            background-image: url('{{ asset('images/background.jpeg') }}');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -28,25 +28,29 @@
             align-items: center; 
             justify-content: center; 
             min-height: 100vh;
-            position: relative; 
+            position: relative;
+            padding: 20px;
         }
+
         .outer-container {
             max-width: 950px;
-            width: 90%;
+            width: 100%;
             background: rgba(0, 0, 0, 0.25); 
             backdrop-filter: blur(12px);
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
             padding: 15px;
-
         }
+
         .inner-container {
             display: flex;
             border-radius: 15px; 
             overflow: hidden; 
             align-items: center;
+            flex-wrap: wrap;
         }
+
         .left-panel {
             flex: 1.1; 
             background: none; 
@@ -58,6 +62,7 @@
             align-items: center;
             text-align: center;
         }
+
         .left-panel .logo { max-width: 160px; margin-bottom: 20px; }
         .left-panel h2 { font-weight: 700; font-size: 2.2rem; margin-bottom: 20px; }
         .left-panel .illustration { max-width: 90%; }
@@ -68,6 +73,7 @@
             padding: 25px;
             border-radius: 15px;
         }
+
         .right-panel h3 {
             text-align: left; 
             font-weight: 600;
@@ -111,12 +117,15 @@
             margin-bottom: 0;
             color: #555;
         }
+
         .item-row {
             display: flex;
             gap: 10px;
             margin-bottom: 0.75rem;
             align-items: center;
+            flex-wrap: wrap;
         }
+
         .item-row select.form-control {
             flex: 1;
             padding-left: 15px; 
@@ -131,6 +140,7 @@
             font-size: 0.85rem;
             color: #555;
         }
+
         .btn-add-item, .btn-remove-item {
             width: 42px; height: 42px; border-radius: 8px;
             display: flex; justify-content: center; align-items: center;
@@ -144,7 +154,9 @@
             justify-content: space-between; 
             gap: 10px;
             margin-top: 25px;
+            flex-wrap: wrap;
         }
+
         .btn-custom {
             padding: 10px 20px;
             border: none;
@@ -154,6 +166,70 @@
         }
         .btn-custom-secondary { background-color: #e9ecef; color: #333; }
         .btn-custom-primary { background-color: #007bff; color: white; }
+
+        /* === RESPONSIVE DESIGN === */
+        @media (max-width: 768px) {
+            body {
+                overflow-y: auto;
+                align-items: flex-start;
+                padding: 20px 10px;
+            }
+
+            .outer-container {
+                padding: 10px;
+                border-radius: 15px;
+            }
+
+            .inner-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .left-panel {
+                order: 1;
+                padding: 20px 10px;
+            }
+
+            .left-panel .logo { max-width: 120px; }
+            .left-panel h2 { font-size: 1.5rem; }
+
+            /* ❌ Sembunyikan ilustrasi hanya di HP */
+            .left-panel .illustration {
+                display: none !important;
+            }
+
+            .right-panel {
+                order: 2;
+                width: 100%;
+                border-radius: 15px;
+                padding: 20px;
+                margin-top: 10px;
+            }
+
+            .item-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .item-row input[type="number"], 
+            .btn-add-item, 
+            .btn-remove-item {
+                width: 100%;
+            }
+
+            .satuan-label {
+                text-align: left;
+                margin-bottom: 5px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn-custom {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -196,13 +272,13 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-6 col-12">
                             <div class="form-group">
                                 <i class="fas fa-id-card form-icon"></i>
                                 <input type="text" class="form-control" name="nip" placeholder="NIP (opsional)" value="{{ old('nip') }}">
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6 col-12">
                             <div class="form-group">
                                 <i class="fas fa-phone form-icon"></i>
                                 <input type="text" class="form-control" name="no_hp" placeholder="Nomor HP" value="{{ old('no_hp') }}" required>
@@ -245,7 +321,6 @@
         $(function() {
             let itemIndex = 0;
 
-            // Tambah baris barang
             $('.btn-add-item').click(function() {
                 itemIndex++;
                 let newRow = `
@@ -267,13 +342,11 @@
                 updateRemoveButtons();
             });
 
-            // Hapus baris barang
             $(document).on('click', '.btn-remove-item', function() {
                 $(this).closest('.item-row').remove();
                 updateRemoveButtons();
             });
 
-            // Update label satuan ketika barang dipilih
             $(document).on('change', '.item-select', function() {
                 let satuan = $(this).find(':selected').data('satuan') || '-';
                 $(this).closest('.item-row').find('.satuan-label').text(satuan);
