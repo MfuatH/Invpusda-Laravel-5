@@ -356,21 +356,21 @@ class RequestController extends Controller
 
     public function createUndangan()
     {
-        return view('requests.Undangan');
+        return view('documents.Undangan');
     }
 
     public function downloadPresensi()
     {
-        return view('requests.download_presensi');
+        return view('documents.download_presensi');
     }
 
     public function downloadNotulensi()
     {
-        return view('requests.download_notulensi');
+        return view('documents.download_notulensi');
     }
 
     public function uploadNotulensinPresensi()
     {
-        return view('requests.upload_notanpresensi');
+        return view('documents.upload_notanpresensi');
     }
 }
