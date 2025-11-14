@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Dokumen Rapat</title>
 
-    <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <style>
         body {
@@ -44,14 +45,9 @@
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             color: #1F78D1;
             margin-bottom: 20px;
-        }
-
-        .section-title:before {
-            content: "📄";
-            font-size: 30px;
         }
 
         /* CARD */
@@ -80,21 +76,13 @@
             font-weight: 600;
             cursor: pointer;
             transition: .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn-primary:hover {
             background: #236fb4;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        .file-name {
-            margin-top: 12px;
-            font-size: 15px;
-            color: #444;
-            font-weight: 500;
         }
 
         .card-grey {
@@ -109,6 +97,13 @@
             color: #444;
             line-height: 1.6;
             margin-bottom: 25px;
+        }
+        .desc b {
+            color: #333;
+        }
+        .desc ul {
+            padding-left: 20px;
+            margin-top: 5px;
         }
 
         .sample-card {
@@ -137,12 +132,12 @@
             opacity: 0.85;
         }
 
-        /* UPDATE: tombol kecil kiri bawah */
+        /* Tombol submit di dalam modal */
         .btn-submit {
             background: #1F78D1;
             color: #fff;
             padding: 10px 18px;
-            width: auto;
+            width: 100%;
             border: none;
             border-radius: 8px;
             font-size: 15px;
@@ -150,13 +145,17 @@
             cursor: pointer;
             transition: .2s;
             margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .btn-submit:hover {
             background: #155fa3;
         }
 
-        /* MODAL PREVIEW */
+        /* MODAL (UMUM) */
         .modal-bg {
             display: none;
             position: fixed;
@@ -172,7 +171,9 @@
 
         .modal-box {
             width: 80%;
-            height: 85%;
+            max-width: 500px;
+            height: auto;
+            max-height: 85vh;
             background: white;
             border-radius: 12px;
             overflow: hidden;
@@ -189,8 +190,12 @@
             justify-content: space-between;
             align-items: center;
         }
+        
+        .modal-header .title {
+            font-weight: 600;
+        }
 
-        .modal-header button {
+        .modal-header button, .modal-close-btn {
             background: white;
             color: #1F78D1;
             padding: 8px 15px;
@@ -199,112 +204,253 @@
             font-weight: 600;
             cursor: pointer;
         }
+        
+        .modal-body {
+            padding: 20px 25px;
+            overflow-y: auto;
+        }
+
+        /* Khusus Modal Preview PDF */
+        .modal-box-pdf {
+            width: 80%;
+            height: 85%;
+            max-width: none;
+        }
 
         iframe {
             width: 100%;
             height: 100%;
             border: none;
         }
+        
+        /* == STYLE FORM UNTUK MODAL == */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+        }
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            font-size: 15px;
+        }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .form-group .opsional {
+            font-weight: 400;
+            color: #777;
+            font-size: 14px;
+        }
+
+        /* TAMPILAN BARU UNTUK FILE INPUT */
+        .file-input-wrapper {
+            position: relative;
+            width: 100%;
+            text-align: center;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 30px;
+            box-sizing: border-box;
+            background: #fafafa;
+            cursor: pointer;
+            transition: .2s;
+        }
+        .file-input-wrapper:hover {
+            background: #f4f4f4;
+            border-color: #1F78D1;
+        }
+        .file-input-wrapper .file-input-icon {
+            font-size: 32px;
+            color: #1F78D1;
+        }
+        .file-input-wrapper .file-input-text {
+            font-size: 16px;
+            color: #555;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .file-name {
+            margin-top: 15px;
+            font-size: 15px;
+            color: #1F78D1;
+            font-weight: 600;
+            text-align: center;
+        }
+        
     </style>
 </head>
 
 <body>
 
-    <!-- Header -->
     <div class="header">
         <img src="/images/logo.png" alt="Logo">
     </div>
 
     <div class="container">
-
-        <h2 class="section-title">Upload Dokumen Rapat</h2>
+        
+        <h2 class="section-title">
+            <i class="fas fa-file-upload"></i>
+            Upload Dokumen Rapat
+        </h2>
 
         <div class="card">
             <h3>Unggah Dokumen</h3>
 
-            <form action="/upload-dokumen" method="POST" enctype="multipart/form-data">
-                {{ csrf_field() }}
+            <button type="button" class="btn-primary" onclick="openUploadModal()">
+                <i class="fas fa-plus"></i>
+                Upload Dokumen
+            </button>
 
-                <button type="button" class="btn-primary" onclick="document.getElementById('fileInput').click();">
-                    Pilih File Dokumen
-                </button>
-
-                <input type="file" id="fileInput" name="dokumen" accept=".pdf,.jpg,.jpeg,.png" onchange="showFileName()">
-
-                <div id="fileName" class="file-name"></div>
-
-                <div class="card-grey">
-
-                    <div class="desc">
-                        Dokumen harus PDF atau Foto (jpg/png).
-                        <br><br><b>Urutan dokumen:</b><br>
-                        • Presensi<br>
-                        • Notulen<br>
-                        • Nodin<br>
-                        • Lampiran pendukung
-                    </div>
-
-                    <!-- CONTOH DOKUMEN -->
-                    <div class="sample-card">
-                        <h4>Contoh Dokumen (Preview di halaman ini)</h4>
-
-                        <img src="/images/pdf.png" class="pdf-icon" onclick="previewPDF('/sample/presensi.pdf')">
-                        <img src="/images/pdf.png" class="pdf-icon" onclick="previewPDF('/sample/notulen.pdf')">
-                        <img src="/images/pdf.png" class="pdf-icon" onclick="previewPDF('/sample/nodin.pdf')">
-                    </div>
-
-                    <!-- UPDATE: TOMBOL KECIL KIRI BAWAH -->
-                    <div style="margin-top: 20px; display: flex; justify-content: flex-start;">
-                        <button type="submit" class="btn-submit">Kirim Dokumen</button>
-                    </div>
-
+            <div class="card-grey">
+                
+                <div class="desc">
+                    Dokumen harus PDF atau Foto (jpg/png).
+                    <br><br>
+                    <b>Format Pembuatan Laporan Akhir:</b><br>
+                    Pastikan file Anda sudah sesuai dengan format yang ditentukan.
+                    <br><br>
+                    <b>Urutan dokumen:</b>
+                    <ul>
+                        <li>Presensi</li>
+                        <li>Notulen</li>
+                        <li>Nodin</li>
+                        <li>Lampiran pendukung</li>
+                    </ul>
                 </div>
 
-            </form>
-        </div>
+                <div class="sample-card">
+                    <h4>Contoh Dokumen (Preview di halaman ini)</h4>
 
+                    <img src="/images/pdf.png" class="pdf-icon" onclick="previewPDF('/sample/presensi.pdf')">
+                    <img src="/images/pdf.png" class="pdf-icon" onclick="previewPDF('/sample/notulen.pdf')">
+                    <img src="/images/pdf.png" class="pdf-icon" onclick="previewPDF('/sample/nodin.pdf')">
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <!-- MODAL PREVIEW -->
-    <div class="modal-bg" id="previewModal">
+    <div class="modal-bg" id="uploadModal">
         <div class="modal-box">
             <div class="modal-header">
-                <span>Preview Dokumen</span>
+                <span class="title">Form Upload Laporan</span>
+                <button class="modal-close-btn" onclick="closeUploadModal()">Tutup</button>
+            </div>
+            
+            <div class="modal-body">
+                
+                <form action="/upload-dokumen" method="POST" enctype="multipart/form-data">
+                    {{ csrf_field() }}
+
+                    <div class="form-group">
+                        <label for="pengunggah">Pengunggah</label>
+                        <input type="text" id="pengunggah" name="pengunggah" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nip">NIP <span class="opsional">(Opsional)</span></label>
+                        <input type="text" id="nip" name="nip">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="keterangan">Keterangan <span class="opsional">(Opsional)</span></label>
+                        <textarea id="keterangan" name="keterangan" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fileInput" style="margin-bottom: 10px;">File <span style="color:red;">(Wajib)</span></label>
+                        
+                        <label class="file-input-wrapper" for="fileInput">
+                            <div class="file-input-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                            <div class="file-input-text">Klik di sini untuk memilih file</div>
+                            <input type="file" id="fileInput" name="dokumen" accept=".pdf,.jpg,.jpeg,.png" onchange="showFileName()" required>
+                        </label>
+                        
+                        <div id="fileName" class="file-name"></div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-paper-plane"></i>
+                        Upload Laporan
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal-bg" id="previewModal">
+        <div class="modal-box modal-box-pdf">
+            <div class="modal-header">
+                <span class="title">Preview Dokumen</span>
                 <div>
-                    <a id="downloadBtn" href="" download>
-                        <button>Download</button>
-                    </a>
-                    <button onclick="closeModal()">Tutup</button>
+                    <button onclick="closePreviewModal()">Tutup</button>
                 </div>
             </div>
             <iframe id="pdfFrame" src=""></iframe>
         </div>
     </div>
 
-    <!-- SCRIPT -->
     <script>
         function showFileName() {
-            let file = document.getElementById("fileInput").files[0];
-            if (file) {
-                document.getElementById("fileName").innerHTML =
-                    "📎 File dipilih: <b>" + file.name + "</b>";
+            let fileInput = document.getElementById("fileInput");
+            let fileNameDisplay = document.getElementById("fileName");
+            
+            if (fileInput.files.length > 0) {
+                let file = fileInput.files[0];
+                fileNameDisplay.innerHTML = "📎 File dipilih: <b>" + file.name + "</b>";
+            } else {
+                fileNameDisplay.innerHTML = "";
             }
         }
 
-        // OPEN PREVIEW
-        function previewPDF(path) {
-            document.getElementById("pdfFrame").src = path;
-            document.getElementById("downloadBtn").href = path;
-            document.getElementById("previewModal").style.display = "flex";
+        // === FUNGSI MODAL BARU (UPLOAD FORM) ===
+        function openUploadModal() {
+            document.getElementById("uploadModal").style.display = "flex";
+        }
+        function closeUploadModal() {
+            document.getElementById("uploadModal").style.display = "none";
+            document.getElementById("fileInput").value = null;
+            document.getElementById("fileName").innerHTML = "";
         }
 
-        // CLOSE PREVIEW
-        function closeModal() {
+
+        // === FUNGSI MODAL LAMA (PREVIEW PDF) ===
+        function previewPDF(path) {
+            document.getElementById("pdfFrame").src = path;
+            /* ==============================
+                PERUBAHAN DI SINI:
+                Baris 'downloadBtn' telah dihapus
+                ==============================
+            */
+            document.getElementById("previewModal").style.display = "flex";
+        }
+        function closePreviewModal() {
             document.getElementById("previewModal").style.display = "none";
             document.getElementById("pdfFrame").src = "";
         }
     </script>
 
 </body>
-
 </html>
