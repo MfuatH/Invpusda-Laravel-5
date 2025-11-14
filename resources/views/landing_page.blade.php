@@ -213,7 +213,7 @@
       <a class="action-button" href="{{ route('request.konsumsi.create') }}">
         <i class="fas fa-utensils"></i> Makanan & Minuman
       </a>
-      <a class="action-button" href="{{ route('request.undangan.create') }}">
+      <a class="action-button" href="{{ route('documents.dashboard_doc') }}">
         <i class="fas fa-file-upload"></i> Upload/download dokumen
       </a>
     </div>

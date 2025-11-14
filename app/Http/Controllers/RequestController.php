@@ -354,6 +354,11 @@ class RequestController extends Controller
         return view('requests.konsumsi_create');
     }
 
+    public function dashboardDoc()
+    {
+        return view('documents.dashboard_doc');
+    }
+
     public function createUndangan()
     {
         return view('documents.Undangan');
