@@ -190,7 +190,7 @@
                     </div>
 
                     <div class="text-end mt-4">
-                        <button type="reset" class="btn btn-secondary btn-custom">Reset</button>
+                        <a href="{{ route('landing-page') }}" class="btn btn-custom btn-custom-secondary">Kembali</a>
                         <button type="submit" class="btn btn-primary btn-custom">Kirim Pemesanan</button>
                     </div>
 
