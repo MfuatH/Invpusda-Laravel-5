@@ -7,12 +7,10 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Font Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
@@ -77,6 +75,7 @@
             left: 12px;
             transform: translateY(-50%);
             color: #777;
+            z-index: 2; /* Pastikan icon di atas input file */
         }
 
         .form-control {
@@ -85,6 +84,11 @@
             border: none;
             height: 45px;
             border-radius: 8px;
+        }
+        
+        /* Penyesuaian untuk input file agar icon terlihat */
+        .form-control[type="file"] {
+            padding-top: 10px;
         }
 
         textarea.form-control {
@@ -113,14 +117,12 @@
 <div class="outer-container">
     <div class="row g-0">
 
-        <!-- Panel kiri -->
         <div class="col-md-5 left-panel">
             <img src="images/logo.png" class="logo" alt="Logo">
             <h2>Form Pemesanan</h2>
             <img src="images/food.png" class="illustration" alt="Ilustrasi Makanan">
         </div>
 
-        <!-- Panel kanan -->
         <div class="col-md-7 p-3">
             <div class="right-panel">
 
@@ -160,6 +162,11 @@
                         <label><input type="checkbox"> Snack</label>
                     </div>
 
+                    <label for="notaDinas" class="form-label" style="font-size: 0.9rem; font-weight: 500;">Upload Nota Dinas (Wajib)</label>
+                    <div class="form-group mb-3">
+                        <i class="fa fa-paperclip"></i>
+                        <input type="file" class="form-control" id="notaDinas" required>
+                    </div>
                     <div class="form-group mb-3">
                         <i class="fa fa-comment"></i>
                         <textarea class="form-control" rows="2" placeholder="Keterangan (opsional)"></textarea>
