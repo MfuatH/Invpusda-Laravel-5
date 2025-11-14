@@ -6,10 +6,12 @@ use App\Bidang;
 use App\Item;
 use App\ItemRequest;
 use App\Transaction;
-use App\RequestLinkZoom; // Using the correct Zoom request model
+use App\RequestLinkZoom;
+use App\LaporanRapat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Exception;
 use Carbon\Carbon;
 
@@ -377,5 +379,67 @@ class RequestController extends Controller
     public function uploadNotulensinPresensi()
     {
         return view('documents.upload_notanpresensi');
+    }
+
+    public function storeLaporanRapat(Request $request)
+    {
+        DB::beginTransaction();
+        $filePath = null;
+
+        try {
+            // --- 1. Proses File ---
+            $fileLaporan = null;
+            $fileOriginalName = null;
+            $fileSize = null;
+            $mimeType = null;
+
+            if ($request->hasFile('file_laporan')) {
+                $file = $request->file('file_laporan');
+                
+                $fileOriginalName = $file->getClientOriginalName();
+                $fileSize = $file->getSize();
+                $mimeType = $file->getMimeType();
+
+                // Beri timestamp agar unik
+                $fileName = time() . '_' . $fileOriginalName;
+                
+                $filePath = $file->storeAs('uploads/laporan_rapat', $fileName);
+            }
+
+            // --- 2. Siapkan Data ---
+            $data = [
+                // Pastikan ada input hidden 'catering_id' di HTML atau set default di sini
+                'catering_id' => $request->input('catering_id') ?: null,
+                'pengunggah'         => $request->input('pengunggah'),
+                'nip'                => $request->input('nip'),
+                'keterangan'         => $request->input('keterangan'),
+                'file_laporan'       => $filePath,
+                'file_original_name' => $fileOriginalName,
+                'file_size'          => $fileSize,
+                'mime_type'          => $mimeType,  
+                'status'             => LaporanRapat::STATUS_SUBMITTED, 
+                'created_by'         => null, 
+            ];
+
+            // --- 3. Simpan Database ---
+            LaporanRapat::create($data);
+
+            DB::commit();
+
+            // --- REVISI: Redirect Kembali dengan Pesan Sukses ---
+            return redirect()->back()->with('success', 'Laporan berhasil diunggah!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            if ($filePath && Storage::exists($filePath)) {
+                Storage::delete($filePath);
+            }
+
+            //dd($e->getMessage());
+
+            // --- REVISI: Redirect Kembali dengan Pesan Error ---
+            return redirect()->back()->with('error', 'Gagal menyimpan: ' . $e->getMessage())->withInput();
+        }
     }
 }

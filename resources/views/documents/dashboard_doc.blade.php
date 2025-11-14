@@ -384,7 +384,7 @@
                         <label class="file-input-wrapper" for="fileInput">
                             <div class="file-input-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                             <div class="file-input-text">Klik di sini untuk memilih file</div>
-                            <input type="file" id="fileInput" name="dokumen" accept=".pdf,.jpg,.jpeg,.png" onchange="showFileName()" required>
+                            <input type="file" id="fileInput" name="file_laporan" accept=".pdf,.jpg,.jpeg,.png" onchange="showFileName()" required>
                         </label>
                         
                         <div id="fileName" class="file-name"></div>

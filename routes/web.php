@@ -18,6 +18,7 @@ Route::get('/undangan-upload', 'RequestController@createUndangan')->name('reques
 Route::get('/download-presensi', 'RequestController@downloadPresensi')->name('request.download.presensi');
 Route::get('/download-notulensi', 'RequestController@downloadNotulensi')->name('request.download.notulensi');
 Route::get('/upload-NotulensinPresensi', 'RequestController@uploadNotulensinPresensi')->name('request.upload.NotulensinPresensi');
+Route::post('/upload-dokumen', 'RequestController@storeLaporanRapat')->name('request.store.LaporanRapat');
 
 // ==========================================================
 // 2. ROUTE AUTH (untuk Laravel 5 manual login/register)
@@ -59,6 +60,17 @@ Route::group(['middleware' => ['auth', 'role:super_admin,admin_barang'], 'prefix
 
     // Transaksi
     Route::get('transaksi', 'TransactionController@index')->name('transaksi.index');
+
+    // Catering Management
+    Route::resource('catering', 'CateringController'); 
+
+    // Laporan Rapat / Document Management
+    Route::group(['prefix' => 'documents', 'as' => 'documents.'], function () {
+        Route::get('/', 'LaporanRapatController@index')->name('index');
+        Route::get('/{id}/download', 'LaporanRapatController@download')->name('download');
+        Route::post('/{id}/verify', 'LaporanRapatController@verify')->name('verify');
+        Route::delete('/{id}', 'LaporanRapatController@destroy')->name('destroy');
+    });
 });
 
 // ==========================================================
