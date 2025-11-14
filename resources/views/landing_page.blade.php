@@ -214,21 +214,10 @@
         <i class="fas fa-utensils"></i> Makanan & Minuman
       </a>
       <a class="action-button" href="{{ route('request.undangan.create') }}">
-        <i class="fas fa-file-upload"></i> Upload Nota Dinas / Undangan
+        <i class="fas fa-file-upload"></i> Upload/download dokumen
       </a>
     </div>
 
-    <div class="button-row" style="justify-content: center;">
-      <a class="action-button" href="{{ route('request.download.presensi') }}">
-        <i class="fas fa-download"></i> Download Presensi
-      </a>
-      <a class="action-button" href="{{ route('request.download.notulensi') }}">
-        <i class="fas fa-file-download"></i> Download Notulen
-      </a>
-      <a class="action-button" href="{{ route('request.upload.NotulensinPresensi') }}">
-        <i class="fas fa-cloud-upload-alt"></i> Upload Presensi, Notulensi & Dokumentasi
-      </a>
-    </div>
   </div>
 
   @php
