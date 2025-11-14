@@ -19,6 +19,7 @@ Route::get('/download-presensi', 'RequestController@downloadPresensi')->name('re
 Route::get('/download-notulensi', 'RequestController@downloadNotulensi')->name('request.download.notulensi');
 Route::get('/upload-NotulensinPresensi', 'RequestController@uploadNotulensinPresensi')->name('request.upload.NotulensinPresensi');
 Route::post('/upload-dokumen', 'RequestController@storeLaporanRapat')->name('request.store.LaporanRapat');
+Route::get('/catering/success', 'CateringController@successPage')->name('catering.success');
 
 // ==========================================================
 // 2. ROUTE AUTH (untuk Laravel 5 manual login/register)

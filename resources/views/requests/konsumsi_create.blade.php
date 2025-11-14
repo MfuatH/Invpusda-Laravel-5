@@ -120,7 +120,7 @@
         <div class="col-md-5 left-panel">
             <img src="images/logo.png" class="logo" alt="Logo">
             <h2>Form Pemesanan</h2>
-            <img src="images/food.png" class="illustration" alt="Ilustrasi Makanan">
+            <img src="images/food.png" class="illustration" alt="Ilustrasi">
         </div>
 
         <div class="col-md-7 p-3">
@@ -128,48 +128,65 @@
 
                 <h4 class="mb-4 fw-bold">Pemesanan Makanan</h4>
 
-                <form>
+                @if(session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                @endif
+                @if($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+                    </div>
+                @endif
+
+                <form action="{{ route('catering.store') }}" method="POST" enctype="multipart/form-data">
+                    
+                    {{ csrf_field() }}
 
                     <div class="form-group mb-3">
                         <i class="fa fa-user"></i>
-                        <input type="text" class="form-control" placeholder="Nama Pemesan" required>
+                        <input type="text" name="nama_pemesan" class="form-control" placeholder="Nama Pemesan" required value="{{ old('nama_pemesan') }}">
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <i class="fa fa-id-card"></i>
+                        <input type="text" name="nip" class="form-control" placeholder="NIP (Opsional)" value="{{ old('nip') }}">
                     </div>
 
                     <div class="form-group mb-3">
                         <i class="fa fa-file-alt"></i>
-                        <input type="text" class="form-control" placeholder="Keperluan" required>
+                        <input type="text" name="keperluan" class="form-control" placeholder="Keperluan" required value="{{ old('keperluan') }}">
                     </div>
 
                     <div class="form-group mb-3">
                         <i class="fa fa-calendar"></i>
-                        <input type="datetime-local" class="form-control" required>
+                        <input type="datetime-local" name="tanggal_kegiatan" class="form-control" required value="{{ old('tanggal_kegiatan') }}">
                     </div>
 
                     <div class="form-group mb-3">
                         <i class="fa fa-location-dot"></i>
-                        <input type="text" class="form-control" placeholder="Tempat" required>
+                        <input type="text" name="tempat" class="form-control" placeholder="Tempat" required value="{{ old('tempat') }}">
                     </div>
 
                     <div class="form-group mb-3">
                         <i class="fa fa-users"></i>
-                        <input type="number" class="form-control" placeholder="Jumlah Peserta" required>
+                        <input type="number" name="jumlah_peserta" class="form-control" placeholder="Jumlah Peserta" required value="{{ old('jumlah_peserta') }}">
                     </div>
 
                     <label class="mb-1">Jenis Konsumsi</label><br>
                     <div class="d-flex gap-3 mb-3">
-                        <label><input type="checkbox"> Makan</label>
-                        <label><input type="checkbox"> Minum</label>
-                        <label><input type="checkbox"> Snack</label>
+                        <label><input type="checkbox" name="jenis_konsumsi[]" value="Makan"> Makan</label>
+                        <label><input type="checkbox" name="jenis_konsumsi[]" value="Minum"> Minum</label>
+                        <label><input type="checkbox" name="jenis_konsumsi[]" value="Snack"> Snack</label>
                     </div>
 
                     <label for="notaDinas" class="form-label" style="font-size: 0.9rem; font-weight: 500;">Upload Nota Dinas (Wajib)</label>
                     <div class="form-group mb-3">
                         <i class="fa fa-paperclip"></i>
-                        <input type="file" class="form-control" id="notaDinas" required>
+                        <input type="file" name="nota_dinas_file" class="form-control" id="notaDinas" required>
                     </div>
+
                     <div class="form-group mb-3">
                         <i class="fa fa-comment"></i>
-                        <textarea class="form-control" rows="2" placeholder="Keterangan (opsional)"></textarea>
+                        <textarea name="keterangan" class="form-control" rows="2" placeholder="Keterangan (opsional)">{{ old('keterangan') }}</textarea>
                     </div>
 
                     <div class="text-end mt-4">

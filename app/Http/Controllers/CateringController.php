@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Catering; // Panggil Model Catering
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use Carbon\Carbon;
 
 class CateringController extends Controller
 {
@@ -15,21 +17,20 @@ class CateringController extends Controller
      */
     public function store(Request $request)
     {
-        // Validasi minimal (opsional, tapi disarankan)
-        // Jika benar-benar tidak mau validasi, hapus bagian ini
+        // 1. Validasi
         $request->validate([
             'nama_pemesan' => 'required|string|max:100',
             'keperluan' => 'required|string',
-            'tanggal_kegiatan' => 'required|date',
+            'tanggal_kegiatan' => 'required',
             'jumlah_peserta' => 'required|integer',
-            'nota_dinas_file' => 'nullable|file|mimes:pdf,jpg,png|max:5120', // 5MB
+            'nota_dinas_file' => 'nullable|file|mimes:pdf,jpg,png|max:5120',
         ]);
 
         DB::beginTransaction();
         $filePath = null;
 
         try {
-            // --- 1. Proses File (Nota Dinas) ---
+            // 2. Proses File
             $fileOriginalName = null;
             if ($request->hasFile('nota_dinas_file')) {
                 $file = $request->file('nota_dinas_file');
@@ -38,48 +39,100 @@ class CateringController extends Controller
                 $filePath = $file->storeAs('uploads/catering_nota_dinas', $fileName);
             }
 
-            // --- 2. Siapkan Data ---
+            // 3. Siapkan Data
             $data = [
                 'nama_pemesan'     => $request->input('nama_pemesan'),
                 'nip'              => $request->input('nip'),
                 'keperluan'        => $request->input('keperluan'),
-                'tanggal_kegiatan' => $request->input('tanggal_kegiatan'),
+                'tanggal_kegiatan' => \Carbon\Carbon::parse($request->input('tanggal_kegiatan')), 
                 'tempat'           => $request->input('tempat'),
                 'jumlah_peserta'   => $request->input('jumlah_peserta'),
-                
-                // Jika jenis_konsumsi adalah array dari checkbox
-                'jenis_konsumsi'   => $request->input('jenis_konsumsi'), // Model sudah handle json_encode
-                
+                'jenis_konsumsi'   => $request->input('jenis_konsumsi') ? json_encode($request->input('jenis_konsumsi')) : null, 
                 'keterangan'       => $request->input('keterangan'),
-                
-                // Info File
                 'nota_dinas_file'  => $filePath,
                 'nota_dinas_original_name' => $fileOriginalName,
-                
-                // Status Default untuk GUEST
-                'status'           => 'pending', // Sesuai Opsi 1 (string langsung)
-                'created_by'       => null,      // Karena GUEST
+                'status'           => 'pending',
+                'created_by'       => null,
             ];
 
-            // --- 3. Simpan ke Database ---
+            // 4. Simpan Database
             Catering::create($data);
-
             DB::commit();
 
-            // Kembalikan ke halaman form dengan pesan sukses
-            return redirect()->back()->with('success', 'Permintaan catering berhasil dikirim!');
+            // ==========================================================
+            // --- 5. NOTIFIKASI WA (VERSI PHP NATIVE CURL - PASTI JALAN) ---
+            // ==========================================================
+            try {
+                $admin = \App\User::where('role', 'super_admin')->first();
+                
+                if ($admin && $admin->no_hp) {
+                    $pesanWA  = "*[Permintaan Catering Baru]*\n\n";
+                    $pesanWA .= "Halo Super Admin, ada pengajuan baru:\n";
+                    $pesanWA .= "👤 Nama: " . $data['nama_pemesan'] . "\n";
+                    $pesanWA .= "📝 Keperluan: " . $data['keperluan'] . "\n";
+                    $pesanWA .= "📅 Tgl: " . $data['tanggal_kegiatan']->format('d-m-Y H:i') . "\n"; 
+                    $pesanWA .= "👥 Peserta: " . $data['jumlah_peserta'] . "\n";
+                    $pesanWA .= "Silakan cek aplikasi untuk Approve/Reject.";
+
+                    // --- MENGGUNAKAN CURL PHP NATIVE ---
+                    $curl = curl_init();
+                    curl_setopt_array($curl, array(
+                    CURLOPT_URL => 'https://api.fonnte.com/send',
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_ENCODING => '',
+                    CURLOPT_MAXREDIRS => 10,
+                    CURLOPT_TIMEOUT => 0,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                    CURLOPT_CUSTOMREQUEST => 'POST',
+                    CURLOPT_POSTFIELDS => array(
+                        'target' => $admin->no_hp,
+                        'message' => $pesanWA,
+                        'countryCode' => '62',
+                    ),
+                    CURLOPT_HTTPHEADER => array(
+                        'Authorization: ' . env('FONTTE_API_KEY') 
+                    ),
+                    ));
+
+                    $response = curl_exec($curl);
+                    if ($response === false) {
+                        \Log::error('Curl Error: ' . curl_error($curl));
+                    }
+                    curl_close($curl);
+                    // -------------------------------------
+                }
+            } catch (\Exception $waError) {
+                \Log::error('Gagal kirim WA Catering: ' . $waError->getMessage());
+            }
+            // ==========================================================
+
+            return redirect()->route('catering.success')
+                ->with('success', 'Permintaan catering berhasil dikirim! Silakan unduh template dokumen.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-
-            // Hapus file jika database gagal
             if ($filePath && Storage::exists($filePath)) {
                 Storage::delete($filePath);
             }
-
-            // Kembalikan ke halaman form dengan pesan error
             return redirect()->back()->with('error', 'Gagal menyimpan: ' . $e->getMessage())->withInput();
         }
+    }
+
+    public function successPage()
+    {
+        // 1. KEAMANAN: Cek apakah ada session 'success'
+        // Jika user mengetik URL manual tanpa submit form, session ini tidak ada.
+        if (!session()->has('success')) {
+            // Tendang balik ke form awal
+            return redirect()->route('requests.konsumsi_create'); 
+        }
+
+        // 2. Jika punya tiket, tampilkan view template_doc
+        // Kita re-flash session 'success' agar bisa ditampilkan di view (opsional)
+        session()->reflash(); 
+        
+        return view('documents.template_doc');
     }
 
 
