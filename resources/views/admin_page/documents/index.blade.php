@@ -12,9 +12,15 @@
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         </div>
     @endif
+    @if(session('error')) {{-- Ditambahkan untuk notif error --}}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle mr-1"></i> {{ session('error') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+    @endif
     @if ($errors->any())
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle mr-1"></i> Gagal memproses permintaan. Silakan periksa formulir Anda.
+            <i class="fas fa-exclamation-triangle mr-1"></i> Gagal memproses permintaan.
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         </div>
     @endif
@@ -30,12 +36,9 @@
     <div class="card shadow-sm w-100">
         <div class="card-body">
 
-            {{-- Tombol dan Pencarian --}}
-            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-                <div class="d-flex align-items-center flex-wrap gap-2">
-                    {{-- Tombol Export & Upload Dihapus --}}
-                </div>
-                <form action="{{ route('documents.index') }}" method="GET" class="form-inline ml-auto"> {{-- Diberi ml-auto agar ke kanan --}}
+            {{-- Pencarian (Tombol Export/Upload Dihapus) --}}
+            <div class="d-flex justify-content-end align-items-center mb-3 flex-wrap">
+                <form action="{{ route('documents.index') }}" method="GET" class="form-inline ml-auto">
                     <input type="text" name="search" class="form-control form-control-sm mr-2"
                            placeholder="Cari dokumen..." value="{{ request('search') }}">
                     <button type="submit" class="btn btn-primary btn-sm">Cari</button>
@@ -45,9 +48,9 @@
             {{-- Tabel Dokumen --}}
             @if(isset($documents) && $documents->count() > 0)
             <div class="table-responsive">
-                <table class="table table-striped table-hover">
+                <table class="table table-striped table-hover align-middle"> {{-- Style Diperbarui --}}
                     <thead class="thead-dark">
-                        <tr class="text-center align-middle">
+                        <tr class="text-center">
                             <th style="width: 15%;">Pengunggah</th>
                             <th style="width: 10%;">NIP</th>
                             <th style="width: 25%;">Nama File</th>
@@ -60,28 +63,32 @@
                         @foreach($documents as $doc)
                         <tr>
                             <td>{{ $doc->pengunggah }}</td>
-                            <td>{{ $doc->nip ?? '-' }}</td>
-                            <td>{{ $doc->file_original_name }}</td> {{-- Memanggil kolom yg benar --}}
+                            <td class="text-center">{{ $doc->nip ?? '-' }}</td>
+                            
+                            {{-- PERBAIKAN NAMA FILE --}}
+                            <td>{{ $doc->file_original_name }}</td>
+                            
                             <td>{{ \Illuminate\Support\Str::limit($doc->keterangan, 80) }}</td>
                             <td class="text-center">{{ $doc->created_at->format('d-m-Y') }}</td>
                             <td class="text-center">
                                 <div class="d-flex justify-content-center align-items-center" style="gap: 10px;">
                                     
+                                    {{-- Tombol Download --}}
                                     <a href="{{ route('documents.download', $doc->id) }}" 
                                        class="btn btn-link text-success p-0 btn-sm" title="Download">
                                         Download
                                     </a>
                                     
+                                    {{-- Tombol Lihat (Preview) --}}
                                     <button type="button" 
                                             class="btn btn-link text-primary p-0 btn-sm btn-view-doc"
-                                            data-url="{{ $doc->file_url }}" {{-- Memanggil accessor --}}
+                                            data-url="{{ $doc->file_url }}" 
                                             data-toggle="modal" 
                                             data-target="#modalViewDokumen" title="Lihat">
                                         Lihat
                                     </button>
                                     
-                                    {{-- === TOMBOL EDIT DIHILANGKAN === --}}
-
+                                    {{-- Tombol Hapus --}}
                                     <form action="{{ route('documents.destroy', $doc->id) }}" 
                                           method="POST" class="d-inline m-0 p-0">
                                         {{ csrf_field() }}
@@ -138,8 +145,6 @@
 <script>
 $(function() {
     
-    // === SCRIPT MODAL EDIT (DIHAPUS) ===
-    
     // Script untuk MODAL LIHAT DOKUMEN
     $('.btn-view-doc').on('click', function() {
         var fileUrl = $(this).data('url');
@@ -158,23 +163,24 @@ $(function() {
         }
     });
 
-    // === SCRIPT ERROR VALIDASI (DIHAPUS) ===
 });
 </script>
 @endpush
 
 @push('styles')
 <style>
-/* ... (Style Anda) ... */
+/* Style tabel (diambil dari Manajemen Barang) */
 .table {
     font-size: 14px;
     background: #fff;
+    vertical-align: middle; /* Menambahkan ini agar teks di tengah */
 }
 .table thead th {
     background-color: #1f2937;
     color: #fff;
     font-weight: 600;
     text-align: center;
+    vertical-align: middle;
 }
 .table tbody tr td {
     background-color: #ffffff;
@@ -198,10 +204,5 @@ $(function() {
 h4 {
     color: #1f2937;
 }
-.invalid-feedback {
-    display: block;
-}
-
-/* === STYLE MODAL EDIT/UPLOAD (DIHAPUS) === */
 </style>
 @endpush

@@ -1,73 +1,133 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Dokumen Rapat</title>
+    <title>Upload Dokumen Laporan</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {{-- Bootstrap & Font Awesome --}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    {{-- Font Poppins --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <style>
+        /* ... (Semua CSS Anda sudah benar) ... */
         body {
-            margin: 0;
-            padding: 0;
             font-family: 'Poppins', sans-serif;
-            background: #F4F6F9;
-        }
-
-        /* HEADER */
-        .header {
-            width: 100%;
-            background: #fff;
-            padding: 12px 30px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .header img {
-            width: 170px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        /* Section Title */
-        .section-title {
-            font-size: 28px;
-            font-weight: 600;
+            background-image: url('/images/background.jpeg');
+            background-size: cover;
+            background-position: center;
+            padding: 20px;
+            min-height: 100vh;
             display: flex;
             align-items: center;
-            gap: 12px;
-            color: #1F78D1;
+            justify-content: center;
+        }
+        .outer-container {
+            max-width: 1140px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .left-panel {
+            background: transparent;
+            padding: 30px;
+            text-align: center;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            height: 100%;
+            min-height: 700px;
+        }
+        .left-panel img.logo {
+            max-width: 150px;
             margin-bottom: 20px;
+            align-self: center;
         }
-
-        /* CARD */
-        .card {
-            background: #ffffff;
-            padding: 25px 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            margin-bottom: 25px;
+        .left-panel h2 {
+            font-size: 2rem;
+            font-weight: 700;
         }
-
-        .card h3 {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 18px;
-            color: #333;
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            margin-top: 20px;
         }
-
-        .btn-primary {
-            background: #2E8AE1;
+        .btn-fullscreen {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: .2s;
+            align-self: flex-start;
+        }
+        .btn-fullscreen:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+        .btn-fullscreen i {
+            margin-right: 6px;
+        }
+        .document-preview-iframe {
+            width: 100%;
+            height: 100%;
+            min-height: 450px;
+            border-radius: 10px;
+            border: none;
+            flex-grow: 1;
+            background: rgba(255,255,255,0.9);
+        }
+        .right-panel {
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            height: 100%;
+            min-height: 700px;
+            overflow-y: auto;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .btn-custom {
+            padding: 10px 20px;
+            font-weight: 500;
+            border-radius: 8px;
+        }
+        .btn-custom-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        @media(max-width: 991px) {
+            .right-panel, .left-panel {
+                min-height: auto;
+            }
+            .right-panel {
+                border-radius: 0 0 15px 15px;
+                max-height: none;
+            }
+            .left-panel {
+                border-radius: 15px 15px 0 0;
+            }
+        }
+        .btn-upload-main {
+            background: #0d6efd;
             color: #fff;
             padding: 12px 25px;
             font-size: 16px;
@@ -76,27 +136,28 @@
             font-weight: 600;
             cursor: pointer;
             transition: .2s;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             gap: 8px;
+            margin-top: 25px;
+            justify-content: center;
+            width: 100%;
         }
-
-        .btn-primary:hover {
-            background: #236fb4;
+        .btn-upload-main:hover {
+            background: #0b5ed7;
+            color: #fff;
         }
-
         .card-grey {
             background: #EEF1F5;
-            padding: 25px;
+            padding: 20px;
             border-radius: 12px;
-            margin-top: 25px;
+            flex-grow: 1;
         }
-
         .desc {
-            font-size: 16px;
+            font-size: 15px;
             color: #444;
             line-height: 1.6;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         .desc b {
             color: #333;
@@ -104,58 +165,8 @@
         .desc ul {
             padding-left: 20px;
             margin-top: 5px;
+            margin-bottom: 0;
         }
-
-        .sample-card {
-            background: white;
-            padding: 22px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .sample-card h4 {
-            font-size: 18px;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .pdf-icon {
-            width: 65px;
-            margin: 0 15px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .pdf-icon:hover {
-            transform: scale(1.06);
-            opacity: 0.85;
-        }
-
-        /* Tombol submit di dalam modal */
-        .btn-submit {
-            background: #1F78D1;
-            color: #fff;
-            padding: 10px 18px;
-            width: 100%;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: .2s;
-            margin-top: 20px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-submit:hover {
-            background: #155fa3;
-        }
-
-        /* MODAL (UMUM) */
         .modal-bg {
             display: none;
             position: fixed;
@@ -166,291 +177,343 @@
             background: rgba(0, 0, 0, 0.6);
             justify-content: center;
             align-items: center;
-            z-index: 999;
+            z-index: 9999;
         }
-
         .modal-box {
             width: 80%;
-            max-width: 500px;
-            height: auto;
-            max-height: 85vh;
+            max-width: 550px;
             background: white;
             border-radius: 12px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            max-height: 90vh;
         }
-
         .modal-header {
-            background: #1F78D1;
+            background: #0d6efd;
             color: white;
             padding: 12px 20px;
             font-size: 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
         }
-        
         .modal-header .title {
             font-weight: 600;
         }
-
-        .modal-header button, .modal-close-btn {
+        .modal-header button {
             background: white;
-            color: #1F78D1;
+            color: #0d6efd;
             padding: 8px 15px;
             border-radius: 8px;
             border: none;
             font-weight: 600;
             cursor: pointer;
         }
-        
-        .modal-body {
-            padding: 20px 25px;
+        .modal-body-scroll {
+            padding: 25px;
             overflow-y: auto;
+            flex-grow: 1;
         }
-
-        /* Khusus Modal Preview PDF */
-        .modal-box-pdf {
-            width: 80%;
-            height: 85%;
-            max-width: none;
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        
-        /* == STYLE FORM UNTUK MODAL == */
-        .form-group {
+        .form-group-modal {
+            position: relative;
             margin-bottom: 15px;
         }
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
+        .form-group-modal label {
             font-weight: 600;
             color: #333;
+            margin-bottom: 6px;
+            display: block;
         }
-        .form-group input[type="text"],
-        .form-group textarea {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ccc;
+        .form-group-modal i {
+            position: absolute;
+            left: 15px;
+            color: #777;
+            z-index: 2;
+            top: 55px; /* Disesuaikan agar di dalam input */
+            transform: translateY(-50%);
+        }
+        .form-control-modal {
+            padding-left: 45px !important;
+            background: #f4f7f6;
+            border: 1px solid #ced4da;
+            height: 50px;
             border-radius: 8px;
+            width: 100%;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-            font-size: 15px;
         }
-        .form-group textarea {
+        .form-control-modal:focus {
+            background: #fff;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            border-color: #86b7fe;
+        }
+        textarea.form-control-modal {
+            height: auto;
             min-height: 80px;
+            padding-top: 15px;
             resize: vertical;
         }
-        .form-group .opsional {
-            font-weight: 400;
-            color: #777;
-            font-size: 14px;
+        .form-group-modal textarea.form-control-modal + i {
+             top: 48px; /* Disesuaikan untuk textarea */
+             transform: none;
         }
-
-        /* TAMPILAN BARU UNTUK FILE INPUT */
-        .file-input-wrapper {
+        .file-input-wrapper-modal {
             position: relative;
             width: 100%;
             text-align: center;
             border: 2px dashed #ccc;
             border-radius: 10px;
-            padding: 30px;
+            padding: 25px;
             box-sizing: border-box;
             background: #fafafa;
             cursor: pointer;
             transition: .2s;
         }
-        .file-input-wrapper:hover {
+        .file-input-wrapper-modal:hover {
             background: #f4f4f4;
-            border-color: #1F78D1;
+            border-color: #007bff;
         }
-        .file-input-wrapper .file-input-icon {
-            font-size: 32px;
-            color: #1F78D1;
+        .file-input-wrapper-modal .file-input-icon-modal {
+            font-size: 30px;
+            color: #6c757d;
         }
-        .file-input-wrapper .file-input-text {
-            font-size: 16px;
+        .file-input-wrapper-modal .file-input-text-modal {
+            font-size: 15px;
             color: #555;
             font-weight: 500;
-            margin-top: 10px;
+            margin-top: 8px;
         }
-        .file-input-wrapper input[type="file"] {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
+        .file-input-wrapper-modal input[type="file"] {
+            position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;
         }
-        
-        .file-name {
-            margin-top: 15px;
-            font-size: 15px;
-            color: #1F78D1;
+        .modal-submit-btn {
+            background: #0d6efd;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
             font-weight: 600;
-            text-align: center;
+            width: 100%;
+            margin-top: 20px;
+            transition: .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        
+        .modal-submit-btn:hover {
+            background: #0b5ed7;
+        }
+        .text-danger.small {
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
     </style>
 </head>
-
 <body>
 
-    <div class="header">
-        <img src="/images/logo.png" alt="Logo">
-    </div>
+<div class="outer-container">
+    <div class="row g-0 h-100">
 
-    <div class="container">
-        
-        <h2 class="section-title">
-            <i class="fas fa-file-upload"></i>
-            Upload Dokumen Rapat
-        </h2>
-
-        <div class="card">
-            <h3>Unggah Dokumen</h3>
-
-            <button type="button" class="btn-primary" onclick="openUploadModal()">
-                <i class="fas fa-plus"></i>
-                Upload Dokumen
-            </button>
-
-            <div class="card-grey">
-                
-                <div class="desc">
-                    Dokumen harus PDF atau Foto (jpg/png).
-                    <br><br>
-                    <b>Format Pembuatan Laporan Akhir:</b><br>
-                    Pastikan file Anda sudah sesuai dengan format yang ditentukan.
-                    <br><br>
-                    <b>Urutan dokumen:</b>
-                    <ul>
-                        <li>Presensi</li>
-                        <li>Notulen</li>
-                        <li>Nodin</li>
-                        <li>Lampiran pendukung</li>
-                    </ul>
-                </div>
-
-                <div class="sample-card">
-                    <h4>Contoh Dokumen (Preview di halaman ini)</h4>
-
-                    <img src="/images/pdf.png" class="pdf-icon" onclick="previewPDF('/sample/presensi.pdf')">
-                    <img src="/images/pdf.png" class="pdf-icon" onclick="previewPDF('/sample/notulen.pdf')">
-                    <img src="/images/pdf.png" class="pdf-icon" onclick="previewPDF('/sample/nodin.pdf')">
-                </div>
+        {{-- LEFT PANEL (Iframe) --}}
+        <div class="col-lg-5 left-panel">
+            <img src="/images/logo.png" class="logo" alt="Logo">
+            <h2>Upload Dokumen</h2>
+            <div class="iframe-container">
+                <button type="button" class="btn-fullscreen" onclick="openFullscreen()">
+                    <i class="fas fa-expand"></i> Perbesar Tampilan
+                </button>
+                <iframe src="/sample/presensi.pdf" class="document-preview-iframe" id="preview-iframe" title="Contoh Dokumen"></iframe>
             </div>
-
         </div>
-    </div>
 
-    <div class="modal-bg" id="uploadModal">
-        <div class="modal-box">
-            <div class="modal-header">
-                <span class="title">Form Upload Laporan</span>
-                <button class="modal-close-btn" onclick="closeUploadModal()">Tutup</button>
-            </div>
-            
-            <div class="modal-body">
-                
-                <form action="/upload-dokumen" method="POST" enctype="multipart/form-data">
-                    {{ csrf_field() }}
+        {{-- RIGHT PANEL (Info + Tombol) --}}
+        <div class="col-lg-7 p-3">
+            <div class="right-panel">
+                <div> @if (session('success'))
+                        <div class="alert alert-success">{{ session('success') }}</div>
+                    @endif
+                    @if (session('error'))
+                        <div class="alert alert-danger">{{ session('error') }}</div>
+                    @endif
+                    @if ($errors->any() && !session('error_modal_open'))
+                        <div class="alert alert-danger small p-2">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
-                    <div class="form-group">
-                        <label for="pengunggah">Pengunggah</label>
-                        <input type="text" id="pengunggah" name="pengunggah" required>
+                    <div class="card-grey">
+                        <div class="desc">
+                            <b>Format Pembuatan Laporan Akhir:</b><br>
+                            Pastikan file Anda sudah sesuai dengan format yang ditentukan.
+                            <br><br>
+                            <b>Urutan dokumen:</b>
+                            <ul>
+                                <li>Presensi</li>
+                                <li>Notulen</li>
+                                <li>Nodin</li>
+                                <li>Lampiran pendukung</li>
+                            </ul>
+                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="nip">NIP <span class="opsional">(Opsional)</span></label>
-                        <input type="text" id="nip" name="nip">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="keterangan">Keterangan <span class="opsional">(Opsional)</span></label>
-                        <textarea id="keterangan" name="keterangan" rows="3"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="fileInput" style="margin-bottom: 10px;">File <span style="color:red;">(Wajib)</span></label>
-                        
-                        <label class="file-input-wrapper" for="fileInput">
-                            <div class="file-input-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                            <div class="file-input-text">Klik di sini untuk memilih file</div>
-                            <input type="file" id="fileInput" name="file_laporan" accept=".pdf,.jpg,.jpeg,.png" onchange="showFileName()" required>
-                        </label>
-                        
-                        <div id="fileName" class="file-name"></div>
-                    </div>
-
-                    <button type="submit" class="btn-submit">
-                        <i class="fas fa-paper-plane"></i>
-                        Upload Laporan
+                    
+                    <button type="button" class="btn-upload-main" onclick="openUploadModal()">
+                        <i class="fas fa-plus"></i> Upload Laporan
                     </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="modal-bg" id="previewModal">
-        <div class="modal-box modal-box-pdf">
-            <div class="modal-header">
-                <span class="title">Preview Dokumen</span>
-                <div>
-                    <button onclick="closePreviewModal()">Tutup</button>
+                </div> <div class="text-end mt-4">
+                    <a href="{{ route('landing-page') }}" class="btn btn-custom btn-custom-secondary">Kembali</a>
                 </div>
             </div>
-            <iframe id="pdfFrame" src=""></iframe>
+        </div>
+
+    </div>
+</div>
+
+{{-- ================================================== --}}
+{{-- === MODAL FORM UPLOAD (YANG AKAN POP-UP) === --}}
+{{-- ================================================== --}}
+<div class="modal-bg" id="uploadModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span class="title">Form Upload Laporan</span>
+            <button class="modal-close-btn" onclick="closeUploadModal()">Tutup</button>
+        </div>
+        
+        <div class="modal-body-scroll">
+            
+            {{-- ================================================ --}}
+            {{-- === PERBAIKAN FORM ADA DI SINI === --}}
+            {{-- ================================================ --}}
+            <form action="{{ route('request.store.LaporanRapat') }}" method="POST" enctype="multipart/form-data">
+                {{ csrf_field() }}
+
+                {{-- 1. Field Pengunggah --}}
+                <div class="form-group-modal">
+                    <label for="pengunggah" class="form-label">Nama Pengunggah <span class="text-danger">*</span></label>
+                    <div class="input-with-icon"> {{-- Wrapper untuk input dan ikon --}}
+                        <i class="fa fa-user"></i>
+                        <input type="text" id="pengunggah" name="pengunggah" 
+                               class="form-control-modal {{ $errors->has('pengunggah') ? 'is-invalid' : '' }}" 
+                               placeholder="Nama Lengkap" required value="{{ old('pengunggah') }}">
+                    </div>
+                    @if ($errors->has('pengunggah'))
+                        <div class="text-danger small">{{ $errors->first('pengunggah') }}</div>
+                    @endif
+                </div>
+
+                {{-- 2. Field NIP --}}
+                <div class="form-group-modal">
+                    <label for="nip" class="form-label">NIP <span class="text-muted">(Opsional)</span></label>
+                    <div class="input-with-icon">
+                        <i class="fa fa-id-card"></i>
+                        <input type="text" id="nip" name="nip" 
+                               class="form-control-modal {{ $errors->has('nip') ? 'is-invalid' : '' }}" 
+                               placeholder="NIP" value="{{ old('nip') }}">
+                    </div>
+                    @if ($errors->has('nip'))
+                        <div class="text-danger small">{{ $errors->first('nip') }}</div>
+                    @endif
+                </div>
+
+                {{-- 3. Field Keterangan --}}
+                <div class="form-group-modal">
+                    <label for="keterangan" class="form-label">Keterangan <span class="text-muted">(Opsional)</span></label>
+                    <div class="input-with-icon">
+                        <i class="fa fa-comment"></i>
+                        <textarea id="keterangan" name="keterangan" rows="3" 
+                                  class="form-control-modal {{ $errors->has('keterangan') ? 'is-invalid' : '' }}" 
+                                  placeholder="Deskripsi singkat tentang dokumen">{{ old('keterangan') }}</textarea>
+                    </div>
+                    @if ($errors->has('keterangan'))
+                        <div class="text-danger small">{{ $errors->first('keterangan') }}</div>
+                    @endif
+                </div>
+
+                {{-- 4. Field File --}}
+                <div class="form-group-modal">
+                    <label for="fileInputModal" class="form-label" style="margin-bottom: 8px;">File <span class="text-danger">(Wajib)</span></label>
+                    
+                    <label class="file-input-wrapper-modal" for="fileInputModal">
+                        <div class="file-input-icon-modal"><i class="fas fa-cloud-upload"></i></div>
+                        <div class="file-input-text-modal" id="file-input-text-modal">Klik di sini untuk memilih file</div>
+                        <input type="file" id="fileInputModal" name="file" accept=".pdf,.jpg,.jpeg,.png" 
+                               class="{{ $errors->has('file') ? 'is-invalid' : '' }}" onchange="updateFileNameModal()" required>
+                    </label>
+                    @if ($errors->has('file'))
+                        <div class="text-danger small">{{ $errors->first('file') }}</div>
+                    @endif
+                </div>
+
+                <button type="submit" class="modal-submit-btn">
+                    <i class="fas fa-paper-plane"></i> Upload Laporan
+                </button>
+            </form>
         </div>
     </div>
-
-    <script>
-        function showFileName() {
-            let fileInput = document.getElementById("fileInput");
-            let fileNameDisplay = document.getElementById("fileName");
-            
-            if (fileInput.files.length > 0) {
-                let file = fileInput.files[0];
-                fileNameDisplay.innerHTML = "📎 File dipilih: <b>" + file.name + "</b>";
-            } else {
-                fileNameDisplay.innerHTML = "";
-            }
-        }
-
-        // === FUNGSI MODAL BARU (UPLOAD FORM) ===
-        function openUploadModal() {
-            document.getElementById("uploadModal").style.display = "flex";
-        }
-        function closeUploadModal() {
-            document.getElementById("uploadModal").style.display = "none";
-            document.getElementById("fileInput").value = null;
-            document.getElementById("fileName").innerHTML = "";
-        }
+</div>
 
 
-        // === FUNGSI MODAL LAMA (PREVIEW PDF) ===
-        function previewPDF(path) {
-            document.getElementById("pdfFrame").src = path;
-            /* ==============================
-                PERUBAHAN DI SINI:
-                Baris 'downloadBtn' telah dihapus
-                ==============================
-            */
-            document.getElementById("previewModal").style.display = "flex";
+<script>
+    // === SCRIPT UNTUK MODAL FORM UPLOAD ===
+    function openUploadModal() {
+        document.getElementById("uploadModal").style.display = "flex";
+    }
+    function closeUploadModal() {
+        document.getElementById("uploadModal").style.display = "none";
+        var invalidInputs = document.querySelectorAll('.is-invalid');
+        for(var i = 0; i < invalidInputs.length; i++) {
+            invalidInputs[i].classList.remove('is-invalid');
         }
-        function closePreviewModal() {
-            document.getElementById("previewModal").style.display = "none";
-            document.getElementById("pdfFrame").src = "";
+        var errorMessages = document.querySelectorAll('.text-danger.small');
+        for(var i = 0; i < errorMessages.length; i++) {
+            errorMessages[i].remove();
         }
-    </script>
+    }
+
+    function updateFileNameModal() {
+        var input = document.getElementById('fileInputModal');
+        var textElement = document.getElementById('file-input-text-modal');
+        if (input.files.length > 0) {
+            textElement.textContent = input.files[0].name;
+        } else {
+            textElement.textContent = 'Klik di sini untuk memilih file';
+        }
+    }
+    
+    // === SCRIPT BARU UNTUK FULLSCREEN IFRAME ===
+    function openFullscreen() {
+        var elem = document.getElementById("preview-iframe");
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { /* Safari */
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE11 */
+            elem.msRequestFullscreen();
+        }
+    }
+    
+    window.onclick = function(event) {
+        if (event.target == document.getElementById("uploadModal")) {
+            closeUploadModal();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        @if ($errors->any() || session('error'))
+            @php session()->flash('error_modal_open', true); @endphp
+            openUploadModal();
+        @endif
+    });
+
+</script>
 
 </body>
 </html>

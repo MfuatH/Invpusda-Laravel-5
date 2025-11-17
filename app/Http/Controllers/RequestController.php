@@ -96,57 +96,15 @@ class RequestController extends Controller
         }
 
         return redirect()->route('landing-page')->with('success', 'Permintaan barang berhasil dikirim.');
-        $validated = $request->validate([
-            'nama_pemohon' => 'required|string|max:255',
-            'nip' => 'nullable|string|max:255',
-            'no_hp' => 'required|string|max:25',
-            'bidang_id' => 'required|exists:bidang,id',
-            'items' => 'required|array|min:1',
-            'items.*.item_id' => 'required|exists:items,id',
-            'items.*.jumlah_request' => 'required|integer|min:1',
-        ]);
-
-        try {
-            DB::transaction(function () use ($validated) {
-                foreach ($validated['items'] as $reqItem) {
-                    $item = Item::findOrFail($reqItem['item_id']);
-                    if ($reqItem['jumlah_request'] > $item->jumlah) {
-                        throw new Exception('Stok untuk barang "' . $item->nama_barang . '" tidak mencukupi.');
-                    }
-                    ItemRequest::create([
-                        'nama_pemohon'   => $validated['nama_pemohon'],
-                        'nip'            => $validated['nip'],
-                        'no_hp'          => $validated['no_hp'],
-                        'bidang_id'      => $validated['bidang_id'],
-                        'item_id'        => $reqItem['item_id'],
-                        'jumlah_request' => $reqItem['jumlah_request'],
-                        'status'         => 'pending',
-                    ]);
-                }
-                // Notifikasi ke admin barang sesuai bidang
-                $admin = \App\User::where('role', 'admin_barang')
-                    ->where('bidang_id', $validated['bidang_id'])
-                    ->first();
-                if ($admin && $admin->no_hp) {
-                    $fontte = app(\App\Services\FontteService::class);
-                    $msg = "[Permintaan Barang Baru]\nAda permintaan barang baru dari {$validated['nama_pemohon']} (Bidang ID: {$validated['bidang_id']}). Silakan cek aplikasi.";
-                    $fontte->sendMessage($admin->no_hp, $msg);
-                }
-            });
-        } catch (Exception $e) {
-            return back()->withErrors(['error' => $e->getMessage()])->withInput();
-        }
-
-        return redirect()->route('landing-page')->with('success', 'Permintaan barang berhasil dikirim.');
+        
+        // --- BLOK KODE DUPLIKAT DIHAPUS DARI SINI ---
     }
     
     // --- ZOOM REQUEST METHODS ---
 
     public function createZoom()
     {
-        // Load the list of Bidang (Departments) for the form
         $bidang = Bidang::orderBy('nama')->pluck('nama', 'id');
-        // Render the view for Zoom Request form
         return view('requests.zoom_create', compact('bidang')); 
     }
 
@@ -176,7 +134,6 @@ class RequestController extends Controller
                     'keterangan'     => $validated['keterangan'],
                     'status'         => 'pending',
                 ]);
-                // Notifikasi ke admin barang sesuai bidang
                 $admin = \App\User::where('role', 'admin_barang')
                     ->where('bidang_id', $validated['bidang_id'])
                     ->first();
@@ -195,13 +152,11 @@ class RequestController extends Controller
     
     // --- END ZOOM REQUEST METHODS ---
 
-    // Ubah signature agar nama parameter cocok dengan route {reqBarang}
     public function approve(ItemRequest $reqBarang)
     {
-        $request = $reqBarang; // alias
+        $request = $reqBarang; 
         $admin = Auth::user();
 
-        // Cek otorisasi admin_barang
         if ($admin->role === 'admin_barang') {
             if (!$request->bidang_id || $admin->bidang_id !== $request->bidang_id) {
                 abort(403, 'Anda tidak berhak menyetujui request dari bidang ini.');
@@ -211,17 +166,11 @@ class RequestController extends Controller
         try {
             DB::transaction(function () use ($request) {
                 $item = $request->item;
-
-                // Cek stok barang
                 if ($request->jumlah_request > $item->jumlah) {
                     throw new \Exception('Stok tidak mencukupi untuk menyetujui permintaan ini.');
                 }
-
-                // Kurangi stok dan ubah status
                 $item->decrement('jumlah', $request->jumlah_request);
                 $request->update(['status' => 'approved']);
-
-                // Catat transaksi
                 Transaction::create([
                     'request_id' => $request->id,
                     'item_id'    => $item->id,
@@ -232,24 +181,15 @@ class RequestController extends Controller
                 ]);
             });
 
-            // --- Kirim Notifikasi WA ---
             if (!empty($request->no_hp)) {
                 try {
-                    // Format nomor HP jadi standar internasional (62)
                     $noHp = preg_replace('/[^0-9]/', '', trim($request->no_hp));
-                    if (substr($noHp, 0, 1) === '0') {
-                        $noHp = '62' . substr($noHp, 1);
-                    } elseif (substr($noHp, 0, 3) === '+62') {
-                        $noHp = substr($noHp, 1);
-                    } elseif (substr($noHp, 0, 2) !== '62') {
-                        $noHp = '62' . $noHp;
-                    }
-
-                    // Format tanggal readable (tanpa isoFormat)
+                    if (substr($noHp, 0, 1) === '0') { $noHp = '62' . substr($noHp, 1); }
+                    elseif (substr($noHp, 0, 3) === '+62') { $noHp = substr($noHp, 1); }
+                    elseif (substr($noHp, 0, 2) !== '62') { $noHp = '62' . $noHp; }
+                    
                     setlocale(LC_TIME, 'id_ID.UTF-8');
                     $tanggal = $request->created_at->formatLocalized('%d %B %Y %H:%M');
-
-                    // Buat pesan WA
                     $pesan = "[Request Barang Disetujui]\n\n"
                         . "Halo {$request->nama_pemohon},\n"
                         . "Request barang Anda telah *DISETUJUI*.\n\n"
@@ -257,45 +197,30 @@ class RequestController extends Controller
                         . "Jumlah: {$request->jumlah_request}\n"
                         . "Tanggal: {$tanggal}\n\n"
                         . "Silakan ambil barang di bagian terkait. Terima kasih.";
-
-                    // Kirim via Fonnte
                     $wa = app(\App\Services\FontteService::class);
                     $wa->sendMessage($noHp, $pesan);
                 } catch (\Exception $wae) {
                     // \Log::error('Gagal kirim WA approve: ' . $wae->getMessage());
                 }
             }
-
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
-
         return redirect()->route('requests.index')
             ->with('success', 'Permintaan berhasil disetujui dan notifikasi telah dikirim.');
     }
 
-    // Ubah juga reject agar nama parameter cocok
     public function reject(ItemRequest $reqBarang, Request $request)
     {
         $admin = Auth::user();
-
-        // Cek otorisasi admin_barang
         if ($admin->role === 'admin_barang') {
             if (!$reqBarang->bidang_id || $admin->bidang_id !== $reqBarang->bidang_id) {
                 abort(403, 'Anda tidak berhak menolak request dari bidang ini.');
             }
         }
-
-        // Validasi alasan opsional (boleh kosong)
-        $this->validate($request, [
-            'note' => 'nullable|string|max:255',
-        ]);
-
+        $this->validate($request, ['note' => 'nullable|string|max:255',]);
         try {
-            // Update status jadi rejected
             $reqBarang->update(['status' => 'rejected']);
-
-            // Buat catatan transaksi (log)
             Transaction::create([
                 'request_id' => $reqBarang->id,
                 'item_id'    => $reqBarang->item_id,
@@ -304,50 +229,34 @@ class RequestController extends Controller
                 'tanggal'    => Carbon::now(),
                 'user_id'    => Auth::id(),
             ]);
-
-            // Kirim notifikasi WhatsApp
             if (!empty($reqBarang->no_hp)) {
                 try {
-                    // Format nomor HP biar aman
                     $noHp = preg_replace('/[^0-9]/', '', trim($reqBarang->no_hp));
-                    if (substr($noHp, 0, 1) === '0') {
-                        $noHp = '62' . substr($noHp, 1);
-                    } elseif (substr($noHp, 0, 3) === '+62') {
-                        $noHp = substr($noHp, 1);
-                    } elseif (substr($noHp, 0, 2) !== '62') {
-                        $noHp = '62' . $noHp;
-                    }
-
-                    // Format tanggal lokal
+                    if (substr($noHp, 0, 1) === '0') { $noHp = '62' . substr($noHp, 1); }
+                    elseif (substr($noHp, 0, 3) === '+62') { $noHp = substr($noHp, 1); }
+                    elseif (substr($noHp, 0, 2) !== '62') { $noHp = '62' . $noHp; }
+                    
                     setlocale(LC_TIME, 'id_ID.UTF-8');
                     $tanggal = $reqBarang->created_at->formatLocalized('%d %B %Y %H:%M');
-
-                    // Buat pesan WA (termasuk alasan jika ada)
                     $pesan = "[Request Barang Ditolak]\n\n"
                         . "Halo {$reqBarang->nama_pemohon},\n"
                         . "Maaf, request barang Anda telah *DITOLAK*.\n\n"
                         . "Barang: {$reqBarang->item->nama_barang}\n"
                         . "Jumlah: {$reqBarang->jumlah_request}\n"
                         . "Tanggal: {$tanggal}";
-
                     if ($request->note) {
                         $pesan .= "\nAlasan: _{$request->note}_";
                     }
-
                     $pesan .= "\n\nSilakan hubungi admin jika ingin mengajukan ulang.";
-
-                    // Kirim via Fonnte
                     $wa = app(\App\Services\FontteService::class);
                     $wa->sendMessage($noHp, $pesan);
                 } catch (\Exception $wae) {
                     // \Log::error('Gagal kirim WA reject: ' . $wae->getMessage());
                 }
             }
-
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
-
         return redirect()->route('requests.index')->with('success', 'Permintaan berhasil ditolak dan notifikasi telah dikirim.');
     }
     
@@ -381,64 +290,72 @@ class RequestController extends Controller
         return view('documents.upload_notanpresensi');
     }
 
+    // ==========================================================
+    // --- FUNGSI INI SUDAH DIPERBAIKI ---
+    // ==========================================================
     public function storeLaporanRapat(Request $request)
     {
+        // === 1. Validasi (Sesuai Form Upload User) ===
+        // (Form Anda menggunakan name="file")
+        $request->validate([
+            'pengunggah' => 'required|string|max:255',
+            'nip'        => 'nullable|string|max:50',
+            'keterangan' => 'nullable|string',
+            'file'       => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240' // WAJIB 'file'
+        ]);
+
         DB::beginTransaction();
         $filePath = null;
+        $fileOriginalName = null;
+        $fileSize = null;
+        $mimeType = null;
 
         try {
-            // --- 1. Proses File ---
-            $fileLaporan = null;
-            $fileOriginalName = null;
-            $fileSize = null;
-            $mimeType = null;
-
-            if ($request->hasFile('file_laporan')) {
-                $file = $request->file('file_laporan');
+            // --- 2. Proses File ---
+            
+            // PERBAIKAN: Ganti 'file_laporan' menjadi 'file'
+            if ($request->hasFile('file')) {
+                $file = $request->file('file'); // WAJIB 'file'
                 
                 $fileOriginalName = $file->getClientOriginalName();
                 $fileSize = $file->getSize();
                 $mimeType = $file->getMimeType();
-
-                // Beri timestamp agar unik
                 $fileName = time() . '_' . $fileOriginalName;
                 
-                $filePath = $file->storeAs('uploads/laporan_rapat', $fileName);
+                // PERBAIKAN: Simpan ke disk 'public'
+                // Ini akan menyimpan ke storage/app/public/uploads/laporan_rapat
+                $filePath = $file->storeAs('uploads/laporan_rapat', $fileName, 'public');
             }
 
-            // --- 2. Siapkan Data ---
+            // --- 3. Siapkan Data ---
             $data = [
-                // Pastikan ada input hidden 'catering_id' di HTML atau set default di sini
                 'catering_id' => $request->input('catering_id') ?: null,
                 'pengunggah'         => $request->input('pengunggah'),
                 'nip'                => $request->input('nip'),
                 'keterangan'         => $request->input('keterangan'),
-                'file_laporan'       => $filePath,
-                'file_original_name' => $fileOriginalName,
+                'file_laporan'       => $filePath, // Path file
+                'file_original_name' => $fileOriginalName, // Nama asli file
                 'file_size'          => $fileSize,
                 'mime_type'          => $mimeType,  
                 'status'             => LaporanRapat::STATUS_SUBMITTED, 
                 'created_by'         => null, 
             ];
 
-            // --- 3. Simpan Database ---
+            // --- 4. Simpan Database ---
             LaporanRapat::create($data);
-
             DB::commit();
 
-            // --- REVISI: Redirect Kembali dengan Pesan Sukses ---
+            // --- 5. Redirect Kembali dengan Pesan Sukses ---
             return redirect()->back()->with('success', 'Laporan berhasil diunggah!');
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            if ($filePath && Storage::exists($filePath)) {
-                Storage::delete($filePath);
+            // PERBAIKAN: Cek di disk 'public'
+            if ($filePath && Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
             }
 
-            //dd($e->getMessage());
-
-            // --- REVISI: Redirect Kembali dengan Pesan Error ---
             return redirect()->back()->with('error', 'Gagal menyimpan: ' . $e->getMessage())->withInput();
         }
     }
