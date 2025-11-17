@@ -24,7 +24,6 @@
       overflow-x: hidden;
     }
 
-    /* Gunakan CSS variable untuk ganti background */
     :root {
       --bg-image: url('{{ asset('images/background.jpeg') }}');
     }
@@ -54,7 +53,6 @@
       position: relative;
     }
 
-    /* Tombol Ganti Background */
     .change-bg-button {
       position: fixed;
       top: 20px;
@@ -77,14 +75,12 @@
       background: rgba(255, 255, 255, 0.4);
     }
 
-    /* Logo */
     .logo {
       max-width: 250px;
       margin-bottom: 25px;
       z-index: 1;
     }
 
-    /* Judul */
     .welcome-title {
       font-family: 'Dancing Script', cursive;
       font-weight: 700;
@@ -95,7 +91,6 @@
       text-align: center;
     }
 
-    /* Grid menu */
     .action-button-wrapper {
       display: flex;
       flex-direction: column;
@@ -151,14 +146,19 @@
 
     .alert {
       margin-top: 20px;
-      background: rgba(40, 167, 69, 0.8);
+      background: rgba(40, 167, 69, 0.8); /* Style untuk success (hijau) */
       border: none;
       color: white;
       position: relative;
       z-index: 1;
     }
 
-    /* Responsif */
+    /* === TAMBAHAN CSS DI SINI === */
+    .alert.alert-danger {
+        background: rgba(220, 53, 69, 0.8); /* Style untuk error (merah) */
+    }
+    /* === AKHIR TAMBAHAN CSS === */
+
     @media (max-width: 768px) {
       .logo {
         max-width: 180px;
@@ -196,11 +196,21 @@
   <img src="{{ asset('images/logo.png') }}" alt="Logo PUSDA" class="logo">
   <h2 class="welcome-title">Selamat Datang</h2>
 
+  {{-- Blok notifikasi sukses (Sudah ada) --}}
   @if (session('success'))
   <div class="alert alert-success">
     {{ session('success') }}
   </div>
   @endif
+
+  {{-- === TAMBAHAN HTML DI SINI === --}}
+  {{-- Blok notifikasi error --}}
+  @if (session('error'))
+  <div class="alert alert-danger">
+    {{ session('error') }}
+  </div>
+  @endif
+  {{-- === AKHIR TAMBAHAN HTML === --}}
 
   <div class="action-button-wrapper">
     <div class="button-row">

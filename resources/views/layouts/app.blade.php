@@ -239,7 +239,9 @@
                     <i class="fas fa-box menu-icon"></i> Manajemen Barang
                 </a>
                 
-                <a  class="list-group-item {{ request()->routeIs('dokumen.*') ? 'active' : '' }}">
+                {{-- Nama route diubah dari 'dokumen.index' menjadi 'documents.index' --}}
+                {{-- 'request()->routeIs' juga diubah menjadi 'documents.*' --}}
+                <a href="{{ route('documents.index') }}" class="list-group-item {{ request()->routeIs('documents.*') ? 'active' : '' }}">
                     <i class="fas fa-file-alt menu-icon"></i> Manajemen Dokumen
                 </a>
                 {{-- ✅ Approval Barang Notif --}}
@@ -280,7 +282,7 @@
                     </div>
                 </div>
 
-                <a class="list-group-item {{ request()->routeIs('catering.*') ? 'active' : '' }}">
+                <a href="{{ route('catering.index') }}" class="list-group-item {{ request()->routeIs('catering.*') ? 'active' : '' }}">
                     <i class="fas fa-utensils menu-icon"></i> Approve Catering
                     @php
                         // Pastikan Anda mengirimkan variabel ini dari Controller/ViewServiceProvider
@@ -290,6 +292,7 @@
                         <span class="badge-notification">{{ $totalCatering }}</span>
                     @endif
                 </a>
+                
                 <a href="{{ route('transaksi.index') }}" class="list-group-item {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
                     <i class="fas fa-history menu-icon"></i> Riwayat Transaksi
                 </a>

@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage; // Pastikan ini ada
 
 class LaporanRapat extends Model
 {
@@ -54,6 +55,7 @@ class LaporanRapat extends Model
         'file_size' => 'integer',
         'verified_by' => 'integer',
         'created_by' => 'integer'
+        // 'jenis_konsumsi' => 'array' <-- DIHAPUS karena tidak ada di $fillable
     ];
 
     /**
@@ -89,9 +91,6 @@ class LaporanRapat extends Model
 
     /**
      * Scope a query to only include submitted reports.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeSubmitted($query)
     {
@@ -100,9 +99,6 @@ class LaporanRapat extends Model
 
     /**
      * Scope a query to only include verified reports.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeVerified($query)
     {
@@ -111,8 +107,6 @@ class LaporanRapat extends Model
 
     /**
      * Get formatted file size
-     *
-     * @return string
      */
     public function getFormattedFileSizeAttribute()
     {
@@ -131,5 +125,24 @@ class LaporanRapat extends Model
         } else {
             return '0 bytes';
         }
+    }
+
+    // Fungsi 'jenis_konsumsi' dihapus karena tidak ada di model ini
+
+    /**
+     * ==========================================================
+     * --- INI ADALAH PERBAIKAN FINAL UNTUK TOMBOL "LIHAT" ---
+     * ==========================================================
+     * Accessor untuk 'file_url' (dipakai di Blade: data-url)
+     */
+    public function getFileUrlAttribute()
+    {
+        // Cek jika file-nya ada di database
+        if ($this->file_laporan) {
+            // Arahkan ke route PREVIEW yang sudah kita buat di web.php
+            return route('documents.preview', $this->id);
+        }
+
+        return '#'; // Link default jika file tidak ada
     }
 }

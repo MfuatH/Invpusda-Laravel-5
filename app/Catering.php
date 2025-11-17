@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage; // <-- 1. TAMBAHAN PENTING
 
 class Catering extends Model
 {
@@ -56,7 +57,8 @@ class Catering extends Model
     protected $casts = [
         'jumlah_peserta' => 'integer',
         'approved_by' => 'integer',
-        'created_by' => 'integer'
+        'created_by' => 'integer',
+        'jenis_konsumsi' => 'array' // <-- 2. TAMBAHAN PENTING
     ];
 
     /**
@@ -118,6 +120,8 @@ class Catering extends Model
      *
      * @return array
      */
+    // Catatan: Fungsi ini tidak masalah jika tetap ada, 
+    // tapi $casts di atas sudah menanganinya.
     public function getJenisKonsumsiArrayAttribute()
     {
         return json_decode($this->jenis_konsumsi, true) ?: [];
@@ -131,5 +135,37 @@ class Catering extends Model
     public function setJenisKonsumsiAttribute($value)
     {
         $this->attributes['jenis_konsumsi'] = is_array($value) ? json_encode($value) : $value;
+    }
+
+
+    // ==========================================================
+    // --- 3. DUA FUNGSI TAMBAHAN UNTUK BLADE ---
+    // ==========================================================
+
+    /**
+     * Accessor untuk 'jenis_konsumsi_string' (dipakai di Blade)
+     * Mengubah array ['makan', 'snack'] menjadi string "Makan, Snack"
+     */
+    public function getJenisKonsumsiStringAttribute()
+    {
+        // $this->jenis_konsumsi akan otomatis jadi array karena $casts
+        if (empty($this->jenis_konsumsi)) {
+            return '-';
+        }
+        return implode(', ', array_map('ucfirst', $this->jenis_konsumsi));
+    }
+
+    /**
+     * Accessor untuk 'nota_dinas_url' (dipakai di Blade)
+     * Ini adalah PERBAIKAN UTAMA untuk link file Anda
+     */
+    public function getNotaDinasUrlAttribute()
+    {
+        if ($this->nota_dinas_file) {
+            // Storage::url() akan membuat URL publik
+            // dari path 'public/uploads/...' menjadi '.../storage/uploads/...'
+            return Storage::url($this->nota_dinas_file);
+        }
+        return '#'; // Link default jika tidak ada file
     }
 }
