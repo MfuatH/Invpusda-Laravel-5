@@ -48,7 +48,7 @@
             {{-- Tabel Dokumen --}}
             @if(isset($documents) && $documents->count() > 0)
             <div class="table-responsive">
-                <table class="table table-striped table-hover align-middle"> {{-- Style Diperbarui --}}
+                <table class="table table-bordered table-hover align-middle"> {{-- Style Diperbarui --}}
                     <thead class="thead-dark">
                         <tr class="text-center">
                             <th style="width: 15%;">Pengunggah</th>
