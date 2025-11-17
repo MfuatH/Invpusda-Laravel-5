@@ -8,18 +8,33 @@ use Illuminate\Support\Facades\Auth;
 // ==========================================================
 
 Route::get('/', 'RequestController@landingPage')->name('landing-page');
+
+// --- Request Barang (Publik)
 Route::get('/request-barang', 'RequestController@createBarang')->name('request.barang.create');
 Route::post('/request-barang', 'RequestController@storeBarang')->name('request.barang.store');
+
+// --- Request Zoom (Publik)
 Route::get('/request-link-zoom', 'RequestController@createZoom')->name('request.zoom.create');
 Route::post('/request-link-zoom', 'RequestController@storeZoom')->name('request.zoom.store');
 
-// --- Rute Catering Publik ---
+// ----------------------------------------------------------
+// --- PERMINTAAN CATERING (Publik)
+// ----------------------------------------------------------
 Route::get('/request-konsumsi', 'RequestController@createKonsumsi')->name('request.konsumsi.create');
+
+// Submit ke CateringController
 Route::post('/request-konsumsi', 'CateringController@store')->name('catering.store');
+
+// Halaman sukses (non-login) → redirect otomatis ke template doc
 Route::get('/catering/success', 'CateringController@successPage')->name('catering.success');
 
+// Halaman Template Dokumen (Preview PDF langsung)
+Route::get('/template-doc', 'CateringController@templateDoc')->name('documents.template_doc');
+// ----------------------------------------------------------
 
-Route::get('/dashboard-doc', 'RequestController@dashboardDoc')->name('documents.dashboard_doc');     
+
+// --- Route Dokumen Lain ---
+Route::get('/dashboard-doc', 'RequestController@dashboardDoc')->name('documents.dashboard_doc');
 Route::get('/undangan-upload', 'RequestController@createUndangan')->name('request.undangan.create');
 Route::get('/download-presensi', 'RequestController@downloadPresensi')->name('request.download.presensi');
 Route::get('/download-notulensi', 'RequestController@downloadNotulensi')->name('request.download.notulensi');
@@ -28,7 +43,7 @@ Route::post('/upload-dokumen', 'RequestController@storeLaporanRapat')->name('req
 
 
 // ==========================================================
-// 2. ROUTE AUTH (untuk Laravel 5 manual login/register)
+// 2. ROUTE AUTH
 // ==========================================================
 Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
 Route::post('login', 'Auth\LoginController@login');
@@ -38,7 +53,10 @@ Route::post('logout', 'Auth\LoginController@logout')->name('logout');
 // ==========================================================
 // 3. ROUTE DASHBOARD ADMIN (SUPER ADMIN & ADMIN BARANG)
 // ==========================================================
-Route::group(['middleware' => ['auth', 'role:super_admin,admin_barang'], 'prefix' => 'dashboard'], function () {
+Route::group([
+    'middleware' => ['auth', 'role:super_admin,admin_barang'], 
+    'prefix' => 'dashboard'
+], function () {
 
     // Dashboard
     Route::get('/', 'AdminDashboardController@index')->name('dashboard.index');
@@ -49,23 +67,24 @@ Route::group(['middleware' => ['auth', 'role:super_admin,admin_barang'], 'prefix
 
     // Approval
     Route::group(['prefix' => 'approvals'], function () {
-        // Barang
+
+        // Approval Barang
         Route::get('barang', 'RequestController@index')->name('requests.index');
         Route::post('barang/{reqBarang}/reject', 'RequestController@reject')->name('requests.reject');
         Route::post('barang/{reqBarang}/approve', 'RequestController@approve')->name('requests.approve');
 
-        // Zoom
+        // Approval Zoom
         Route::get('zoom', 'ZoomRequestController@index')->name('zoom.requests.index');
         Route::post('zoom/{reqZoom}/reject', 'ZoomRequestController@reject')->name('zoom.requests.reject');
         Route::post('zoom/{reqZoom}/approve', 'ZoomRequestController@approve')->name('zoom.requests.approve');
 
-        // Catering
-        Route::get('catering', 'CateringController@index')->name('catering.index'); 
+        // Approval Catering
+        Route::get('catering', 'CateringController@index')->name('catering.index');
         Route::post('catering/{catering}/reject', 'CateringController@reject')->name('catering.reject');
         Route::post('catering/{catering}/approve', 'CateringController@approve')->name('catering.approve');
     });
 
-    // Pengaturan (SettingController)
+    // Setting / Template / Response
     Route::group(['prefix' => 'settings'], function () {
         Route::get('template', 'SettingController@templateIndex')->name('template.index');
         Route::post('template/update', 'SettingController@updateTemplate')->name('template.update');
@@ -75,32 +94,40 @@ Route::group(['middleware' => ['auth', 'role:super_admin,admin_barang'], 'prefix
     // Transaksi
     Route::get('transaksi', 'TransactionController@index')->name('transaksi.index');
 
-    // (Route 'catering' resource sudah dipindah)
 
     // Laporan Rapat / Document Management
     Route::group(['prefix' => 'documents', 'as' => 'documents.'], function () {
-        Route::get('/', 'LaporanRapatController@index')->name('index'); 
+
+        Route::get('/', 'LaporanRapatController@index')->name('index');
         Route::post('/', 'LaporanRapatController@store')->name('store');
         Route::put('/{id}', 'LaporanRapatController@update')->name('update');
-        
-        // ==================================================
-        // === TAMBAHAN BARU UNTUK TOMBOL "LIHAT" (PREVIEW) ===
-        // ==================================================
+
+        // PREVIEW
         Route::get('/{id}/preview', 'LaporanRapatController@preview')->name('preview');
-        // ==================================================
-        
+
+        // Download
         Route::get('/{id}/download', 'LaporanRapatController@download')->name('download');
+
+        // Verifikasi
         Route::post('/{id}/verify', 'LaporanRapatController@verify')->name('verify');
+
+        // Hapus
         Route::delete('/{id}', 'LaporanRapatController@destroy')->name('destroy');
     });
+
 });
 
 // ==========================================================
 // 4. SUPER ADMIN ROUTES
 // ==========================================================
-Route::group(['middleware' => ['auth', 'role:super_admin'], 'prefix' => 'super', 'as' => 'super.'], function () {
+Route::group([
+    'middleware' => ['auth', 'role:super_admin'], 
+    'prefix' => 'super', 
+    'as' => 'super.'
+], function () {
     Route::resource('users', 'UserController');
 });
+
 
 // ==========================================================
 // 5. HOME / FALLBACK
@@ -115,12 +142,10 @@ Route::get('/home', function () {
     return redirect()->route('landing-page');
 })->name('home');
 
+
 // ==========================================================
 // 6. EXPORT DATA
 // ==========================================================
 Route::get('/export/barang', 'ExportController@exportBarang')->name('export.barang');
 Route::get('/export/transaksi', 'ExportController@exportTransaksi')->name('export.transactions');
-
-// === TAMBAHAN BARU UNTUK TOMBOL EXPORT DOKUMEN ===
 Route::get('/export/dokumen', 'ExportController@exportDokumen')->name('export.dokumen');
-// ===============================================

@@ -59,6 +59,7 @@
         }
         .iframe-container {
             position: relative;
+            height: 100%;
             width: 100%;
             flex-grow: 1;
             display: flex;
@@ -87,7 +88,7 @@
         .document-preview-iframe {
             width: 100%;
             height: 100%;
-            min-height: 450px;
+            min-height: 600px;
             border-radius: 10px;
             border: none;
             flex-grow: 1;
@@ -322,11 +323,8 @@
         {{-- LEFT PANEL (Iframe) --}}
         <div class="col-lg-5 left-panel">
             <img src="/images/logo.png" class="logo" alt="Logo">
-            <h2>Upload Dokumen</h2>
             <div class="iframe-container">
-                <button type="button" class="btn-fullscreen" onclick="openFullscreen()">
-                    <i class="fas fa-expand"></i> Perbesar Tampilan
-                </button>
+                <h3>Contoh Dokumen</h3>
                 <iframe src="/sample/presensi.pdf" class="document-preview-iframe" id="preview-iframe" title="Contoh Dokumen"></iframe>
             </div>
         </div>
@@ -351,6 +349,7 @@
                     @endif
 
                     <div class="card-grey">
+                        <h3>Upload Dokumen</h3>
                         <div class="desc">
                             <b>Format Pembuatan Laporan Akhir:</b><br>
                             Pastikan file Anda sudah sesuai dengan format yang ditentukan.
