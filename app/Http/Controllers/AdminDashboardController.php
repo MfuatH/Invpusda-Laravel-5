@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Item;
 use App\ItemRequest;
 use App\RequestLinkZoom;
+use App\Catering;
+use App\LaporanRapat;
 use App\Transaction;
 use App\User;
 use Illuminate\Support\Facades\Auth;
@@ -27,22 +29,28 @@ class AdminDashboardController extends Controller
         // 🔹 Hitung total permintaan pending
         $totalRequests = $this->getPendingRequests($user);
         $totalZoomRequests = $this->getPendingZoomRequests($user);
+        $totalCateringRequests = $this->getPendingCateringRequests($user);
 
         // 🔹 Ambil 5 transaksi terbaru
         $recentTransactions = $this->getRecentTransactions($user);
 
-        // 🔹 🔸 Tambahkan kode ini: ambil 5 barang terbaru
+        // 🔹 Ambil 5 barang terbaru
         $recentItems = Item::orderBy('created_at', 'desc')
             ->take(5)
             ->get();
 
+        // 🔹 Ambil 5 dokumen (laporan) terbaru
+        $recentDocuments = $this->getRecentDocuments($user);
+
         // 🔹 Kumpulkan semua data untuk dashboard
         $data = [
-            'totalItems'         => $totalItems,
-            'totalRequests'      => $totalRequests,
-            'totalZoomRequests'  => $totalZoomRequests,
-            'recentTransactions' => $recentTransactions,
-            'recentItems'        => $recentItems, // ✅ tambahkan ini
+            'totalItems'            => $totalItems,
+            'totalRequests'         => $totalRequests,
+            'totalZoomRequests'     => $totalZoomRequests,
+            'totalCateringRequests' => $totalCateringRequests,
+            'recentTransactions'    => $recentTransactions,
+            'recentItems'           => $recentItems,
+            'recentDocuments'       => $recentDocuments,
         ];
 
         // 🔹 Tambahkan total pengguna jika super_admin
@@ -95,6 +103,33 @@ class AdminDashboardController extends Controller
                 $q->where('bidang_id', $user->bidang_id);
             });
         }
+
+        return $query->get();
+    }
+
+    /**
+     * Hitung jumlah permintaan catering pending
+     */
+    private function getPendingCateringRequests($user)
+    {
+        $query = Catering::where('status', 'pending');
+
+        // Note: Catering table does not have bidang_id, so we don't filter by bidang
+        // If needed later, add bidang relationship and filter accordingly
+
+        return $query->count();
+    }
+
+    /**
+     * Ambil 5 dokumen (laporan rapat) terbaru
+     */
+    private function getRecentDocuments($user)
+    {
+        $query = LaporanRapat::orderBy('created_at', 'desc')
+            ->limit(5);
+
+        // Note: LaporanRapat was recently updated and no longer has created_by
+        // If needed in future, update filtering logic
 
         return $query->get();
     }

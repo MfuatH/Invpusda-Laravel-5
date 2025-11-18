@@ -69,6 +69,24 @@
                 <a href="{{ route('zoom.requests.index') }}" class="stretched-link"></a>
             </div>
         </div>
+
+        <!-- Permintaan Catering Pending Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Permintaan Catering</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $data['totalCateringRequests'] ?? '0' }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-utensils fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <a href="{{ route('catering.index') }}" class="stretched-link"></a>
+            </div>
+        </div>
         @endif
 
         <!-- Total Users Card (Super Admin Only) -->
@@ -95,7 +113,7 @@
     <!-- Content Row - Recent Items and Requests -->
     <div class="row">
         <!-- Recent Items Card -->
-        <div class="col-lg-5 mb-4">
+        <div class="col-lg-6 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Barang Terbaru</h6>
@@ -142,8 +160,8 @@
             </div>
         </div>
 
-        <!-- Permintaan & Approval Card -->
-        <div class="col-lg-7 mb-4">
+        <!-- Recent Transactions Card -->
+        <div class="col-lg-6 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Riwayat Transaksi Terbaru</h6>
@@ -151,7 +169,7 @@
                 <div class="card-body">
                     @if(isset($data['recentTransactions']) && count($data['recentTransactions']) > 0)
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table table-bordered table-sm">
                             <thead>
                                 <tr>
                                     <th>Tanggal</th>
@@ -190,6 +208,60 @@
         
     </div>
 
+    <!-- Content Row - Recent Documents -->
+    <div class="row">
+        <!-- Recent Documents Card -->
+        <div class="col-lg-12 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Dokumen Terbaru</h6>
+                </div>
+                <div class="card-body">
+                    @if(isset($data['recentDocuments']) && count($data['recentDocuments']) > 0)
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Pengunggah</th>
+                                    <th>File</th>
+                                    <th>Tanggal</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($data['recentDocuments'] as $doc)
+                                <tr>
+                                    <td>{{ $doc->pengunggah ?? '-' }}</td>
+                                    <td>
+                                        <span class="badge badge-info">
+                                            {{ $doc->file_original_name ?? $doc->file_laporan ?? '-' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ \Carbon\Carbon::parse($doc->created_at)->format('d/m/Y') }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ $doc->status == 'submitted' ? 'warning' : ($doc->status == 'verified' ? 'success' : 'secondary') }}">
+                                            {{ ucfirst($doc->status) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @else
+                    <p class="text-center text-muted">Belum ada dokumen</p>
+                    @endif
+                    <div class="mt-3">
+                        <a href="{{ route('documents.index') }}" class="btn btn-primary btn-sm">
+                            Lihat Semua Dokumen
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
     <!-- Content Row - Additional Features -->
     <div class="row">
         <!-- Transactions History Card -->
@@ -200,14 +272,19 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-lg-6 mb-3">
+                        <div class="col-lg-4 mb-3">
                             <a href="{{ route('requests.index') }}" class="btn btn-warning btn-block">
                                 <i class="fas fa-clipboard-check fa-sm mr-2"></i>Approval Barang
                             </a>
                         </div>
-                        <div class="col-lg-6 mb-3">
+                        <div class="col-lg-4 mb-3">
                             <a href="{{ route('zoom.requests.index') }}" class="btn btn-info btn-block">
                                 <i class="fas fa-video fa-sm mr-2"></i>Approval Zoom
+                            </a>
+                        </div>
+                        <div class="col-lg-4 mb-3">
+                            <a href="{{ route('catering.index') }}" class="btn btn-danger btn-block">
+                                <i class="fas fa-utensils fa-sm mr-2"></i>Approval Catering
                             </a>
                         </div>
                     </div>
