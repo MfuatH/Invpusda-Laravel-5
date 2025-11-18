@@ -28,7 +28,7 @@
             justify-content: center;
         }
         .outer-container {
-            max-width: 1140px;
+            max-width: 1350px;
             width: 100%;
             background: rgba(0, 0, 0, 0.25);
             backdrop-filter: blur(12px);
@@ -49,7 +49,7 @@
             min-height: 700px;
         }
         .left-panel img.logo {
-            max-width: 150px;
+            max-width: 250px;
             margin-bottom: 20px;
             align-self: center;
         }
@@ -89,6 +89,7 @@
             width: 100%;
             height: 100%;
             min-height: 600px;
+            min-width: 700px;
             border-radius: 10px;
             border: none;
             flex-grow: 1;
@@ -99,7 +100,7 @@
             padding: 30px;
             border-radius: 15px;
             height: 100%;
-            min-height: 700px;
+            min-height: 850px;
             overflow-y: auto;
             max-height: 85vh;
             display: flex;
@@ -321,16 +322,16 @@
     <div class="row g-0 h-100">
 
         {{-- LEFT PANEL (Iframe) --}}
-        <div class="col-lg-5 left-panel">
+        <div class="col-lg-6 left-panel">
             <img src="/images/logo.png" class="logo" alt="Logo">
             <div class="iframe-container">
                 <h3>Contoh Dokumen</h3>
-                <iframe src="/sample/presensi.pdf" class="document-preview-iframe" id="preview-iframe" title="Contoh Dokumen"></iframe>
+                <iframe src="/sample/Contoh_Dokumen_Final.pdf" class="document-preview-iframe" id="preview-iframe" title="Contoh Dokumen"></iframe>
             </div>
         </div>
 
         {{-- RIGHT PANEL (Info + Tombol) --}}
-        <div class="col-lg-7 p-3">
+        <div class="col-lg-5 p-3 offset-lg-1">
             <div class="right-panel">
                 <div> @if (session('success'))
                         <div class="alert alert-success">{{ session('success') }}</div>
@@ -361,6 +362,10 @@
                                 <li>Nodin</li>
                                 <li>Lampiran pendukung</li>
                             </ul>
+                            <small class="form-text text-muted d-block mb-1">
+                            <strong>Penting:</strong> Nama file tidak boleh pakai spasi/karakter spesial (!@#$).
+                            <br>Contoh benar: <code>NotaDinas_Rapat_2025.pdf</code>
+                    </small>
                         </div>
                     </div>
                     

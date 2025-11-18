@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\RequestLinkZoom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class ZoomRequestController extends Controller
 {
@@ -57,8 +58,47 @@ class ZoomRequestController extends Controller
                     $nohp = '62' . ltrim($nohp, '0');
                 }
 
-                // --- Isi pesan ---
-                $msg = "[Permintaan Zoom Disetujui]\nPermintaan link Zoom Anda telah disetujui.\nNama Rapat: {$reqZoom->nama_rapat}\nTanggal: {$reqZoom->jadwal_mulai}\nLink: {$reqZoom->link_zoom}";
+                // --- Isi pesan menggunakan template dari tabel `bidang` jika ada ---
+                // Pastikan locale untuk tanggal Indonesia
+                setlocale(LC_TIME, 'id_ID.UTF-8');
+
+                $formatted_mulai = Carbon::parse($reqZoom->jadwal_mulai)->formatLocalized('%d %B %Y %H:%M');
+                $formatted_selesai = $reqZoom->jadwal_selesai ? Carbon::parse($reqZoom->jadwal_selesai)->formatLocalized('%d %B %Y %H:%M') : '';
+
+                $bidang = $reqZoom->bidang; // relation exists on model
+
+                if ($bidang && !empty($bidang->pesan_template)) {
+                    $template = $bidang->pesan_template;
+
+                    // Support both {placeholders} and @placeholders used in templates
+                    $replacements = [
+                        '{nama_pemohon}' => $reqZoom->nama_pemohon,
+                        '{nip}' => $reqZoom->nip ?? '',
+                        '{nama_rapat}' => $reqZoom->nama_rapat,
+                        '{jadwal_mulai}' => $formatted_mulai,
+                        '{jadwal_selesai}' => $formatted_selesai,
+                        '{link_zoom}' => $reqZoom->link_zoom ?? '',
+                    ];
+
+                    $atReplacements = [
+                        '@nama' => $reqZoom->nama_pemohon,
+                        '@nip' => $reqZoom->nip ?? '',
+                        '@kegiatan' => $reqZoom->nama_rapat,
+                        '@tanggal' => $formatted_mulai,
+                        '@link' => $reqZoom->link_zoom ?? '',
+                    ];
+
+                    $allReplacements = array_merge($replacements, $atReplacements);
+
+                    // Replace placeholders in template (both syntaxes)
+                    $msg = strtr($template, $allReplacements);
+                } else {
+                    // Fallback message jika template tidak diisi
+                    $msg = "[Permintaan Zoom Disetujui]\nPermintaan link Zoom Anda telah disetujui.\nNama Rapat: {$reqZoom->nama_rapat}\nTanggal: {$formatted_mulai}";
+                    if (!empty($reqZoom->link_zoom)) {
+                        $msg .= "\nLink: {$reqZoom->link_zoom}";
+                    }
+                }
 
                 // --- Kirim pesan ---
                 $fontte->sendMessage($nohp, $msg);

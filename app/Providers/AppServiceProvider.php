@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use App\ItemRequest;
 use App\RequestLinkZoom;
 use App\Catering; // PENTING: TAMBAHKAN MODEL CATERING DI SINI
@@ -36,12 +37,14 @@ class AppServiceProvider extends ServiceProvider
                 // --- TAMBAHKAN BLOK INI UNTUK MENGHITUNG CATERING ---
                 // ==========================================================
                 $totalCateringRequests = Catering::where('status', 'pending')
-                    ->when($user->role === 'admin_barang' && $user->bidang_id, function ($query) use ($user) {
-                        // Catatan: Ini mengasumsikan tabel 'caterings' Anda
-                        // juga memiliki kolom 'bidang_id'.
-                        // Jika tidak, hapus blok 'when()' ini.
-                        $query->where('bidang_id', $user->bidang_id);
-                    })
+                    ->when(
+                        // Only apply bidang filter when the user is admin_barang,
+                        // has a bidang_id, AND the catering table actually has the column
+                        $user->role === 'admin_barang' && $user->bidang_id && Schema::hasColumn((new Catering)->getTable(), 'bidang_id'),
+                        function ($query) use ($user) {
+                            $query->where('bidang_id', $user->bidang_id);
+                        }
+                    )
                     ->count();
                 // ==========================================================
 
