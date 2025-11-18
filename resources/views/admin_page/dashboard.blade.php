@@ -70,6 +70,7 @@
             </div>
         </div>
 
+        @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
         <!-- Permintaan Catering Pending Card -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-danger shadow h-100 py-2">
@@ -87,6 +88,7 @@
                 <a href="{{ route('catering.index') }}" class="stretched-link"></a>
             </div>
         </div>
+        @endif
         @endif
 
         <!-- Total Users Card (Super Admin Only) -->
@@ -209,6 +211,7 @@
     </div>
 
     <!-- Content Row - Recent Documents -->
+    @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
     <div class="row">
         <!-- Recent Documents Card -->
         <div class="col-lg-12 mb-4">
@@ -261,6 +264,7 @@
         </div>
         
     </div>
+    @endif
 
     <!-- Content Row - Additional Features -->
     <div class="row">
@@ -282,11 +286,13 @@
                                 <i class="fas fa-video fa-sm mr-2"></i>Approval Zoom
                             </a>
                         </div>
+                        @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
                         <div class="col-lg-4 mb-3">
                             <a href="{{ route('catering.index') }}" class="btn btn-danger btn-block">
                                 <i class="fas fa-utensils fa-sm mr-2"></i>Approval Catering
                             </a>
                         </div>
+                        @endif
                     </div>
                 </div>
             </div>
