@@ -27,7 +27,7 @@
         }
 
         .outer-container {
-            max-width: 950px;
+            max-width: 1250px;
             width: 100%;
             background: rgba(0, 0, 0, 0.25);
             backdrop-filter: blur(12px);
@@ -44,7 +44,7 @@
         }
 
         .left-panel img.logo {
-            max-width: 150px;
+            max-width: 250px;
             margin-bottom: 20px;
         }
 
@@ -131,7 +131,7 @@
             <img src="images/food.png" class="illustration" alt="Ilustrasi">
         </div>
 
-        <div class="col-md-7 p-3">
+        <div class="col-md-6  p-3 offset-lg-1">
             <div class="right-panel">
 
                 <h4 class="mb-4 fw-bold">Pemesanan Makanan</h4>
