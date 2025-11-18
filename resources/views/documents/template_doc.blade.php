@@ -134,7 +134,7 @@
                             <div class="doc-item">
                                 <div><i class="fas fa-file-pdf"></i> &nbsp; Template Presensi</div>
                                 <a href="{{ asset('sample/Presensi.pdf') }}" download class="btn-download">
-                                    <i class="fas fa-download"></i> Download
+                                     Download
                                 </a>
                             </div>
                         </li>
@@ -144,7 +144,7 @@
                             <div class="doc-item">
                                 <div><i class="fas fa-file-pdf"></i> &nbsp; Template Notulen Rapat</div>
                                 <a href="{{ asset('sample/Template_NOTULA.pdf') }}" download class="btn-download">
-                                    <i class="fas fa-download"></i> Download
+                                     Download
                                 </a>
                             </div>
                         </li>

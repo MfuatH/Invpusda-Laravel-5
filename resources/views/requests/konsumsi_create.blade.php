@@ -102,6 +102,14 @@
             border-radius: 8px;
         }
 
+        /* Style untuk contoh kode */
+        code {
+            background-color: #e9ecef;
+            padding: 2px 4px;
+            border-radius: 4px;
+            color: #c7254e;
+        }
+
         @media(max-width: 768px) {
             .right-panel {
                 border-radius: 0;
@@ -179,6 +187,11 @@
                     </div>
 
                     <label for="notaDinas" class="form-label" style="font-size: 0.9rem; font-weight: 500;">Upload Nota Dinas (Wajib)</label>
+                    
+                    <small class="form-text text-muted d-block mb-1">
+                        <strong>Penting:</strong> Nama file tidak boleh pakai spasi/karakter spesial (!@#$).
+                        <br>Contoh benar: <code>NotaDinas_Rapat_2025.pdf</code>
+                    </small>
                     <div class="form-group mb-3">
                         <i class="fa fa-paperclip"></i>
                         <input type="file" name="nota_dinas_file" class="form-control" id="notaDinas" required>
