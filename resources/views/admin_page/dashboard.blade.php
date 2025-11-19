@@ -70,6 +70,7 @@
             </div>
         </div>
 
+        @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-0 shadow-sm h-100 card-hover">
                 <div class="card-body">
@@ -86,6 +87,7 @@
                 <a href="{{ route('catering.index') }}" class="stretched-link"></a>
             </div>
         </div>
+        @endif
         @endif
 
         @if (Auth::user()->role === 'super_admin')
@@ -198,6 +200,7 @@
     </div>
 
     <div class="row">
+        @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
         <div class="col-lg-8 mb-4">
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
@@ -250,6 +253,11 @@
                 </div>
             </div>
         </div>
+        @else
+        <div class="col-lg-12 mb-4">
+            <div class="card border-0 shadow-sm mb-4" style="display:none"></div>
+        </div>
+        @endif
 
         <div class="col-lg-4 mb-4">
             <div class="card shadow-sm border-0 mb-4">
@@ -272,12 +280,14 @@
                                 <i class="fas fa-chevron-right text-gray-400 small"></i>
                             </a>
                         </div>
+                        @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
                         <div class="col-12 mb-2">
                             <a href="{{ route('catering.index') }}" class="btn btn-light btn-block text-left d-flex justify-content-between align-items-center p-3 shadow-sm border-0">
                                 <span><i class="fas fa-utensils text-danger mr-2"></i> Approval Catering</span>
                                 <i class="fas fa-chevron-right text-gray-400 small"></i>
                             </a>
                         </div>
+                        @endif
                     </div>
 
                     @if(Auth::user()->role === 'super_admin')
