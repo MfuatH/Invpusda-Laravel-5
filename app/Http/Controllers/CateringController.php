@@ -75,7 +75,7 @@ class CateringController extends Controller
                     $pesanWA  = "*[Permintaan Catering Baru]*\n\n";
                     $pesanWA .= "Nama: {$data['nama_pemesan']}\n";
                     $pesanWA .= "Keperluan: {$data['keperluan']}\n";
-                    $pesanWA .= "Tanggal: " . $data['tanggal_kegiatan']->format('d-m-Y') . "\n";
+                    $pesanWA .= "Tanggal: " . $data['tanggal_kegiatan']->format('d-m-Y H:i') . "\n";
                     $pesanWA .= "Peserta: {$data['jumlah_peserta']}\n";
                     $pesanWA .= "Silakan cek aplikasi untuk Approve/Reject.";
 
