@@ -241,9 +241,11 @@
                 
                 {{-- Nama route diubah dari 'dokumen.index' menjadi 'documents.index' --}}
                 {{-- 'request()->routeIs' juga diubah menjadi 'documents.*' --}}
+                @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
                 <a href="{{ route('documents.index') }}" class="list-group-item {{ request()->routeIs('documents.*') ? 'active' : '' }}">
                     <i class="fas fa-file-alt menu-icon"></i> Manajemen Dokumen
                 </a>
+                @endif
                 {{-- ✅ Approval Barang Notif --}}
                 <a href="{{ route('requests.index') }}" class="list-group-item {{ request()->routeIs('requests.*') ? 'active' : '' }}">
                     <i class="fas fa-check-circle menu-icon"></i> Approval Barang
@@ -282,16 +284,17 @@
                     </div>
                 </div>
 
+                @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
                 <a href="{{ route('catering.index') }}" class="list-group-item {{ request()->routeIs('catering.*') ? 'active' : '' }}">
                     <i class="fas fa-utensils menu-icon"></i> Approve Catering
                     @php
-                        // Pastikan Anda mengirimkan variabel ini dari Controller/ViewServiceProvider
                         $totalCatering = $notifCounts['catering'] ?? ($data['totalCateringRequests'] ?? 0);
                     @endphp
                     @if($totalCatering > 0)
                         <span class="badge-notification">{{ $totalCatering }}</span>
                     @endif
                 </a>
+                @endif
                 
                 <a href="{{ route('transaksi.index') }}" class="list-group-item {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
                     <i class="fas fa-history menu-icon"></i> Riwayat Transaksi

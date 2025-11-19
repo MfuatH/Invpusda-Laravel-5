@@ -70,6 +70,11 @@
             </div>
         </div>
 
+<<<<<<< HEAD
+=======
+        @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
+        <!-- Permintaan Catering Pending Card -->
+>>>>>>> b5096323c43a97c23bd9a7690ef5f9a230616b91
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-0 shadow-sm h-100 card-hover">
                 <div class="card-body">
@@ -86,6 +91,7 @@
                 <a href="{{ route('catering.index') }}" class="stretched-link"></a>
             </div>
         </div>
+        @endif
         @endif
 
         @if (Auth::user()->role === 'super_admin')
@@ -197,6 +203,11 @@
         </div>
     </div>
 
+<<<<<<< HEAD
+=======
+    <!-- Content Row - Recent Documents -->
+    @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
+>>>>>>> b5096323c43a97c23bd9a7690ef5f9a230616b91
     <div class="row">
         <div class="col-lg-8 mb-4">
             <div class="card shadow-sm border-0 mb-4">
@@ -247,6 +258,49 @@
                         <p>Belum ada dokumen terbaru.</p>
                     </div>
                     @endif
+<<<<<<< HEAD
+=======
+                    <div class="mt-3">
+                        <a href="{{ route('documents.index') }}" class="btn btn-primary btn-sm">
+                            Lihat Semua Dokumen
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    @endif
+
+    <!-- Content Row - Additional Features -->
+    <div class="row">
+        <!-- Transactions History Card -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">Permintaan & Persetujuan</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-4 mb-3">
+                            <a href="{{ route('requests.index') }}" class="btn btn-warning btn-block">
+                                <i class="fas fa-clipboard-check fa-sm mr-2"></i>Approval Barang
+                            </a>
+                        </div>
+                        <div class="col-lg-4 mb-3">
+                            <a href="{{ route('zoom.requests.index') }}" class="btn btn-info btn-block">
+                                <i class="fas fa-video fa-sm mr-2"></i>Approval Zoom
+                            </a>
+                        </div>
+                        @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
+                        <div class="col-lg-4 mb-3">
+                            <a href="{{ route('catering.index') }}" class="btn btn-danger btn-block">
+                                <i class="fas fa-utensils fa-sm mr-2"></i>Approval Catering
+                            </a>
+                        </div>
+                        @endif
+                    </div>
+>>>>>>> b5096323c43a97c23bd9a7690ef5f9a230616b91
                 </div>
             </div>
         </div>
