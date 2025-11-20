@@ -125,7 +125,7 @@
 <div class="outer-container">
     <div class="row g-0">
 
-        <div class="col-md-5 left-panel">
+        <div class="col-md-7 left-panel">
             <div class="p-3">
                 <h4 class="text-white font-weight-bold">Permintaan Catering Terbaru</h4>
                 @php
@@ -187,7 +187,7 @@
             </div>
         </div>
 
-        <div class="col-md-6  p-3 offset-lg-1">
+        <div class="col-md-4 p-3 offset-lg-1">
             <div class="right-panel">
 
                 <h4 class="mb-4 fw-bold">Pemesanan Makanan</h4>
