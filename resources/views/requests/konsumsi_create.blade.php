@@ -27,7 +27,7 @@
         }
 
         .outer-container {
-            max-width: 1250px;
+            max-width: 1850px;
             width: 100%;
             background: rgba(0, 0, 0, 0.25);
             backdrop-filter: blur(12px);
@@ -126,9 +126,65 @@
     <div class="row g-0">
 
         <div class="col-md-5 left-panel">
-            <img src="images/logo.png" class="logo" alt="Logo">
-            <h2>Form Pemesanan</h2>
-            <img src="images/food.png" class="illustration" alt="Ilustrasi">
+            <div class="p-3">
+                <h4 class="text-white font-weight-bold">Permintaan Catering Terbaru</h4>
+                @php
+                    // Use provided $caterings or fallback to a small query (avoid heavy queries in view)
+                    $caterings = isset($caterings) ? $caterings : \App\Catering::latest()->limit(6)->get();
+                @endphp
+
+                @if($caterings->count() > 0)
+                <div class="table-responsive mt-3">
+                    <table class="table table-sm table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nama</th>
+                                <th>Keperluan</th>
+                                <th>Tgl Kegiatan</th>
+                                <th>Jumlah</th>
+                                <th>Tgl Kirim</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($caterings as $c)
+                            <tr>
+                                <td class="align-middle" style="min-width:120px">{{ \Illuminate\Support\Str::limit($c->nama_pemesan, 18) }}</td>
+                                <td class="align-middle" style="min-width:120px">{{ \Illuminate\Support\Str::limit($c->keperluan, 20) }}</td>
+                                <td class="align-middle">{{ \Carbon\Carbon::parse($c->tanggal_kegiatan)->format('d M Y') }}</td>
+                                <td class="align-middle text-center">{{ $c->jumlah_peserta }}</td>
+                                <td class="align-middle small">{{ \Carbon\Carbon::parse($c->created_at)->format('d M Y') }}</td>
+                                <td class="align-middle">
+                                    <span class="badge badge-pill {{ $c->status == 'pending' ? 'badge-soft-warning' : ($c->status == 'approved' ? 'badge-soft-success' : 'badge-soft-danger') }}">{{ ucfirst($c->status) }}</span>
+                                </td>
+                                <td class="align-middle">
+                                    <button type="button" 
+                                        class="btn btn-sm btn-light lihat-btn"
+                                        data-bs-toggle="modal" data-bs-target="#viewCateringModal"
+                                        data-id="{{ $c->id }}"
+                                        data-name="{{ e($c->nama_pemesan) }}"
+                                        data-nip="{{ e($c->nip) }}"
+                                        data-keperluan="{{ e($c->keperluan) }}"
+                                        data-tanggal="{{ \Carbon\Carbon::parse($c->tanggal_kegiatan)->format('d-m-Y H:i') }}"
+                                        data-tempat="{{ e($c->tempat) }}"
+                                        data-peserta="{{ $c->jumlah_peserta }}"
+                                        data-konsumsi="{{ e($c->jenis_konsumsi_string) }}"
+                                        data-nota_url="{{ $c->nota_dinas_url ?? '#' }}"
+                                        data-keterangan="{{ e($c->keterangan ?? '-') }}"
+                                    >Lihat</button>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @else
+                <div class="mt-3 text-center text-white-50">
+                    <p class="mb-0">Belum ada permintaan catering.</p>
+                </div>
+                @endif
+            </div>
         </div>
 
         <div class="col-md-6  p-3 offset-lg-1">
@@ -214,6 +270,93 @@
 
     </div>
 </div>
+
+        <!-- Modal: View Catering Details -->
+        <div class="modal fade" id="viewCateringModal" tabindex="-1" aria-labelledby="viewCateringModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="viewCateringModalLabel">Detail Pemesanan Catering</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><small class="text-muted">Pemesan</small><br><strong id="view-name"></strong></p>
+                                <p><small class="text-muted">NIP</small><br><strong id="view-nip"></strong></p>
+                                <p><small class="text-muted">Keperluan</small><br><strong id="view-keperluan"></strong></p>
+                                <p><small class="text-muted">Tanggal Kegiatan</small><br><strong id="view-tanggal"></strong></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><small class="text-muted">Tempat</small><br><strong id="view-tempat"></strong></p>
+                                <p><small class="text-muted">Jumlah Peserta</small><br><strong id="view-peserta"></strong></p>
+                                <p><small class="text-muted">Jenis Konsumsi</small><br><strong id="view-konsumsi"></strong></p>
+                                <p><small class="text-muted">Keterangan</small><br><strong id="view-keterangan"></strong></p>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button type="button" id="view-nota-btn" class="btn btn-outline-primary btn-sm">Lihat File Nota</button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bootstrap JS bundle (includes Popper) -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+        <script>
+        (function(){
+            var viewModalEl = document.getElementById('viewCateringModal');
+            if (!viewModalEl) return;
+
+            viewModalEl.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget; // Button that triggered the modal
+                if (!button) return;
+
+                // Read data attributes
+                var name = button.getAttribute('data-name') || '-';
+                var nip = button.getAttribute('data-nip') || '-';
+                var keperluan = button.getAttribute('data-keperluan') || '-';
+                var tanggal = button.getAttribute('data-tanggal') || '-';
+                var tempat = button.getAttribute('data-tempat') || '-';
+                var peserta = button.getAttribute('data-peserta') || '-';
+                var konsumsi = button.getAttribute('data-konsumsi') || '-';
+                var keterangan = button.getAttribute('data-keterangan') || '-';
+                var notaUrl = button.getAttribute('data-nota_url') || '#';
+
+                // Populate modal fields
+                document.getElementById('view-name').textContent = name;
+                document.getElementById('view-nip').textContent = nip;
+                document.getElementById('view-keperluan').textContent = keperluan;
+                document.getElementById('view-tanggal').textContent = tanggal;
+                document.getElementById('view-tempat').textContent = tempat;
+                document.getElementById('view-peserta').textContent = peserta;
+                document.getElementById('view-konsumsi').textContent = konsumsi;
+                document.getElementById('view-keterangan').textContent = keterangan;
+
+                var notaBtn = document.getElementById('view-nota-btn');
+                if (notaBtn) {
+                    notaBtn.dataset.url = notaUrl;
+                }
+            });
+
+            // Nota button opens file in new tab or alerts if missing
+            document.addEventListener('click', function(e){
+                if (e.target && e.target.id === 'view-nota-btn'){
+                    var url = e.target.dataset.url || '#';
+                    if (url && url !== '#') {
+                        window.open(url, '_blank');
+                    } else {
+                        alert('File nota dinas tidak tersedia.');
+                    }
+                }
+            });
+        })();
+        </script>
 
 </body>
 </html>
