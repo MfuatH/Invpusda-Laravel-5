@@ -126,10 +126,13 @@ class ZoomRequestController extends Controller
         }
 
         // --- B. Siapkan Data Format Tanggal ---
-        setlocale(LC_TIME, 'id_ID.UTF-8');
-        $formatted_mulai = Carbon::parse($reqZoom->jadwal_mulai)->translatedFormat('d F Y H:i');
-        $formatted_selesai = $reqZoom->jadwal_selesai ? Carbon::parse($reqZoom->jadwal_selesai)->translatedFormat('d F Y H:i') : '-';
-
+        setlocale(LC_TIME, 'id_ID.UTF-8', 'id_ID', 'Indonesian_indonesia.1252', 'ID');
+        $formatted_mulai = Carbon::parse($reqZoom->jadwal_mulai)->formatLocalized('%d %B %Y %H:%M');
+        $formatted_selesai = '-';
+        if ($reqZoom->jadwal_selesai) {
+            $formatted_selesai = Carbon::parse($reqZoom->jadwal_selesai)->formatLocalized('%d %B %Y %H:%M');
+        }
+        
         // --- C. Logika Pesan Berdasarkan Tipe ---
         $msg = "";
 
