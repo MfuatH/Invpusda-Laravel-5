@@ -166,10 +166,27 @@ class CateringController extends Controller
         return redirect()->route('catering.index')->with('success', 'Data catering berhasil diperbarui.');
     }
 
+    /**
+     * PERBARUI: Fungsi Hapus Data (Destroy)
+     */
     public function destroy($id)
     {
-        // ... (Logika hapus data) ...
-        return redirect()->route('catering.index')->with('success', 'Data catering berhasil dihapus.');
+        try {
+            // 1. Cari Data
+            $catering = Catering::findOrFail($id);
+
+            // 2. Hapus File Fisik (Jika ada, agar storage tidak penuh)
+            if ($catering->nota_dinas_file && Storage::exists($catering->nota_dinas_file)) {
+                Storage::delete($catering->nota_dinas_file);
+            }
+
+            // 3. Hapus Data Database
+            $catering->delete();
+
+            return redirect()->route('catering.index')->with('success', 'Data catering berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->route('catering.index')->with('error', 'Gagal menghapus data: ' . $e->getMessage());
+        }
     }
 
 
@@ -194,10 +211,6 @@ class CateringController extends Controller
 
         // ... (Tambahkan logika notif WA ke pemesan di sini jika perlu) ...
 
-        // ==========================================================
-        // --- PERBAIKAN REDIRECT DI SINI ---
-        // ==========================================================
-        // Kembali ke halaman approval catering
         return redirect()->route('catering.index')->with('success', 'Pemesanan catering telah disetujui.');
     }
 
@@ -219,10 +232,6 @@ class CateringController extends Controller
 
         // ... (Tambahkan logika notif WA ke pemesan di sini jika perlu) ...
 
-        // ==========================================================
-        // --- PERBAIKAN REDIRECT DI SINI ---
-        // ==========================================================
-        // Kembali ke halaman approval catering
         return redirect()->route('catering.index')->with('success', 'Pemesanan catering telah ditolak.');
     }
 }

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\RequestLinkZoom;
+use App\RequestLinkZoom; // Pastikan Model ini benar
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Services\FontteService; // Pastikan Service ini ada
+use Illuminate\Support\Facades\Log;
 
 class ZoomRequestController extends Controller
 {
@@ -26,8 +28,20 @@ class ZoomRequestController extends Controller
         return view('admin_page.approvals.zoom', compact('requests'));
     }
 
-    public function approve(RequestLinkZoom $reqZoom)
+    /**
+     * Menyetujui Permintaan Zoom
+     */
+    public function approve(Request $request, $id)
     {
+        // 1. VALIDASI INPUT (PENTING: Agar link tidak kosong)
+        $request->validate([
+            'link_zoom' => 'required|string' 
+        ]);
+
+        // 2. AMBIL DATA
+        $reqZoom = RequestLinkZoom::findOrFail($id);
+
+        // 3. CEK OTORISASI (Admin Barang hanya boleh bidangnya sendiri)
         if (
             Auth::user()->role === 'admin_barang' &&
             (!$reqZoom->bidang_id || Auth::user()->bidang_id !== $reqZoom->bidang_id)
@@ -35,133 +49,134 @@ class ZoomRequestController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        // Update status dan kirim notifikasi WA
+        // 4. UPDATE DATABASE
+        // Link diambil dari input form ($request->link_zoom)
         $reqZoom->update([
-            'status' => 'approved',
-            'link_zoom' => 'https://zoom.us/j/example', // Replace with actual Zoom link generation
-            'approved_by' => Auth::id()
+            'status'      => 'approved',
+            'link_zoom'   => $request->link_zoom, 
+            'approved_by' => Auth::id(),
+            'approved_at' => now()
         ]);
 
-        // Kirim notifikasi WA
+        // 5. KIRIM NOTIFIKASI WA
         if ($reqZoom->no_hp) {
             try {
-                $fontte = app(\App\Services\FontteService::class);
-
-                // --- Normalisasi nomor HP ---
-                $nohp = preg_replace('/[\s\-\.\+]/', '', $reqZoom->no_hp); // hapus spasi, +, titik, strip
-
-                if (substr($nohp, 0, 2) === '62') {
-                    // sudah benar
-                } elseif (substr($nohp, 0, 1) === '0') {
-                    $nohp = '62' . substr($nohp, 1);
-                } elseif (!str_starts_with($nohp, '62')) {
-                    $nohp = '62' . ltrim($nohp, '0');
-                }
-
-                // --- Isi pesan menggunakan template dari tabel `bidang` jika ada ---
-                // Pastikan locale untuk tanggal Indonesia
-                setlocale(LC_TIME, 'id_ID.UTF-8');
-
-                $formatted_mulai = Carbon::parse($reqZoom->jadwal_mulai)->formatLocalized('%d %B %Y %H:%M');
-                $formatted_selesai = $reqZoom->jadwal_selesai ? Carbon::parse($reqZoom->jadwal_selesai)->formatLocalized('%d %B %Y %H:%M') : '';
-
-                $bidang = $reqZoom->bidang; // relation exists on model
-
-                if ($bidang && !empty($bidang->pesan_template)) {
-                    $template = $bidang->pesan_template;
-
-                    // Support both {placeholders} and @placeholders used in templates
-                    $replacements = [
-                        '{nama_pemohon}' => $reqZoom->nama_pemohon,
-                        '{nip}' => $reqZoom->nip ?? '',
-                        '{nama_rapat}' => $reqZoom->nama_rapat,
-                        '{jadwal_mulai}' => $formatted_mulai,
-                        '{jadwal_selesai}' => $formatted_selesai,
-                        '{link_zoom}' => $reqZoom->link_zoom ?? '',
-                    ];
-
-                    $atReplacements = [
-                        '@nama' => $reqZoom->nama_pemohon,
-                        '@nip' => $reqZoom->nip ?? '',
-                        '@kegiatan' => $reqZoom->nama_rapat,
-                        '@tanggal' => $formatted_mulai,
-                        '@link' => $reqZoom->link_zoom ?? '',
-                    ];
-
-                    $allReplacements = array_merge($replacements, $atReplacements);
-
-                    // Replace placeholders in template (both syntaxes)
-                    $msg = strtr($template, $allReplacements);
-                } else {
-                    // Fallback message jika template tidak diisi
-                    $msg = "[Permintaan Zoom Disetujui]\nPermintaan link Zoom Anda telah disetujui.\nNama Rapat: {$reqZoom->nama_rapat}\nTanggal: {$formatted_mulai}";
-                    if (!empty($reqZoom->link_zoom)) {
-                        $msg .= "\nLink: {$reqZoom->link_zoom}";
-                    }
-                }
-
-                // --- Kirim pesan ---
-                $fontte->sendMessage($nohp, $msg);
-
+                $this->sendWhatsAppNotification($reqZoom, 'approved', $request->link_zoom);
             } catch (\Exception $e) {
-                \Log::error('Gagal kirim WA: ' . $e->getMessage());
+                Log::error('Gagal kirim WA Approve: ' . $e->getMessage());
             }
         }
 
         return redirect()->route('zoom.requests.index')
-            ->with('success', 'Permintaan link zoom berhasil disetujui.');
+            ->with('success', 'Permintaan link zoom berhasil disetujui dan link telah tersimpan.');
     }
 
-    public function reject(Request $request, $reqZoomId)
+    /**
+     * Menolak Permintaan Zoom
+     */
+    public function reject(Request $request, $id)
     {
-        // Validasi form alasan penolakan
-        $this->validate($request, [
+        // 1. VALIDASI CATATAN
+        $request->validate([
             'note' => 'required|string|max:255',
         ]);
 
-        // Ambil data permintaan Zoom
-        $reqZoom = RequestLinkZoom::findOrFail($reqZoomId);
+        // 2. AMBIL DATA
+        $reqZoom = RequestLinkZoom::findOrFail($id);
 
-        // Ubah status ke "rejected"
-        $reqZoom->update(['status' => 'rejected']);
+        // 3. UPDATE DATABASE
+        // Simpan alasan penolakan ke kolom rejection_note (Pastikan kolom ini ada di DB)
+        $reqZoom->update([
+            'status'         => 'rejected',
+            'rejection_note' => $request->note, // Simpan alasan ke DB
+            'approved_by'    => Auth::id(),
+            'approved_at'    => now()
+        ]);
 
-        // Pastikan locale untuk tanggal Indonesia
-        setlocale(LC_TIME, 'id_ID.UTF-8');
-
-        // Format tanggal kegiatan
-        $tanggal = \Carbon\Carbon::parse($reqZoom->jadwal_mulai)
-            ->formatLocalized('%d %B %Y %H:%M');
-
-        // Buat pesan WA dinamis
-        $pesan = "Halo {$reqZoom->nama_pemohon},\n\n"
-            . "Permintaan link Zoom untuk kegiatan *{$reqZoom->nama_rapat}* "
-            . "pada tanggal {$tanggal} telah *DITOLAK*.\n\n"
-            . "Alasan penolakan: _{$request->note}_\n\n"
-            . "Silakan hubungi admin jika ingin mengajukan ulang.";
-
-        // Format nomor HP jadi internasional (62)
-        $noHp = trim($reqZoom->no_hp);
-        $noHp = preg_replace('/[^0-9]/', '', $noHp); // hanya angka
-
-        if (substr($noHp, 0, 1) === '0') {
-            $noHp = '62' . substr($noHp, 1);
-        } elseif (substr($noHp, 0, 3) === '+62') {
-            $noHp = substr($noHp, 1);
-        } elseif (substr($noHp, 0, 2) !== '62') {
-            $noHp = '62' . $noHp;
+        // 4. KIRIM NOTIFIKASI WA
+        if ($reqZoom->no_hp) {
+            try {
+                $this->sendWhatsAppNotification($reqZoom, 'rejected', $request->note);
+            } catch (\Exception $e) {
+                Log::error('Gagal kirim WA Reject: ' . $e->getMessage());
+            }
         }
 
-        // Kirim pesan lewat FonnteService
-        try {
-            $fonnte = new \App\Services\FontteService();
-            $fonnte->sendMessage($noHp, $pesan);
-        } catch (\Exception $e) {
-            // Kamu bisa log error kalau mau
-            // \Log::error('Gagal kirim WA reject: '.$e->getMessage());
-        }
-
-        // Redirect ke halaman approval dengan pesan sukses
-        return redirect()->route('admin_page.approvals.zoom')
+        return redirect()->route('zoom.requests.index')
             ->with('success', 'Request berhasil ditolak dan notifikasi telah dikirim ke pemohon.');
+    }
+
+    /**
+     * FUNGSI PRIVAT UNTUK MENGIRIM WA
+     * (Digunakan oleh Approve dan Reject agar kodingan lebih rapi)
+     */
+    private function sendWhatsAppNotification($reqZoom, $type, $additionalInfo)
+    {
+        $fontte = app(FontteService::class);
+
+        // --- A. Normalisasi Nomor HP ---
+        $nohp = preg_replace('/[\s\-\.\+]/', '', $reqZoom->no_hp); // Hapus karakter aneh
+        
+        if (substr($nohp, 0, 2) === '62') {
+            // Sudah format 62
+        } elseif (substr($nohp, 0, 1) === '0') {
+            $nohp = '62' . substr($nohp, 1);
+        } elseif (!str_starts_with($nohp, '62')) {
+            $nohp = '62' . ltrim($nohp, '0');
+        }
+
+        // --- B. Siapkan Data Format Tanggal ---
+        setlocale(LC_TIME, 'id_ID.UTF-8');
+        $formatted_mulai = Carbon::parse($reqZoom->jadwal_mulai)->translatedFormat('d F Y H:i');
+        $formatted_selesai = $reqZoom->jadwal_selesai ? Carbon::parse($reqZoom->jadwal_selesai)->translatedFormat('d F Y H:i') : '-';
+
+        // --- C. Logika Pesan Berdasarkan Tipe ---
+        $msg = "";
+
+        if ($type === 'approved') {
+            // -- Cek Template dari Bidang --
+            $bidang = $reqZoom->bidang;
+            
+            if ($bidang && !empty($bidang->pesan_template)) {
+                $template = $bidang->pesan_template;
+
+                // Mapping Placeholder
+                $replacements = [
+                    '{nama_pemohon}'    => $reqZoom->nama_pemohon,
+                    '{nip}'             => $reqZoom->nip ?? '-',
+                    '{nama_rapat}'      => $reqZoom->nama_rapat,
+                    '{jadwal_mulai}'    => $formatted_mulai,
+                    '{jadwal_selesai}'  => $formatted_selesai,
+                    '{link_zoom}'       => $additionalInfo, // Link Zoom dari parameter
+                    '@nama'             => $reqZoom->nama_pemohon,
+                    '@kegiatan'         => $reqZoom->nama_rapat,
+                    '@tanggal'          => $formatted_mulai,
+                    '@link'             => $additionalInfo,
+                ];
+
+                $msg = strtr($template, $replacements);
+            } else {
+                // Template Default Approve
+                $msg = "*[Permintaan Zoom Disetujui]*\n\n" .
+                       "Halo {$reqZoom->nama_pemohon},\n" .
+                       "Permintaan link Zoom Anda telah disetujui.\n\n" .
+                       "Nama Rapat: {$reqZoom->nama_rapat}\n" .
+                       "Jadwal: {$formatted_mulai}\n" .
+                       "Link Zoom: {$additionalInfo}\n\n" . 
+                       "Terima kasih.";
+            }
+
+        } else {
+            // -- Template Default Reject --
+            $msg = "*[Permintaan Zoom Ditolak]*\n\n" .
+                   "Halo {$reqZoom->nama_pemohon},\n" .
+                   "Permintaan link Zoom untuk kegiatan *{$reqZoom->nama_rapat}* " .
+                   "pada tanggal {$formatted_mulai} telah *DITOLAK*.\n\n" .
+                   "Alasan: _{$additionalInfo}_\n\n" . // Alasan penolakan dari parameter
+                   "Silakan hubungi admin jika ingin mengajukan ulang.";
+        }
+
+        // --- D. Eksekusi Kirim ---
+        $fontte->sendMessage($nohp, $msg);
     }
 }

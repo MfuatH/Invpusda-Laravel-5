@@ -82,6 +82,9 @@ Route::group([
         Route::get('catering', 'CateringController@index')->name('catering.index');
         Route::post('catering/{catering}/reject', 'CateringController@reject')->name('catering.reject');
         Route::post('catering/{catering}/approve', 'CateringController@approve')->name('catering.approve');
+        
+        // === TAMBAHAN: ROUTE HAPUS CATERING ===
+        Route::delete('catering/{catering}', 'CateringController@destroy')->name('catering.destroy');
     });
 
     // Setting / Template / Response

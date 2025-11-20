@@ -49,6 +49,7 @@
                                 <td>
                                     @if($r->status === 'pending')
                                         <div class="d-flex justify-content-center">
+                                            {{-- Tombol Approve --}}
                                             <button class="btn btn-sm btn-success mr-2 approve-btn"
                                                 data-toggle="modal" data-target="#approveModal"
                                                 data-id="{{ $r->id }}"
@@ -58,18 +59,18 @@
                                                 data-tempat="{{ $r->tempat }}"
                                                 data-peserta="{{ $r->jumlah_peserta }}"
                                                 data-konsumsi="{{ $r->jenis_konsumsi_string }}" 
-                                                data-nota_url="{{ $r->nota_dinas_url }}" {{-- Ini adalah data URL file --}}
+                                                data-nota_url="{{ $r->nota_dinas_url }}"
                                                 data-keterangan="{{ $r->keterangan ?? '-' }}">
-                                                Approve
+                                                <i class="fas fa-check"></i> Approve
                                             </button>
                                             
-                                            <button class="btn btn-sm btn-danger reject-btn"
-                                                data-toggle="modal" data-target="#rejectModal"
+                                            {{-- Tombol Hapus --}}
+                                            <button class="btn btn-sm btn-danger delete-btn"
+                                                data-toggle="modal" data-target="#deleteModal"
                                                 data-id="{{ $r->id }}"
                                                 data-name="{{ $r->nama_pemesan }}"
-                                                data-keperluan="{{ $r->keperluan }}"
-                                                data-tanggal="{{ \Carbon\Carbon::parse($r->tanggal_kegiatan)->format('d-m-Y H:i') }}">
-                                                Tolak
+                                                data-keperluan="{{ $r->keperluan }}">
+                                                <i class="fas fa-trash"></i> Hapus
                                             </button>
                                         </div>
                                     @else
@@ -86,94 +87,130 @@
     </div>
 </div>
 
+{{-- =================================================================== --}}
+{{-- MODAL APPROVE (TETAP SEPERTI YANG SUDAH DISETUJUI) --}}
+{{-- =================================================================== --}}
 <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="approveModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-lg" role="document"> 
         <div class="modal-content">
             <form id="approveForm" method="POST">
                 {{ csrf_field() }}
                 <div class="modal-header">
-                    <h5 class="modal-title" id="approveModalLabel">Konfirmasi Persetujuan</h5>
+                    <h5 class="modal-title font-weight-bold" id="approveModalLabel">
+                        <i class="fas fa-check-circle text-success mr-2"></i> Konfirmasi Persetujuan
+                    </h5>
                     <button type="button" class="close" data-dismiss="modal">
                         <span>&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Anda akan menyetujui pemesanan makanan berikut:</p>
+                    <p class="mb-3">Anda akan menyetujui pemesanan makanan berikut:</p>
                     
-                    <div class="alert alert-info">
+                    <div class="alert alert-light border shadow-sm">
                         <div class="row">
+                            {{-- Kolom Kiri --}}
                             <div class="col-md-6">
-                                <p class="mb-1"><strong>Pemesan:</strong> <span id="approve-name"></span></p>
-                                <p class="mb-1"><strong>Keperluan:</strong> <span id="approve-keperluan"></span></p>
-                                <p class="mb-1"><strong>Tanggal Kegiatan:</strong> <span id="approve-tanggal"></span></p>
-                                <p class="mb-0"><strong>Tempat:</strong> <span id="approve-tempat"></span></p>
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">PEMESAN</small>
+                                    <i class="fas fa-user text-primary mr-2"></i>
+                                    <span id="approve-name" class="font-weight-bold"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">KEPERLUAN</small>
+                                    <i class="fas fa-clipboard-list text-primary mr-2"></i>
+                                    <span id="approve-keperluan" class="font-weight-bold"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">TANGGAL KEGIATAN</small>
+                                    <i class="fas fa-calendar-alt text-primary mr-2"></i>
+                                    <span id="approve-tanggal" class="font-weight-bold"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">TEMPAT</small>
+                                    <i class="fas fa-map-marker-alt text-primary mr-2"></i>
+                                    <span id="approve-tempat" class="font-weight-bold"></span>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <p class="mb-1"><strong>Jumlah Peserta:</strong> <span id="approve-peserta"></span></p>
-                                <p class="mb-1"><strong>Jenis Konsumsi:</strong> <span id="approve-konsumsi"></span></p>
-                                <p class="mb-1"><strong>Keterangan:</strong> <span id="approve-keterangan"></span></p>
-                                <p class="mb-0"><strong>Nota Dinas:</strong> 
-                                    
-                                    {{-- ============ PERUBAHAN TOMBOL DI SINI ============ --}}
-                                    {{-- Diubah dari <a> menjadi <button> --}}
-                                    <button type="button" id="approve-nota-btn" class="btn btn-sm btn-primary">
-                                        Lihat File
-                                    </button>
-                                    {{-- ================================================ --}}
 
-                                </p>
+                            {{-- Kolom Kanan --}}
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">JUMLAH PESERTA</small>
+                                    <i class="fas fa-users text-primary mr-2"></i>
+                                    <span id="approve-peserta" class="font-weight-bold"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">JENIS KONSUMSI</small>
+                                    <i class="fas fa-utensils text-primary mr-2"></i>
+                                    <span id="approve-konsumsi" class="font-weight-bold"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">KETERANGAN</small>
+                                    <i class="fas fa-info-circle text-primary mr-2"></i>
+                                    <span id="approve-keterangan" class="font-weight-bold"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">NOTA DINAS</small>
+                                    <button type="button" id="approve-nota-btn" class="btn btn-sm btn-outline-primary mt-1">
+                                        <i class="fas fa-eye mr-1"></i> Lihat File Nota
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <label>Catatan (Opsional)</label>
-                        <textarea name="note" class="form-control" rows="3"></textarea>
-                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button class="btn btn-success" type="submit">Setujui Permintaan</button>
+                <div class="modal-footer bg-light">
+                    <button class="btn btn-secondary btn-sm" data-dismiss="modal">Batal</button>
+                    <button class="btn btn-success btn-sm" type="submit">
+                        <i class="fas fa-check mr-1"></i> Ya, Setujui
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
-    {{-- ... (Isi modal reject Anda, tidak perlu diubah) ... --}}
+{{-- =================================================================== --}}
+{{-- MODAL HAPUS --}}
+{{-- =================================================================== --}}
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form id="rejectForm" method="POST">
+            <form id="deleteForm" method="POST">
                 {{ csrf_field() }}
-                <div class="modal-header">
-                    <h5 class="modal-title" id="rejectModalLabel">Konfirmasi Penolakan</h5>
-                    <button type="button" class="close" data-dismiss="modal">
+                {{ method_field('DELETE') }}
+                
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel">
+                        <i class="fas fa-exclamation-triangle mr-2"></i> Konfirmasi Penghapusan
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">
                         <span>&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <p>Anda akan menolak pemesanan makanan berikut:</p>
-                    <div class="alert alert-warning">
-                        <strong id="reject-keperluan"></strong><br>
-                        Pemesan: <span id="reject-name"></span><br>
-                        Tanggal Kegiatan: <span id="reject-tanggal"></span>
-                    </div>
-                    <div class="form-group">
-                        <label>Alasan Penolakan</label>
-                        <textarea name="note" class="form-control" rows="3" required></textarea>
-                    </div>
+                <div class="modal-body text-center py-4">
+                    <i class="fas fa-trash-alt fa-4x text-danger mb-3"></i>
+                    <h4>Apakah Anda Yakin?</h4>
+                    <p class="text-muted">
+                        Anda akan menghapus data pemesanan dari <strong><span id="delete-name"></span></strong> 
+                        untuk keperluan <strong><span id="delete-keperluan"></span></strong>.
+                        <br>
+                        <small class="text-danger">Tindakan ini tidak dapat dibatalkan.</small>
+                    </p>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button class="btn btn-danger" type="submit">Tolak Permintaan</button>
+                    <button class="btn btn-secondary btn-sm" data-dismiss="modal">Batal</button>
+                    <button class="btn btn-danger btn-sm" type="submit">Ya, Hapus Data</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-
+{{-- =================================================================== --}}
+{{-- MODAL PREVIEW FILE (DIKEMBALIKAN KE UKURAN AWAL) --}}
+{{-- =================================================================== --}}
+{{-- PERUBAHAN: Kembali ke modal-lg dan height 75vh --}}
 <div class="modal fade" id="filePreviewModal" tabindex="-1" role="dialog" aria-labelledby="filePreviewModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -184,11 +221,11 @@
                 </button>
             </div>
             <div class="modal-body" style="height: 75vh;">
-                {{-- Konten akan diisi oleh JavaScript --}}
-                <div id="previewContent"></div>
+                {{-- Konten akan diisi JavaScript, style width/height 100% agar pas di wadah --}}
+                <div id="previewContent" style="width: 100%; height: 100%;"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
@@ -201,20 +238,19 @@
 $(function(){
     
     const approveTemplate = '{{ route("catering.approve", ["catering" => "PLACEHOLDER"]) }}';
-    const rejectTemplate = '{{ route("catering.reject", ["catering" => "PLACEHOLDER"]) }}';
+    const deleteTemplate = '{{ route("catering.destroy", ["catering" => "PLACEHOLDER"]) }}';
     
     function getFinalUrl(template, id) {
         return template.replace('PLACEHOLDER', id);
     }
 
-    // 1. Saat tombol APPROVE (hijau) di tabel diklik
+    // 1. Tombol APPROVE
     $('.approve-btn').on('click', function(){
         var id = $(this).data('id');
-        var notaUrl = $(this).data('nota_url'); // Ambil URL file
+        var notaUrl = $(this).data('nota_url'); 
         
         $('#approveForm').attr('action', getFinalUrl(approveTemplate, id));
         
-        // Mengisi data modal approve
         $('#approve-name').text($(this).data('name'));
         $('#approve-keperluan').text($(this).data('keperluan'));
         $('#approve-tanggal').text($(this).data('tanggal'));
@@ -223,58 +259,40 @@ $(function(){
         $('#approve-konsumsi').text($(this).data('konsumsi'));
         $('#approve-keterangan').text($(this).data('keterangan'));
         
-        // ============ PERUBAHAN SCRIPT DI SINI ============
-        // Simpan URL file ke tombol "Lihat File"
         $('#approve-nota-btn').data('url', notaUrl); 
-        // =================================================
     });
 
-    // 2. Saat tombol REJECT (merah) di tabel diklik
-    $('.reject-btn').on('click', function(){
+    // 2. Tombol DELETE
+    $('.delete-btn').on('click', function(){
         var id = $(this).data('id');
-        $('#rejectForm').attr('action', getFinalUrl(rejectTemplate, id));
+        $('#deleteForm').attr('action', getFinalUrl(deleteTemplate, id));
         
-        $('#reject-keperluan').text($(this).data('keperluan'));
-        $('#reject-name').text($(this).data('name'));
-        $('#reject-tanggal').text($(this).data('tanggal'));
+        $('#delete-name').text($(this).data('name'));
+        $('#delete-keperluan').text($(this).data('keperluan'));
     });
 
-
-    // ==========================================================
-    // --- SCRIPT BARU UNTUK MENANGANI TOMBOL "LIHAT FILE" ---
-    // ==========================================================
-
-    // 3. Saat tombol "Lihat File" (#approve-nota-btn) di dalam modal diklik
+    // 3. Tombol LIHAT FILE
     $(document).on('click', '#approve-nota-btn', function() {
         var fileUrl = $(this).data('url');
         var previewContent = $('#previewContent');
         
-        // Kosongkan konten preview sebelumnya
         previewContent.empty(); 
 
         if (fileUrl && fileUrl !== '#') {
-            // Cek apakah file adalah gambar
             if (fileUrl.match(/\.(jpeg|jpg|gif|png)$/i) != null) {
-                // Jika gambar, gunakan tag <img>
-                previewContent.html('<img src="' + fileUrl + '" style="width: 100%; height: auto;">');
+                previewContent.html('<img src="' + fileUrl + '" style="width: 100%; height: 100%; object-fit: contain;">');
             } else {
-                // Jika bukan gambar (PDF, dll), gunakan <iframe>
-                previewContent.html('<iframe src="' + fileUrl + '" width="100%" height="100%" frameborder="0"></iframe>');
+                // Style iframe di-set 100% agar mengisi modal-body
+                previewContent.html('<iframe src="' + fileUrl + '" style="width: 100%; height: 100%; border: none;" frameborder="0"></iframe>');
             }
-            
-            // Buka modal preview (#filePreviewModal)
             $('#filePreviewModal').modal('show');
         } else {
             alert('File nota dinas tidak ditemukan atau rusak.');
         }
     });
 
-    // 4. (PENTING) Mengelola tumpukan modal
-    // Saat modal preview (#filePreviewModal) ditutup...
+    // 4. Fix Scroll
     $('#filePreviewModal').on('hidden.bs.modal', function () {
-        // Bootstrap secara otomatis menghapus 'modal-open' dari body.
-        // Kita harus menambahkannya kembali agar modal approval (#approveModal)
-        // tetap bisa di-scroll.
         $('body').addClass('modal-open');
     });
 
@@ -283,56 +301,31 @@ $(function(){
 @endpush
 
 @push('styles')
-{{-- Style Anda sudah benar, tidak perlu diubah --}}
 <style>
-.table {
-    font-size: 14px;
-    background: #fff;
-}
-.table thead th {
-    background-color: #1f2937;
-    color: #fff;
-    font-weight: 600;
-    text-align: center;
-}
-.table tbody tr td {
-    background-color: #ffffff;
-    color: #333;
-    vertical-align: middle;
-}
-.table-striped tbody tr:nth-of-type(odd) {
+.table { font-size: 14px; background: #fff; }
+.table thead th { background-color: #1f2937; color: #fff; font-weight: 600; text-align: center; }
+.table tbody tr td { background-color: #ffffff; color: #333; vertical-align: middle; }
+.table-striped tbody tr:nth-of-type(odd) { background-color: #f8f9fa; }
+.btn-sm { font-size: 13px; padding: 5px 10px; }
+.text-dark { color: #444 !important; }
+.card { border: 1px solid #ddd; border-radius: 10px; }
+.card-body { padding: 20px; }
+h4 { color: #1f2937; }
+
+.alert-light {
     background-color: #f8f9fa;
-}
-.btn-sm {
-    font-size: 13px;
-    padding: 5px 10px;
-}
-.alert-info, .alert-warning {
-    font-size: 14px;
-    margin-bottom: 10px;
-}
-.text-dark {
-    color: #444 !important;
-}
-.card {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-}
-.card-body {
+    border-radius: 8px;
     padding: 20px;
 }
-h4 {
-    color: #1f2937;
+.alert-light small {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    font-size: 0.75rem;
+    margin-bottom: 4px;
 }
-.alert-info p {
-    margin-bottom: 0.5rem;
-}
-
-/* Style tambahan untuk modal preview (opsional) */
-#previewContent iframe {
-    width: 100%;
-    height: 70vh; /* Pastikan iframe tinggi */
-    border: none;
+.alert-light span {
+    font-size: 1rem;
+    color: #333;
 }
 </style>
 @endpush
