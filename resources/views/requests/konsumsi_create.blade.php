@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
     <style>
         body {
@@ -222,7 +223,28 @@
 
                     <div class="form-group mb-3">
                         <i class="fa fa-calendar"></i>
-                        <input type="datetime-local" name="tanggal_kegiatan" class="form-control" required value="{{ old('tanggal_kegiatan') }}">
+                        <div class="d-flex gap-2">
+                            @php
+                                $oldTanggal = old('tanggal_kegiatan');
+                                $oldDate = '';
+                                $oldTime = '';
+                                if ($oldTanggal) {
+                                    try {
+                                        $dt = \Carbon\Carbon::parse($oldTanggal);
+                                        $oldDate = $dt->format('Y-m-d');
+                                        $oldTime = $dt->format('H:i');
+                                    } catch (\Exception $e) {
+                                        $oldDate = '';
+                                        $oldTime = '';
+                                    }
+                                }
+                            @endphp
+
+                            <input type="date" id="tanggal_date" class="form-control" style="max-width:40%;" value="{{ $oldDate }}" required>
+                            <input type="text" id="tanggal_time" class="form-control" style="max-width:40%;" value="{{ $oldTime }}" required placeholder="HH:mm">
+                            <input type="hidden" name="tanggal_kegiatan" id="tanggal_kegiatan_hidden" value="{{ $oldTanggal ?? '' }}">
+                        </div>
+                        <small class="form-text text-muted">Pilih tanggal dan jam (format 24 jam).</small>
                     </div>
 
                     <div class="form-group mb-3">
@@ -297,6 +319,12 @@
                         <div class="mt-3">
                             <button type="button" id="view-nota-btn" class="btn btn-outline-primary btn-sm">Lihat File Nota</button>
                         </div>
+                        <div class="mt-3">
+                            <button type="button" id="" class="btn btn-outline-primary btn-sm">Hapus</button>
+                        </div>
+                        <div class="mt-3">
+                            <button type="button" id="" class="btn btn-outline-primary btn-sm">Laporan</button>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
@@ -356,6 +384,59 @@
                 }
             });
         })();
+        </script>
+
+        <script>
+        // Combine date + time into hidden input so backend gets a single datetime string
+        (function(){
+            var form = document.querySelector('form[action="{{ route('catering.store') }}"]');
+            if (!form) return;
+
+            var dateInput = document.getElementById('tanggal_date');
+            var timeInput = document.getElementById('tanggal_time');
+            var hidden = document.getElementById('tanggal_kegiatan_hidden');
+
+            function setHidden() {
+                if (!dateInput || !timeInput || !hidden) return;
+                var d = dateInput.value;
+                var t = timeInput.value;
+                if (d && t) {
+                    // Format to 'Y-m-d H:i:00' which Laravel/DB accepts
+                    hidden.value = d + ' ' + t + ':00';
+                } else if (d) {
+                    hidden.value = d + ' 00:00:00';
+                }
+            }
+
+            // Update hidden on change
+            if (dateInput) dateInput.addEventListener('change', setHidden);
+            if (timeInput) timeInput.addEventListener('change', setHidden);
+
+            // Ensure hidden is up-to-date before submit
+            form.addEventListener('submit', function(e){
+                setHidden();
+            });
+
+            // Initialize once
+            setHidden();
+        })();
+        </script>
+
+        <!-- flatpickr time picker (24-hour) -->
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script>
+            (function(){
+                var timeEl = document.getElementById('tanggal_time');
+                if (!timeEl) return;
+                flatpickr(timeEl, {
+                    enableTime: true,
+                    noCalendar: true,
+                    dateFormat: "H:i",
+                    time_24hr: true,
+                    minuteIncrement: 1,
+                    defaultDate: timeEl.value || null,
+                });
+            })();
         </script>
 
 </body>

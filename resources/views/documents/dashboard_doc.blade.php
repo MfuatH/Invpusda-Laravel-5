@@ -373,7 +373,8 @@
                         <i class="fas fa-plus"></i> Upload Laporan
                     </button>
                 </div> <div class="text-end mt-4">
-                    <a href="{{ route('landing-page') }}" class="btn btn-custom btn-custom-secondary">Kembali</a>
+                    {{--buat menjadi tombol penyelesaian request, merubah status dari approved ke completed --}}
+                    <a href="{{ route('landing-page') }}" class="btn btn-custom btn-custom-secondary">Selesaikan Request</a>
                 </div>
             </div>
         </div>
