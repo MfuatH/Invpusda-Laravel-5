@@ -41,6 +41,7 @@ Route::get('/download-notulensi', 'RequestController@downloadNotulensi')->name('
 Route::get('/upload-NotulensinPresensi', 'RequestController@uploadNotulensinPresensi')->name('request.upload.NotulensinPresensi');
 Route::post('/upload-dokumen', 'RequestController@storeLaporanRapat')->name('request.store.LaporanRapat');
 
+Route::delete('catering/{catering}', 'CateringController@destroy')->name('catering.destroy');
 
 // ==========================================================
 // 2. ROUTE AUTH
@@ -84,7 +85,7 @@ Route::group([
         Route::post('catering/{catering}/approve', 'CateringController@approve')->name('catering.approve');
         
         // === TAMBAHAN: ROUTE HAPUS CATERING ===
-        Route::delete('catering/{catering}', 'CateringController@destroy')->name('catering.destroy');
+        
     });
 
     // Setting / Template / Response

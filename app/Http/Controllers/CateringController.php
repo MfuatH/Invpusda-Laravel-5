@@ -171,24 +171,29 @@ class CateringController extends Controller
      */
     public function destroy($id)
     {
+        $userRole = optional(auth()->user())->role;
+
+        $isAdmin = in_array($userRole, ['super_admin', 'admin_barang']);
+        
+        $routeTujuan = $isAdmin ? 'catering.index' : 'request.konsumsi.create';
+
         try {
-            // 1. Cari Data
             $catering = Catering::findOrFail($id);
 
-            // 2. Hapus File Fisik (Jika ada, agar storage tidak penuh)
             if ($catering->nota_dinas_file && Storage::exists($catering->nota_dinas_file)) {
                 Storage::delete($catering->nota_dinas_file);
             }
 
-            // 3. Hapus Data Database
             $catering->delete();
 
-            return redirect()->route('catering.index')->with('success', 'Data catering berhasil dihapus.');
+            return redirect()->route($routeTujuan)
+                ->with('success', 'Data catering berhasil dihapus.');
+
         } catch (\Exception $e) {
-            return redirect()->route('catering.index')->with('error', 'Gagal menghapus data: ' . $e->getMessage());
+            return redirect()->route($routeTujuan)
+                ->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
     }
-
 
     // ===================================================================
     // --- FUNGSI BARU UNTUK MODAL APPROVE / REJECT ---
