@@ -5,19 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form Pemesanan Makanan</title>
 
+    {{-- Library CSS --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-image: url('images/background.jpeg'); /* ganti sesuai lokasi gambar */
+            background-image: url('images/background.jpeg');
             background-size: cover;
             background-position: center;
             padding: 20px;
@@ -44,22 +43,26 @@
             color: white;
         }
 
-        .left-panel img.logo {
-            max-width: 250px;
-            margin-bottom: 20px;
+        /* --- STYLING TABEL --- */
+        .table-custom {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .table-custom thead th {
+            background-color: #f8f9fa;
+            color: #333;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+            vertical-align: middle;
+        }
+        .table-custom td, .table-custom th {
+            border: 1px solid #dee2e6;
+            vertical-align: middle;
+            padding: 10px;
         }
 
-        .left-panel h2 {
-            font-size: 2rem;
-            font-weight: 700;
-        }
-
-        .left-panel img.illustration {
-            max-width: 90%;
-            margin-top: 20px;
-        }
-
-        /* Panel kanan form */
+        /* --- STYLING KANAN --- */
         .right-panel {
             background: #fff;
             padding: 30px;
@@ -76,7 +79,7 @@
             left: 12px;
             transform: translateY(-50%);
             color: #777;
-            z-index: 2; /* Pastikan icon di atas input file */
+            z-index: 2;
         }
 
         .form-control {
@@ -87,7 +90,6 @@
             border-radius: 8px;
         }
         
-        /* Penyesuaian untuk input file agar icon terlihat */
         .form-control[type="file"] {
             padding-top: 10px;
         }
@@ -103,7 +105,6 @@
             border-radius: 8px;
         }
 
-        /* Style untuk contoh kode */
         code {
             background-color: #e9ecef;
             padding: 2px 4px;
@@ -111,12 +112,18 @@
             color: #c7254e;
         }
 
+        /* Iframe Styling untuk Nota */
+        .nota-iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+
         @media(max-width: 768px) {
             .right-panel {
                 border-radius: 0;
-            }
-            .left-panel img.illustration {
-                display: none;
             }
         }
     </style>
@@ -128,17 +135,16 @@
 
         <div class="col-md-7 left-panel">
             <div class="p-3">
-                <h4 class="text-white font-weight-bold">Permintaan Catering Terbaru</h4>
+                <h4 class="text-white font-weight-bold mb-4">Permintaan Catering Terbaru</h4>
                 @php
-                    // Use provided $caterings or fallback to a small query (avoid heavy queries in view)
                     $caterings = isset($caterings) ? $caterings : \App\Catering::latest()->limit(6)->get();
                 @endphp
 
                 @if($caterings->count() > 0)
-                <div class="table-responsive mt-3">
-                    <table class="table table-sm table-striped mb-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-custom mb-0">
                         <thead>
-                            <tr>
+                            <tr class="text-center">
                                 <th>Nama</th>
                                 <th>Keperluan</th>
                                 <th>Tgl Kegiatan</th>
@@ -151,17 +157,17 @@
                         <tbody>
                             @foreach($caterings as $c)
                             <tr>
-                                <td class="align-middle" style="min-width:120px">{{ \Illuminate\Support\Str::limit($c->nama_pemesan, 18) }}</td>
-                                <td class="align-middle" style="min-width:120px">{{ \Illuminate\Support\Str::limit($c->keperluan, 20) }}</td>
-                                <td class="align-middle">{{ \Carbon\Carbon::parse($c->tanggal_kegiatan)->format('d M Y') }}</td>
-                                <td class="align-middle text-center">{{ $c->jumlah_peserta }}</td>
-                                <td class="align-middle small">{{ \Carbon\Carbon::parse($c->created_at)->format('d M Y') }}</td>
-                                <td class="align-middle">
-                                    <span class="badge badge-pill {{ $c->status == 'pending' ? 'badge-soft-warning' : ($c->status == 'approved' ? 'badge-soft-success' : 'badge-soft-danger') }}">{{ ucfirst($c->status) }}</span>
+                                <td style="min-width:120px">{{ \Illuminate\Support\Str::limit($c->nama_pemesan, 18) }}</td>
+                                <td style="min-width:120px">{{ \Illuminate\Support\Str::limit($c->keperluan, 20) }}</td>
+                                <td class="text-center">{{ \Carbon\Carbon::parse($c->tanggal_kegiatan)->format('d M Y') }}</td>
+                                <td class="text-center">{{ $c->jumlah_peserta }}</td>
+                                <td class="text-center small">{{ \Carbon\Carbon::parse($c->created_at)->format('d M Y') }}</td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill {{ $c->status == 'pending' ? 'text-bg-warning' : ($c->status == 'approved' ? 'text-bg-success' : 'text-bg-danger') }}">{{ ucfirst($c->status) }}</span>
                                 </td>
-                                <td class="align-middle">
+                                <td class="text-center">
                                     <button type="button" 
-                                        class="btn btn-sm btn-light lihat-btn"
+                                        class="btn btn-sm btn-outline-dark lihat-btn"
                                         data-bs-toggle="modal" data-bs-target="#viewCateringModal"
                                         data-id="{{ $c->id }}"
                                         data-name="{{ e($c->nama_pemesan) }}"
@@ -203,7 +209,6 @@
                 @endif
 
                 <form action="{{ route('catering.store') }}" method="POST" enctype="multipart/form-data">
-                    
                     {{ csrf_field() }}
 
                     <div class="form-group mb-3">
@@ -226,20 +231,15 @@
                         <div class="d-flex gap-2">
                             @php
                                 $oldTanggal = old('tanggal_kegiatan');
-                                $oldDate = '';
-                                $oldTime = '';
+                                $oldDate = ''; $oldTime = '';
                                 if ($oldTanggal) {
                                     try {
                                         $dt = \Carbon\Carbon::parse($oldTanggal);
                                         $oldDate = $dt->format('Y-m-d');
                                         $oldTime = $dt->format('H:i');
-                                    } catch (\Exception $e) {
-                                        $oldDate = '';
-                                        $oldTime = '';
-                                    }
+                                    } catch (\Exception $e) {}
                                 }
                             @endphp
-
                             <input type="date" id="tanggal_date" class="form-control" style="max-width:40%;" value="{{ $oldDate }}" required>
                             <input type="text" id="tanggal_time" class="form-control" style="max-width:40%;" value="{{ $oldTime }}" required placeholder="HH:mm">
                             <input type="hidden" name="tanggal_kegiatan" id="tanggal_kegiatan_hidden" value="{{ $oldTanggal ?? '' }}">
@@ -265,7 +265,6 @@
                     </div>
 
                     <label for="notaDinas" class="form-label" style="font-size: 0.9rem; font-weight: 500;">Upload Nota Dinas (Wajib)</label>
-                    
                     <small class="form-text text-muted d-block mb-1">
                         <strong>Penting:</strong> Nama file tidak boleh pakai spasi/karakter spesial (!@#$).
                         <br>Contoh benar: <code>NotaDinas_Rapat_2025.pdf</code>
@@ -284,160 +283,211 @@
                         <a href="{{ route('landing-page') }}" class="btn btn-custom btn-custom-secondary">Kembali</a>
                         <button type="submit" class="btn btn-primary btn-custom">Kirim Pemesanan</button>
                     </div>
-
                 </form>
-
             </div>
         </div>
-
     </div>
 </div>
 
-        <!-- Modal: View Catering Details -->
-        <div class="modal fade" id="viewCateringModal" tabindex="-1" aria-labelledby="viewCateringModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="viewCateringModalLabel">Detail Pemesanan Catering</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+<div class="modal fade" id="viewCateringModal" tabindex="-1" aria-labelledby="viewCateringModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewCateringModalLabel">Detail Pemesanan Catering</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><small class="text-muted">Pemesan</small><br><strong id="view-name"></strong></p>
+                        <p><small class="text-muted">NIP</small><br><strong id="view-nip"></strong></p>
+                        <p><small class="text-muted">Keperluan</small><br><strong id="view-keperluan"></strong></p>
+                        <p><small class="text-muted">Tanggal Kegiatan</small><br><strong id="view-tanggal"></strong></p>
                     </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><small class="text-muted">Pemesan</small><br><strong id="view-name"></strong></p>
-                                <p><small class="text-muted">NIP</small><br><strong id="view-nip"></strong></p>
-                                <p><small class="text-muted">Keperluan</small><br><strong id="view-keperluan"></strong></p>
-                                <p><small class="text-muted">Tanggal Kegiatan</small><br><strong id="view-tanggal"></strong></p>
-                            </div>
-                            <div class="col-md-6">
-                                <p><small class="text-muted">Tempat</small><br><strong id="view-tempat"></strong></p>
-                                <p><small class="text-muted">Jumlah Peserta</small><br><strong id="view-peserta"></strong></p>
-                                <p><small class="text-muted">Jenis Konsumsi</small><br><strong id="view-konsumsi"></strong></p>
-                                <p><small class="text-muted">Keterangan</small><br><strong id="view-keterangan"></strong></p>
-                            </div>
-                        </div>
-                        <div class="mt-3">
-                            <button type="button" id="view-nota-btn" class="btn btn-outline-primary btn-sm">Lihat File Nota</button>
-                        </div>
-                        <div class="mt-3">
-                            <button type="button" id="" class="btn btn-outline-primary btn-sm">Hapus</button>
-                        </div>
-                        <div class="mt-3">
-                            <button type="button" id="" class="btn btn-outline-primary btn-sm">Laporan</button>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                    <div class="col-md-6">
+                        <p><small class="text-muted">Tempat</small><br><strong id="view-tempat"></strong></p>
+                        <p><small class="text-muted">Jumlah Peserta</small><br><strong id="view-peserta"></strong></p>
+                        <p><small class="text-muted">Jenis Konsumsi</small><br><strong id="view-konsumsi"></strong></p>
+                        <p><small class="text-muted">Keterangan</small><br><strong id="view-keterangan"></strong></p>
                     </div>
                 </div>
+                
+                <div class="mt-4 d-flex gap-2">
+                    <button type="button" id="btn-show-nota-modal" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-file-invoice"></i> Lihat File Nota
+                    </button>
+
+                    <form id="form-delete-catering" action="#" method="POST" class="d-inline">
+                        {{ csrf_field() }}
+                        {{ method_field('DELETE') }}
+                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    </form>
+
+                    <a href="#" id="btn-laporan-link" class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-file-alt"></i> Laporan
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Bootstrap JS bundle (includes Popper) -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<div class="modal fade" id="viewNotaModal" tabindex="-1" aria-labelledby="viewNotaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="viewNotaModalLabel"><i class="fas fa-file-pdf me-2"></i> File Nota Dinas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body p-0">
+                <iframe id="nota-iframe" class="nota-iframe" src=""></iframe>
+                <div id="nota-error" class="text-center p-5 d-none">
+                    <i class="fas fa-exclamation-circle fa-3x text-warning mb-3"></i>
+                    <p class="text-muted">File tidak dapat ditampilkan atau tidak ditemukan.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="btn-download-nota" class="btn btn-primary btn-sm" download>Download File</a>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-        <script>
-        (function(){
-            var viewModalEl = document.getElementById('viewCateringModal');
-            if (!viewModalEl) return;
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-            viewModalEl.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget; // Button that triggered the modal
-                if (!button) return;
+<script>
+(function(){
+    // Modal Detail
+    var viewModalEl = document.getElementById('viewCateringModal');
+    // Modal Nota
+    var notaModalEl = document.getElementById('viewNotaModal');
+    var notaModal = new bootstrap.Modal(notaModalEl); // Instance Bootstrap Modal
 
-                // Read data attributes
-                var name = button.getAttribute('data-name') || '-';
-                var nip = button.getAttribute('data-nip') || '-';
-                var keperluan = button.getAttribute('data-keperluan') || '-';
-                var tanggal = button.getAttribute('data-tanggal') || '-';
-                var tempat = button.getAttribute('data-tempat') || '-';
-                var peserta = button.getAttribute('data-peserta') || '-';
-                var konsumsi = button.getAttribute('data-konsumsi') || '-';
-                var keterangan = button.getAttribute('data-keterangan') || '-';
-                var notaUrl = button.getAttribute('data-nota_url') || '#';
+    if (!viewModalEl) return;
 
-                // Populate modal fields
-                document.getElementById('view-name').textContent = name;
-                document.getElementById('view-nip').textContent = nip;
-                document.getElementById('view-keperluan').textContent = keperluan;
-                document.getElementById('view-tanggal').textContent = tanggal;
-                document.getElementById('view-tempat').textContent = tempat;
-                document.getElementById('view-peserta').textContent = peserta;
-                document.getElementById('view-konsumsi').textContent = konsumsi;
-                document.getElementById('view-keterangan').textContent = keterangan;
+    var deleteUrlTemplate = "{{ route('catering.destroy', ':id') }}";
+    var laporanUrlTemplate = "{{ route('documents.dashboard_doc') }}";
+    var currentNotaUrl = '#'; // Menyimpan URL nota sementara
 
-                var notaBtn = document.getElementById('view-nota-btn');
-                if (notaBtn) {
-                    notaBtn.dataset.url = notaUrl;
-                }
-            });
+    // Event saat Modal Detail Dibuka
+    viewModalEl.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget; 
+        if (!button) return;
 
-            // Nota button opens file in new tab or alerts if missing
-            document.addEventListener('click', function(e){
-                if (e.target && e.target.id === 'view-nota-btn'){
-                    var url = e.target.dataset.url || '#';
-                    if (url && url !== '#') {
-                        window.open(url, '_blank');
-                    } else {
-                        alert('File nota dinas tidak tersedia.');
-                    }
-                }
-            });
-        })();
-        </script>
+        // 1. Ambil Data
+        var id = button.getAttribute('data-id');
+        var name = button.getAttribute('data-name') || '-';
+        var nip = button.getAttribute('data-nip') || '-';
+        var keperluan = button.getAttribute('data-keperluan') || '-';
+        var tanggal = button.getAttribute('data-tanggal') || '-';
+        var tempat = button.getAttribute('data-tempat') || '-';
+        var peserta = button.getAttribute('data-peserta') || '-';
+        var konsumsi = button.getAttribute('data-konsumsi') || '-';
+        var keterangan = button.getAttribute('data-keterangan') || '-';
+        var notaUrl = button.getAttribute('data-nota_url') || '#';
 
-        <script>
-        // Combine date + time into hidden input so backend gets a single datetime string
-        (function(){
-            var form = document.querySelector('form[action="{{ route('catering.store') }}"]');
-            if (!form) return;
+        currentNotaUrl = notaUrl; // Simpan URL nota
 
-            var dateInput = document.getElementById('tanggal_date');
-            var timeInput = document.getElementById('tanggal_time');
-            var hidden = document.getElementById('tanggal_kegiatan_hidden');
+        // 2. Isi Text Modal Detail
+        document.getElementById('view-name').textContent = name;
+        document.getElementById('view-nip').textContent = nip;
+        document.getElementById('view-keperluan').textContent = keperluan;
+        document.getElementById('view-tanggal').textContent = tanggal;
+        document.getElementById('view-tempat').textContent = tempat;
+        document.getElementById('view-peserta').textContent = peserta;
+        document.getElementById('view-konsumsi').textContent = konsumsi;
+        document.getElementById('view-keterangan').textContent = keterangan;
 
-            function setHidden() {
-                if (!dateInput || !timeInput || !hidden) return;
-                var d = dateInput.value;
-                var t = timeInput.value;
-                if (d && t) {
-                    // Format to 'Y-m-d H:i:00' which Laravel/DB accepts
-                    hidden.value = d + ' ' + t + ':00';
-                } else if (d) {
-                    hidden.value = d + ' 00:00:00';
-                }
+        // 3. Update Form Hapus
+        var deleteForm = document.getElementById('form-delete-catering');
+        if (deleteForm) {
+            deleteForm.action = deleteUrlTemplate.replace(':id', id);
+        }
+
+        // 4. Update Link Laporan
+        var laporanBtn = document.getElementById('btn-laporan-link');
+        if (laporanBtn) {
+            laporanBtn.href = laporanUrlTemplate + "?catering_id=" + id;
+        }
+    });
+
+    // Event Klik Tombol "Lihat File Nota" di dalam Modal Detail
+    var btnShowNota = document.getElementById('btn-show-nota-modal');
+    if (btnShowNota) {
+        btnShowNota.addEventListener('click', function() {
+            if (currentNotaUrl && currentNotaUrl !== '#') {
+                // Set src iframe
+                var iframe = document.getElementById('nota-iframe');
+                var errorDiv = document.getElementById('nota-error');
+                var btnDownload = document.getElementById('btn-download-nota');
+
+                iframe.src = currentNotaUrl;
+                btnDownload.href = currentNotaUrl;
+                
+                iframe.classList.remove('d-none');
+                errorDiv.classList.add('d-none');
+
+                // Tampilkan Modal Nota (ini akan menumpuk di atas modal detail)
+                notaModal.show();
+            } else {
+                alert('File nota dinas tidak tersedia.');
             }
+        });
+    }
+})();
+</script>
 
-            // Update hidden on change
-            if (dateInput) dateInput.addEventListener('change', setHidden);
-            if (timeInput) timeInput.addEventListener('change', setHidden);
+<script>
+(function(){
+    var form = document.querySelector('form[action="{{ route('catering.store') }}"]');
+    if (!form) return;
 
-            // Ensure hidden is up-to-date before submit
-            form.addEventListener('submit', function(e){
-                setHidden();
-            });
+    var dateInput = document.getElementById('tanggal_date');
+    var timeInput = document.getElementById('tanggal_time');
+    var hidden = document.getElementById('tanggal_kegiatan_hidden');
 
-            // Initialize once
-            setHidden();
-        })();
-        </script>
+    function setHidden() {
+        if (!dateInput || !timeInput || !hidden) return;
+        var d = dateInput.value;
+        var t = timeInput.value;
+        if (d && t) {
+            hidden.value = d + ' ' + t + ':00';
+        } else if (d) {
+            hidden.value = d + ' 00:00:00';
+        }
+    }
 
-        <!-- flatpickr time picker (24-hour) -->
-        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-        <script>
-            (function(){
-                var timeEl = document.getElementById('tanggal_time');
-                if (!timeEl) return;
-                flatpickr(timeEl, {
-                    enableTime: true,
-                    noCalendar: true,
-                    dateFormat: "H:i",
-                    time_24hr: true,
-                    minuteIncrement: 1,
-                    defaultDate: timeEl.value || null,
-                });
-            })();
-        </script>
+    if (dateInput) dateInput.addEventListener('change', setHidden);
+    if (timeInput) timeInput.addEventListener('change', setHidden);
+
+    form.addEventListener('submit', function(e){
+        setHidden();
+    });
+    setHidden();
+})();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    (function(){
+        var timeEl = document.getElementById('tanggal_time');
+        if (!timeEl) return;
+        flatpickr(timeEl, {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            minuteIncrement: 1,
+            defaultDate: timeEl.value || null,
+        });
+    })();
+</script>
 
 </body>
 </html>
