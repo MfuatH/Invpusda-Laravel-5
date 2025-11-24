@@ -32,6 +32,10 @@ Route::get('/catering/success', 'CateringController@successPage')->name('caterin
 Route::get('/template-doc', 'CateringController@templateDoc')->name('documents.template_doc');
 // ----------------------------------------------------------
 
+// --- Request Kendaraan (Publik)
+Route::get('/request-kendaraan', 'PeminjamanKendaraanController@create')->name('request.kendaraan.create');
+Route::post('/request-kendaraan', 'PeminjamanKendaraanController@store')->name('request.kendaraan.store');
+
 
 // --- Route Dokumen Lain ---
 Route::get('/dashboard-doc', 'RequestController@dashboardDoc')->name('documents.dashboard_doc');
@@ -83,6 +87,10 @@ Route::group([
         Route::get('catering', 'CateringController@index')->name('catering.index');
         Route::post('catering/{catering}/reject', 'CateringController@reject')->name('catering.reject');
         Route::post('catering/{catering}/approve', 'CateringController@approve')->name('catering.approve');
+        
+        // Approval Kendaraan
+        Route::get('kendaraan', 'PeminjamanKendaraanController@index')->name('kendaraan.index');
+        Route::get('kendaraan/{id}', 'PeminjamanKendaraanController@show')->name('kendaraan.show');
         
         // === TAMBAHAN: ROUTE HAPUS CATERING ===
         
