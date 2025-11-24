@@ -18,11 +18,13 @@ class CreatePeminjamanKendaraanTable extends Migration
             $table->string('nip', 50)->nullable();
             $table->string('no_hp', 50)->nullable();
             $table->string('urgensi', 200)->nullable();
+            $table->unsignedBigInteger('kendaraan_id')->nullable();
             $table->dateTime('tanggal_ambil')->nullable();
             $table->dateTime('tanggal_kembali')->nullable();
-            $table->string('plat_no', 50)->nullable();
             $table->string('status', 30)->default('pending');
             $table->timestamps();
+            
+            $table->foreign('kendaraan_id')->references('id')->on('kendaraan')->onDelete('set null');
         });
     }
 

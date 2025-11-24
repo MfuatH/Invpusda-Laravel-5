@@ -295,6 +295,13 @@
                     @endif
                 </a>
                 @endif
+
+                @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
+                <a href="" class="list-group-item ">
+                    <i class="fas fa-car menu-icon"></i> Approve Kendaraan
+                    
+                </a>
+                @endif
                 
                 <a href="{{ route('transaksi.index') }}" class="list-group-item {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
                     <i class="fas fa-history menu-icon"></i> Riwayat Transaksi

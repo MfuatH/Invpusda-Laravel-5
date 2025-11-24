@@ -267,15 +267,15 @@
 
                     <div class="form-group">
                         <i class="fas fa-car form-icon"></i>
-                        <select class="form-control" name="kendaraan" id="kendaraan">
-                            <option value="" selected disabled>-- Pilih Jenis Kendaraan --</option>
-                            
-                            <option value="Innova Reborn - L 1234 AB">Innova Reborn - L 1234 AB</option>
-                            <option value="Toyota Avanza - L 5678 CD">Toyota Avanza - L 5678 CD</option>
-                            <option value="Toyota Hiace - L 9012 EF">Toyota Hiace - L 9012 EF</option>
-                            <option value="Hilux Double Cabin - L 3456 GH">Hilux Double Cabin - L 3456 GH</option>
-                            
-                            <option value="Lainnya / Ditentukan Admin">Lainnya / Ditentukan Admin</option>
+                        <select class="form-control" name="kendaraan_id" id="kendaraan_id" required>
+                            <option value="" selected disabled>-- Pilih Kendaraan --</option>
+                            @forelse($kendaraans as $k)
+                                <option value="{{ $k->id }}" {{ old('kendaraan_id') == $k->id ? 'selected' : '' }}>
+                                    {{ $k->jenis }} - {{ $k->plat_no }}
+                                </option>
+                            @empty
+                                <option value="" disabled>Tidak ada kendaraan tersedia</option>
+                            @endforelse
                         </select>
                     </div>
                     <div class="row">

@@ -10,7 +10,8 @@ class PeminjamanKendaraanController extends Controller
 {
     public function create()
     {
-        return view('requests.kendaraan_create');
+        $kendaraans = \App\Kendaraan::all();
+        return view('requests.kendaraan_create', compact('kendaraans'));
     }
 
     public function store(Request $request)
@@ -20,12 +21,12 @@ class PeminjamanKendaraanController extends Controller
             'nip' => 'nullable|string|max:50',
             'no_hp' => 'nullable|string|max:50',
             'urgensi' => 'nullable|string|max:500',
+            'kendaraan_id' => 'required|exists:kendaraan,id',
             'tanggal_ambil' => 'required|date',
-            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_ambil',
-            'plat_no' => 'nullable|string|max:50'
+            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_ambil'
         ]);
 
-        $data = $request->only(['nama','nip','no_hp','urgensi','plat_no']);
+        $data = $request->only(['nama','nip','no_hp','urgensi','kendaraan_id']);
         $data['tanggal_ambil'] = Carbon::parse($request->input('tanggal_ambil'));
         $data['tanggal_kembali'] = Carbon::parse($request->input('tanggal_kembali'));
         $data['status'] = 'pending';
