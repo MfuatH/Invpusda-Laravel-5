@@ -15,7 +15,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        /* ... (Semua CSS Anda sudah benar) ... */
         body {
             font-family: 'Poppins', sans-serif;
             background-image: url('/images/background.jpeg');
@@ -66,25 +65,6 @@
             flex-direction: column;
             margin-top: 20px;
         }
-        .btn-fullscreen {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 10px;
-            font-weight: 500;
-            font-size: 14px;
-            transition: .2s;
-            align-self: flex-start;
-        }
-        .btn-fullscreen:hover {
-            background: rgba(0, 0, 0, 0.7);
-        }
-        .btn-fullscreen i {
-            margin-right: 6px;
-        }
         .document-preview-iframe {
             width: 100%;
             height: 100%;
@@ -114,6 +94,11 @@
         }
         .btn-custom-secondary {
             background: #6c757d;
+            color: white;
+            text-decoration: none;
+        }
+        .btn-custom-secondary:hover {
+            background: #5a6268;
             color: white;
         }
         @media(max-width: 991px) {
@@ -233,7 +218,7 @@
             left: 15px;
             color: #777;
             z-index: 2;
-            top: 55px; /* Disesuaikan agar di dalam input */
+            top: 55px; 
             transform: translateY(-50%);
         }
         .form-control-modal {
@@ -257,7 +242,7 @@
             resize: vertical;
         }
         .form-group-modal textarea.form-control-modal + i {
-             top: 48px; /* Disesuaikan untuk textarea */
+             top: 48px; 
              transform: none;
         }
         .file-input-wrapper-modal {
@@ -333,7 +318,8 @@
         {{-- RIGHT PANEL (Info + Tombol) --}}
         <div class="col-lg-5 p-3 offset-lg-1">
             <div class="right-panel">
-                <div> @if (session('success'))
+                <div> 
+                    @if (session('success'))
                         <div class="alert alert-success">{{ session('success') }}</div>
                     @endif
                     @if (session('error'))
@@ -363,19 +349,52 @@
                                 <li>Lampiran pendukung</li>
                             </ul>
                             <small class="form-text text-muted d-block mb-1">
-                            <strong>Penting:</strong> Nama file tidak boleh pakai spasi/karakter spesial (!@#$).
-                            <br>Contoh benar: <code>NotaDinas_Rapat_2025.pdf</code>
-                    </small>
+                                <strong>Penting:</strong> Nama file tidak boleh pakai spasi/karakter spesial (!@#$).
+                                <br>Contoh benar: <code>NotaDinas_Rapat_2025.pdf</code>
+                            </small>
                         </div>
                     </div>
                     
-                    <button type="button" class="btn-upload-main" onclick="openUploadModal()">
-                        <i class="fas fa-plus"></i> Upload Laporan
-                    </button>
-                </div> <div class="text-end mt-4">
-                    {{--buat menjadi tombol penyelesaian request, merubah status dari approved ke completed --}}
-                    <a href="{{ route('request.konsumsi.create') }}" class="btn btn-custom btn-custom-secondary">Selesaikan Request</a>
-                </div>
+                    {{-- ========================================================== --}}
+                    {{-- LOGIKA TOMBOL BERDASARKAN STATUS CATERING --}}
+                    {{-- ========================================================== --}}
+                    <div class="mt-4">
+                        @if(isset($catering) && $catering->status == 'completed')
+                            {{-- KONDISI: SUDAH UPLOAD (Status Completed) --}}
+                            
+                            {{-- Tampilkan Pesan Sukses --}}
+                            <div class="alert alert-success text-center">
+                                <i class="fas fa-check-circle fa-2x mb-2"></i><br>
+                                <strong>Laporan Telah Diterima</strong><br>
+                                Terima kasih, proses administrasi kegiatan ini telah selesai.
+                            </div>
+
+                            {{-- Tombol Selesaikan MUNCUL --}}
+                            <div class="text-end mt-3">
+                                <a href="{{ route('landing-page') }}" class="btn btn-custom btn-custom-secondary w-100">
+                                    <i class="fas fa-home me-1"></i> Selesai & Kembali ke Menu Utama
+                                </a>
+                            </div>
+
+                        @else
+                            {{-- KONDISI: BELUM UPLOAD --}}
+
+                            {{-- Tombol Upload MUNCUL --}}
+                            <button type="button" class="btn-upload-main" onclick="openUploadModal()">
+                                <i class="fas fa-plus"></i> Upload Laporan
+                            </button>
+
+                            {{-- Info bahwa tombol selesai belum muncul --}}
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i> Tombol penyelesaian akan muncul setelah Anda mengunggah laporan.
+                                </small>
+                            </div>
+                        @endif
+                    </div>
+                    {{-- ========================================================== --}}
+
+                </div> 
             </div>
         </div>
 
@@ -393,17 +412,26 @@
         </div>
         
         <div class="modal-body-scroll">
-            
-            {{-- ================================================ --}}
-            {{-- === PERBAIKAN FORM ADA DI SINI === --}}
-            {{-- ================================================ --}}
             <form action="{{ route('request.store.LaporanRapat') }}" method="POST" enctype="multipart/form-data">
                 {{ csrf_field() }}
+
+                {{-- ====================================================== --}}
+                {{-- === [PENTING] INPUT HIDDEN UNTUK CATERING ID === --}}
+                {{-- ====================================================== --}}
+                @if(isset($catering))
+                    <input type="hidden" name="catering_id" value="{{ $catering->id }}">
+                @else
+                    {{-- Fallback pencegah error jika view diakses tanpa data --}}
+                    <div class="alert alert-danger p-2 mb-3 small">
+                        Error: Data Catering tidak ditemukan.
+                    </div>
+                @endif
+                {{-- ====================================================== --}}
 
                 {{-- 1. Field Pengunggah --}}
                 <div class="form-group-modal">
                     <label for="pengunggah" class="form-label">Nama Pengunggah <span class="text-danger">*</span></label>
-                    <div class="input-with-icon"> {{-- Wrapper untuk input dan ikon --}}
+                    <div class="input-with-icon"> 
                         <i class="fa fa-user"></i>
                         <input type="text" id="pengunggah" name="pengunggah" 
                                class="form-control-modal {{ $errors->has('pengunggah') ? 'is-invalid' : '' }}" 
@@ -423,9 +451,6 @@
                                class="form-control-modal {{ $errors->has('nip') ? 'is-invalid' : '' }}" 
                                placeholder="NIP" value="{{ old('nip') }}">
                     </div>
-                    @if ($errors->has('nip'))
-                        <div class="text-danger small">{{ $errors->first('nip') }}</div>
-                    @endif
                 </div>
 
                 {{-- 3. Field Keterangan --}}
@@ -437,9 +462,6 @@
                                   class="form-control-modal {{ $errors->has('keterangan') ? 'is-invalid' : '' }}" 
                                   placeholder="Deskripsi singkat tentang dokumen">{{ old('keterangan') }}</textarea>
                     </div>
-                    @if ($errors->has('keterangan'))
-                        <div class="text-danger small">{{ $errors->first('keterangan') }}</div>
-                    @endif
                 </div>
 
                 {{-- 4. Field File --}}
@@ -458,21 +480,20 @@
                 </div>
 
                 <button type="submit" class="modal-submit-btn">
-                    <i class="fas fa-paper-plane"></i> Upload Laporan
+                    <i class="fas fa-paper-plane"></i> Upload Laporan & Selesaikan
                 </button>
             </form>
         </div>
     </div>
 </div>
 
-
 <script>
-    // === SCRIPT UNTUK MODAL FORM UPLOAD ===
     function openUploadModal() {
         document.getElementById("uploadModal").style.display = "flex";
     }
     function closeUploadModal() {
         document.getElementById("uploadModal").style.display = "none";
+        // Reset error styling
         var invalidInputs = document.querySelectorAll('.is-invalid');
         for(var i = 0; i < invalidInputs.length; i++) {
             invalidInputs[i].classList.remove('is-invalid');
@@ -493,18 +514,6 @@
         }
     }
     
-    // === SCRIPT BARU UNTUK FULLSCREEN IFRAME ===
-    function openFullscreen() {
-        var elem = document.getElementById("preview-iframe");
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-        } else if (elem.webkitRequestFullscreen) { /* Safari */
-            elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) { /* IE11 */
-            elem.msRequestFullscreen();
-        }
-    }
-    
     window.onclick = function(event) {
         if (event.target == document.getElementById("uploadModal")) {
             closeUploadModal();
@@ -517,7 +526,6 @@
             openUploadModal();
         @endif
     });
-
 </script>
 
 </body>

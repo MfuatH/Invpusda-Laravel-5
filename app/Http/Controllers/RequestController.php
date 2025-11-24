@@ -265,9 +265,11 @@ class RequestController extends Controller
         return view('requests.konsumsi_create');
     }
 
-    public function dashboardDoc()
+    public function dashboardDoc($id)
     {
-        return view('documents.dashboard_doc');
+        $catering = \App\Catering::findOrFail($id);
+        
+        return view('documents.dashboard_doc', compact('catering'));
     }
 
     public function createUndangan()
@@ -290,68 +292,63 @@ class RequestController extends Controller
         return view('documents.upload_notanpresensi');
     }
 
-    // ==========================================================
-    // --- FUNGSI INI SUDAH DIPERBAIKI ---
-    // ==========================================================
     public function storeLaporanRapat(Request $request)
     {
-        // === 1. Validasi (Sesuai Form Upload User) ===
-        // (Form Anda menggunakan name="file")
         $request->validate([
-            'pengunggah' => 'required|string|max:255',
-            'nip'        => 'nullable|string|max:50',
-            'keterangan' => 'nullable|string',
-            'file'       => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240' // WAJIB 'file'
+            'pengunggah'  => 'required|string|max:255',
+            'nip'         => 'nullable|string|max:50',
+            'keterangan'  => 'nullable|string',
+            'file'        => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
+            'catering_id' => 'required|exists:catering,id', 
         ]);
 
         DB::beginTransaction();
         $filePath = null;
-        $fileOriginalName = null;
-        $fileSize = null;
-        $mimeType = null;
 
         try {
-            // --- 2. Proses File ---
-            
-            // PERBAIKAN: Ganti 'file_laporan' menjadi 'file'
+            $fileOriginalName = null;
+            $fileSize = 0;
+            $mimeType = null;
+
             if ($request->hasFile('file')) {
-                $file = $request->file('file'); // WAJIB 'file'
-                
+                $file = $request->file('file');
                 $fileOriginalName = $file->getClientOriginalName();
                 $fileSize = $file->getSize();
                 $mimeType = $file->getMimeType();
                 $fileName = time() . '_' . $fileOriginalName;
                 
-                // PERBAIKAN: Simpan ke disk 'public'
-                // Ini akan menyimpan ke storage/app/public/uploads/laporan_rapat
                 $filePath = $file->storeAs('uploads/laporan_rapat', $fileName, 'public');
             }
 
-            // --- 3. Siapkan Data ---
-            $data = [
-                'catering_id' => $request->input('catering_id') ?: null,
-                'pengunggah'         => $request->input('pengunggah'),
-                'nip'                => $request->input('nip'),
-                'keterangan'         => $request->input('keterangan'),
-                'file_laporan'       => $filePath, // Path file
-                'file_original_name' => $fileOriginalName, // Nama asli file
-                'file_size'          => $fileSize,
-                'mime_type'          => $mimeType,  
-                'status'             => LaporanRapat::STATUS_SUBMITTED, 
-                'created_by'         => null, 
-            ];
+            $laporan = new LaporanRapat();
+            $laporan->catering_id        = $request->input('catering_id');
+            $laporan->pengunggah         = $request->input('pengunggah');
+            $laporan->nip                = $request->input('nip');
+            $laporan->keterangan         = $request->input('keterangan');
+            $laporan->file_laporan       = $filePath;
+            $laporan->file_original_name = $fileOriginalName;
+            $laporan->file_size          = $fileSize;
+            $laporan->mime_type          = $mimeType;
+            $laporan->status             = LaporanRapat::STATUS_SUBMITTED;
+            $laporan->created_by         = null; // Atau Auth::id() jika login
+            $laporan->save(); // <--- Eksekusi simpan
 
-            // --- 4. Simpan Database ---
-            LaporanRapat::create($data);
+            // 4. Update Status Catering jadi Completed
+            $catering = \App\Catering::find($request->input('catering_id'));
+            if ($catering) {
+                $catering->update([
+                    'status' => \App\Catering::STATUS_COMPLETED
+                ]);
+            }
+
             DB::commit();
 
-            // --- 5. Redirect Kembali dengan Pesan Sukses ---
-            return redirect()->back()->with('success', 'Laporan berhasil diunggah!');
+            return redirect()->back()->with('success', 'Laporan berhasil diunggah dan status kegiatan selesai!');
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // PERBAIKAN: Cek di disk 'public'
+            // Hapus file jika gagal database
             if ($filePath && Storage::disk('public')->exists($filePath)) {
                 Storage::disk('public')->delete($filePath);
             }

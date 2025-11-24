@@ -38,7 +38,7 @@ Route::post('/request-kendaraan', 'PeminjamanKendaraanController@store')->name('
 
 
 // --- Route Dokumen Lain ---
-Route::get('/dashboard-doc', 'RequestController@dashboardDoc')->name('documents.dashboard_doc');
+Route::get('/dashboard-doc/{id}', 'RequestController@dashboardDoc')->name('documents.dashboard_doc');
 Route::get('/undangan-upload', 'RequestController@createUndangan')->name('request.undangan.create');
 Route::get('/download-presensi', 'RequestController@downloadPresensi')->name('request.download.presensi');
 Route::get('/download-notulensi', 'RequestController@downloadNotulensi')->name('request.download.notulensi');

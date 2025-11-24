@@ -373,7 +373,7 @@
     if (!viewModalEl) return;
 
     var deleteUrlTemplate = "{{ route('catering.destroy', ':id') }}";
-    var laporanUrlTemplate = "{{ route('documents.dashboard_doc') }}";
+    var laporanUrlTemplate = "{{ route('documents.dashboard_doc', ['id' => '0']) }}";
     var currentNotaUrl = '#'; // Menyimpan URL nota sementara
 
     // Event saat Modal Detail Dibuka
@@ -425,7 +425,7 @@
         // 4. Update Link Laporan
         var laporanBtn = document.getElementById('btn-laporan-link');
         if (laporanBtn) {
-            laporanBtn.href = laporanUrlTemplate + "?catering_id=" + id;
+            laporanBtn.href = laporanUrlTemplate.replace('/0', '/' + id);
         }
     });
 
