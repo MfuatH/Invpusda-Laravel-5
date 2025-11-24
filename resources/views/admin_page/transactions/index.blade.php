@@ -40,7 +40,7 @@
                         @forelse($transactions ?? [] as $t)
                             <tr>
                                 {{-- 1. Tanggal Transaksi --}}
-                                <td>{{ \Carbon\Carbon::parse($t->tanggal)->format('d-m-Y H:i') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($t->tanggal)->format('d-m-Y') }}</td>
                                 
                                 {{-- 2. Nama Barang --}}
                                 <td>{{ $t->item->nama_barang ?? 'Barang Dihapus' }}</td>

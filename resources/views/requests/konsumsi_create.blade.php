@@ -179,6 +179,7 @@
                                         data-konsumsi="{{ e($c->jenis_konsumsi_string) }}"
                                         data-nota_url="{{ $c->nota_dinas_url ?? '#' }}"
                                         data-keterangan="{{ e($c->keterangan ?? '-') }}"
+                                        data-status="{{ $c->status }}"
                                     >Lihat</button>
                                 </td>
                             </tr>
@@ -325,7 +326,7 @@
                         </button>
                     </form>
 
-                    <a href="#" id="btn-laporan-link" class="btn btn-outline-success btn-sm">
+                    <a href="#" id="btn-laporan-link" class="btn btn-outline-success btn-sm d-none">
                         <i class="fas fa-file-alt"></i> Laporan
                     </a>
                 </div>
@@ -391,6 +392,7 @@
         var konsumsi = button.getAttribute('data-konsumsi') || '-';
         var keterangan = button.getAttribute('data-keterangan') || '-';
         var notaUrl = button.getAttribute('data-nota_url') || '#';
+        var status = button.getAttribute('data-status') || 'pending';
 
         currentNotaUrl = notaUrl; // Simpan URL nota
 
@@ -403,6 +405,16 @@
         document.getElementById('view-peserta').textContent = peserta;
         document.getElementById('view-konsumsi').textContent = konsumsi;
         document.getElementById('view-keterangan').textContent = keterangan;
+
+        // 2.5 Show/Hide Laporan button based on status
+        var laporanBtn = document.getElementById('btn-laporan-link');
+        if (laporanBtn) {
+            if (status === 'approved') {
+                laporanBtn.classList.remove('d-none');
+            } else {
+                laporanBtn.classList.add('d-none');
+            }
+        }
 
         // 3. Update Form Hapus
         var deleteForm = document.getElementById('form-delete-catering');
