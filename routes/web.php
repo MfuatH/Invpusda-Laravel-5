@@ -3,74 +3,66 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
-// ==========================================================
-// 1. ROUTE PUBLIC (LANDING PAGE & REQUESTS)
-// ==========================================================
+// ==================================================================================
+// 1. ROUTE PUBLIC (BISA DIAKSES SIAPA SAJA: TAMU & ADMIN)
+// ==================================================================================
 
 Route::get('/', 'RequestController@landingPage')->name('landing-page');
 
-// --- Request Barang (Publik)
+// --- Request Barang
 Route::get('/request-barang', 'RequestController@createBarang')->name('request.barang.create');
 Route::post('/request-barang', 'RequestController@storeBarang')->name('request.barang.store');
 
-// --- Request Zoom (Publik)
+// --- Request Zoom
 Route::get('/request-link-zoom', 'RequestController@createZoom')->name('request.zoom.create');
 Route::post('/request-link-zoom', 'RequestController@storeZoom')->name('request.zoom.store');
 
-// ----------------------------------------------------------
-// --- PERMINTAAN CATERING (Publik)
-// ----------------------------------------------------------
+// --- Request Catering
 Route::get('/request-konsumsi', 'RequestController@createKonsumsi')->name('request.konsumsi.create');
-
-// Submit ke CateringController
 Route::post('/request-konsumsi', 'CateringController@store')->name('catering.store');
-
-// Halaman sukses (non-login) → redirect otomatis ke template doc
 Route::get('/catering/success', 'CateringController@successPage')->name('catering.success');
-
-// Halaman Template Dokumen (Preview PDF langsung)
 Route::get('/template-doc', 'CateringController@templateDoc')->name('documents.template_doc');
-// ----------------------------------------------------------
 
-// --- Request Kendaraan (Publik)
+// Route Hapus Catering (Publik - Agar tamu bisa hapus data sendiri jika salah input)
+Route::delete('/request-konsumsi/{id}', 'CateringController@destroy')->name('catering.destroy');
+
+// --- Request Kendaraan
 Route::get('/request-kendaraan', 'PeminjamanKendaraanController@create')->name('request.kendaraan.create');
 Route::post('/request-kendaraan', 'PeminjamanKendaraanController@store')->name('request.kendaraan.store');
 
-
-// --- Route Dokumen Lain ---
-Route::get('/dashboard-doc/{id}', 'RequestController@dashboardDoc')->name('documents.dashboard_doc');
+// --- Route Dokumen Lain
+Route::get('/dashboard-doc', 'RequestController@dashboardDoc')->name('documents.dashboard_doc');
 Route::get('/undangan-upload', 'RequestController@createUndangan')->name('request.undangan.create');
 Route::get('/download-presensi', 'RequestController@downloadPresensi')->name('request.download.presensi');
 Route::get('/download-notulensi', 'RequestController@downloadNotulensi')->name('request.download.notulensi');
 Route::get('/upload-NotulensinPresensi', 'RequestController@uploadNotulensinPresensi')->name('request.upload.NotulensinPresensi');
 Route::post('/upload-dokumen', 'RequestController@storeLaporanRapat')->name('request.store.LaporanRapat');
 
-Route::delete('catering/{catering}', 'CateringController@destroy')->name('catering.destroy');
 
-// ==========================================================
-// 2. ROUTE AUTH
-// ==========================================================
+// ==================================================================================
+// 2. ROUTE AUTH (LOGIN/LOGOUT)
+// ==================================================================================
 Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
 Route::post('login', 'Auth\LoginController@login');
 Route::post('logout', 'Auth\LoginController@logout')->name('logout');
 
 
-// ==========================================================
-// 3. ROUTE DASHBOARD ADMIN (SUPER ADMIN & ADMIN BARANG)
-// ==========================================================
+// ==================================================================================
+// 3. ROUTE DASHBOARD ADMIN (BUTUH LOGIN: SUPER ADMIN & ADMIN BARANG)
+// ==================================================================================
 Route::group([
     'middleware' => ['auth', 'role:super_admin,admin_barang'], 
     'prefix' => 'dashboard'
 ], function () {
 
-    // Dashboard
+    // Dashboard Utama
     Route::get('/', 'AdminDashboardController@index')->name('dashboard.index');
 
-    // Barang
+    // Manajemen Barang (Resource)
     Route::resource('barang', 'ItemController');
     Route::post('barang/add-stock', 'ItemController@addStock')->name('barang.addStock');
 
-    // Approval
+    // --- Group Approval ---
     Route::group(['prefix' => 'approvals'], function () {
 
         // Approval Barang
@@ -89,12 +81,18 @@ Route::group([
         Route::post('catering/{catering}/approve', 'CateringController@approve')->name('catering.approve');
         
         // Approval Kendaraan
-        Route::get('kendaraan', 'PeminjamanKendaraanController@index')->name('kendaraan.index');
+        Route::get('kendaraan', 'PeminjamanKendaraanController@index')->name('approvals.kendaraan');
         Route::get('kendaraan/{id}', 'PeminjamanKendaraanController@show')->name('kendaraan.show');
-        
-        // === TAMBAHAN: ROUTE HAPUS CATERING ===
-        
+        Route::post('kendaraan/{id}/approve', 'PeminjamanKendaraanController@approve')->name('kendaraan.approve');
+        Route::post('kendaraan/{id}/reject', 'PeminjamanKendaraanController@reject')->name('kendaraan.reject');
     });
+
+    // === MASTER DATA KENDARAAN (CRUD MOBIL) ===
+    // Ini yang mengatasi error 'kendaraan.list' sebelumnya
+    Route::get('data-kendaraan', 'PeminjamanKendaraanController@listKendaraan')->name('kendaraan.index');
+    Route::post('data-kendaraan', 'PeminjamanKendaraanController@storeKendaraan')->name('kendaraan.store_unit');
+    Route::put('data-kendaraan/{id}', 'PeminjamanKendaraanController@updateKendaraan')->name('kendaraan.update');
+    Route::delete('data-kendaraan/{id}', 'PeminjamanKendaraanController@destroyKendaraan')->name('kendaraan.destroy');
 
     // Setting / Template / Response
     Route::group(['prefix' => 'settings'], function () {
@@ -106,32 +104,22 @@ Route::group([
     // Transaksi
     Route::get('transaksi', 'TransactionController@index')->name('transaksi.index');
 
-
-    // Laporan Rapat / Document Management
+    // Manajemen Dokumen (Admin side)
     Route::group(['prefix' => 'documents', 'as' => 'documents.'], function () {
-
         Route::get('/', 'LaporanRapatController@index')->name('index');
         Route::post('/', 'LaporanRapatController@store')->name('store');
         Route::put('/{id}', 'LaporanRapatController@update')->name('update');
-
-        // PREVIEW
         Route::get('/{id}/preview', 'LaporanRapatController@preview')->name('preview');
-
-        // Download
         Route::get('/{id}/download', 'LaporanRapatController@download')->name('download');
-
-        // Verifikasi
         Route::post('/{id}/verify', 'LaporanRapatController@verify')->name('verify');
-
-        // Hapus
         Route::delete('/{id}', 'LaporanRapatController@destroy')->name('destroy');
     });
 
 });
 
-// ==========================================================
+// ==================================================================================
 // 4. SUPER ADMIN ROUTES
-// ==========================================================
+// ==================================================================================
 Route::group([
     'middleware' => ['auth', 'role:super_admin'], 
     'prefix' => 'super', 
@@ -141,9 +129,9 @@ Route::group([
 });
 
 
-// ==========================================================
+// ==================================================================================
 // 5. HOME / FALLBACK
-// ==========================================================
+// ==================================================================================
 Route::get('/home', function () {
     if (Auth::check()) {
         $role = Auth::user()->role;
@@ -155,9 +143,9 @@ Route::get('/home', function () {
 })->name('home');
 
 
-// ==========================================================
+// ==================================================================================
 // 6. EXPORT DATA
-// ==========================================================
+// ==================================================================================
 Route::get('/export/barang', 'ExportController@exportBarang')->name('export.barang');
 Route::get('/export/transaksi', 'ExportController@exportTransaksi')->name('export.transactions');
 Route::get('/export/dokumen', 'ExportController@exportDokumen')->name('export.dokumen');

@@ -23,10 +23,12 @@
         body {
             background-color: #f8f9fa;
             font-family: 'Poppins', sans-serif;
+            overflow-x: hidden; /* Mencegah scroll horizontal pada body */
         }
 
+        /* --- SIDEBAR WRAPPER (DIPERBARUI AGAR BISA SCROLL) --- */
         #sidebar-wrapper {
-            min-height: 100vh;
+            height: 100vh; /* Full height viewport */
             width: var(--sidebar-width);
             margin-left: -var(--sidebar-width);
             transition: margin 0.25s ease-out;
@@ -37,6 +39,22 @@
             z-index: 1000;
             display: flex;
             flex-direction: column;
+            overflow-y: auto; /* ✅ Mengizinkan scroll vertikal */
+        }
+
+        /* Custom Scrollbar untuk Sidebar (Optional, agar lebih rapi) */
+        #sidebar-wrapper::-webkit-scrollbar {
+            width: 6px;
+        }
+        #sidebar-wrapper::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        #sidebar-wrapper::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+        #sidebar-wrapper::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
         }
 
         .sidebar-header {
@@ -44,6 +62,7 @@
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             background: transparent;
+            flex-shrink: 0; /* Agar header tidak mengecil saat di-scroll */
         }
 
         .sidebar-logo {
@@ -147,6 +166,7 @@
             margin-right: 0.75rem;
             text-align: left;
             cursor: pointer;
+            flex-shrink: 0; /* Agar tombol logout tidak gepeng */
         }
 
         .logout-button:hover {
@@ -239,14 +259,14 @@
                     <i class="fas fa-box menu-icon"></i> Manajemen Barang
                 </a>
                 
-                {{-- Nama route diubah dari 'dokumen.index' menjadi 'documents.index' --}}
-                {{-- 'request()->routeIs' juga diubah menjadi 'documents.*' --}}
+                {{-- Manajemen Dokumen --}}
                 @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
                 <a href="{{ route('documents.index') }}" class="list-group-item {{ request()->routeIs('documents.*') ? 'active' : '' }}">
                     <i class="fas fa-file-alt menu-icon"></i> Manajemen Dokumen
                 </a>
                 @endif
-                {{-- ✅ Approval Barang Notif --}}
+
+                {{-- Approval Barang --}}
                 <a href="{{ route('requests.index') }}" class="list-group-item {{ request()->routeIs('requests.*') ? 'active' : '' }}">
                     <i class="fas fa-check-circle menu-icon"></i> Approval Barang
                     @php
@@ -257,7 +277,7 @@
                     @endif
                 </a>
 
-                {{-- ✅ Approval Zoom Notif --}}
+                {{-- Approval Zoom (Dropdown) --}}
                 @php
                     $isZoomMenuActive = request()->routeIs('zoom.requests.index') || request()->routeIs('template.index');
                     $totalZoom = $notifCounts['zoom'] ?? ($data['totalZoomRequests'] ?? 0);
@@ -284,6 +304,7 @@
                     </div>
                 </div>
 
+                {{-- Approval Catering --}}
                 @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
                 <a href="{{ route('catering.index') }}" class="list-group-item {{ request()->routeIs('catering.*') ? 'active' : '' }}">
                     <i class="fas fa-utensils menu-icon"></i> Approve Catering
@@ -296,11 +317,48 @@
                 </a>
                 @endif
 
+                {{-- === APPROVAL KENDARAAN (DROPDOWN) === --}}
                 @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
-                <a href="" class="list-group-item ">
-                    <i class="fas fa-car menu-icon"></i> Approve Kendaraan
+                    @php
+                        // Cek apakah menu kendaraan sedang aktif (Salah satu submenu aktif)
+                        // Kita cek 'approvals.kendaraan' (jika ada) dan 'kendaraan.index'
+                        $isKendaraanActive = request()->routeIs('kendaraan.index') || request()->routeIs('approvals.kendaraan'); 
+                        
+                        // Notifikasi
+                        $totalKendaraan = $notifCounts['kendaraan'] ?? ($data['totalKendaraanRequests'] ?? 0);
+                    @endphp
                     
-                </a>
+                    {{-- MENU UTAMA (PARENT) --}}
+                    <a href="#kendaraanSubmenu" data-toggle="collapse" aria-expanded="{{ $isKendaraanActive ? 'true' : 'false' }}" class="list-group-item {{ $isKendaraanActive ? 'active' : '' }}">
+                        <i class="fas fa-car menu-icon"></i>
+                        Approve Kendaraan
+                        
+                        @if($totalKendaraan > 0)
+                            <span class="badge-notification">{{ $totalKendaraan }}</span>
+                        @endif
+
+                        <span class="ml-auto">
+                            <i class="fas fa-chevron-down dropdown-arrow ml-2"></i>
+                        </span>
+                    </a>
+
+                    {{-- SUBMENU CONTAINER --}}
+                    <div class="collapse submenu-collapse {{ $isKendaraanActive ? 'show' : '' }}" id="kendaraanSubmenu">
+                        <div class="list-group list-group-flush">
+                            
+                            {{-- 1. Submenu Approval Peminjaman (Sesuai Kode Anda) --}}
+                            {{-- Pastikan route 'approvals.kendaraan' sudah dibuat di web.php --}}
+                            <a href="{{ route('approvals.kendaraan') }}" class="list-group-item {{ request()->routeIs('kendaraan.index') ? 'active' : '' }}">
+                                Approval Peminjaman
+                            </a>
+
+                            {{-- 2. Submenu Daftar Kendaraan --}}
+                            <a href="{{ route('kendaraan.index') }}" class="list-group-item {{ request()->routeIs('kendaraan.index') ? 'active' : '' }}">
+                                Daftar Kendaraan
+                            </a>
+
+                        </div>
+                    </div>
                 @endif
                 
                 <a href="{{ route('transaksi.index') }}" class="list-group-item {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
