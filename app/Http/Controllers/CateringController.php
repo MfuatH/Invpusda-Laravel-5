@@ -60,7 +60,7 @@ class CateringController extends Controller
                 'keterangan'        => $request->keterangan,
                 'nota_dinas_file'   => $filePath,
                 'nota_dinas_original_name' => $fileOriginalName,
-                'status'            => 'pending',
+                'status'            => 'completed',
                 'created_by'        => null,
             ];
 
