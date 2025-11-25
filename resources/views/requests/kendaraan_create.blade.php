@@ -271,7 +271,7 @@
                             <option value="" selected disabled>-- Pilih Kendaraan --</option>
                             @forelse($kendaraans as $k)
                                 <option value="{{ $k->id }}" {{ old('kendaraan_id') == $k->id ? 'selected' : '' }}>
-                                    {{ $k->jenis }} - {{ $k->plat_no }}
+                                    {{ $k->jenis }} - {{ $k->plat_no }} - {{ $k->status }}
                                 </option>
                             @empty
                                 <option value="" disabled>Tidak ada kendaraan tersedia</option>

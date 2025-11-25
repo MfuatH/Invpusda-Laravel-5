@@ -65,9 +65,9 @@
                                     </span>
                                 </td>
                                 <td>
-                                    @if($k->status == 'tersedia')
+                                    @if($k->status == 'available')
                                         <span class="badge badge-success">Tersedia</span>
-                                    @elseif($k->status == 'dipakai')
+                                    @elseif($k->status == 'unavailable')
                                         <span class="badge badge-warning text-dark">Sedang Dipakai</span>
                                     @else
                                         <span class="badge badge-secondary">Maintenance</span>

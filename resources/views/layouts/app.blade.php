@@ -245,140 +245,131 @@
 <div id="app" class="d-flex">
     @if (Auth::check())
         <div id="sidebar-wrapper">
-            <div class="sidebar-header">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo PUSDA" class="sidebar-logo">
-                <p class="sidebar-welcome-text">Welcome, {{ Auth::user()->name }}</p>
+        <div class="sidebar-header">
+            <img src="{{ asset('images/logo.png') }}" alt="Logo PUSDA" class="sidebar-logo">
+            <p class="sidebar-welcome-text">Welcome, {{ Auth::user()->name }}</p>
+        </div>
+
+        <div class="list-group list-group-flush">
+            <a href="{{ route('dashboard.index') }}" class="list-group-item {{ request()->routeIs('dashboard.index') ? 'active' : '' }}">
+                <i class="fas fa-th-large menu-icon"></i> Dashboard
+            </a>
+
+            <a href="{{ route('barang.index') }}" class="list-group-item {{ request()->routeIs('barang.*') ? 'active' : '' }}">
+                <i class="fas fa-box menu-icon"></i> Manajemen Barang
+            </a>
+            
+            {{-- Manajemen Dokumen --}}
+            @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
+            <a href="{{ route('documents.index') }}" class="list-group-item {{ request()->routeIs('documents.*') ? 'active' : '' }}">
+                <i class="fas fa-file-alt menu-icon"></i> Manajemen Dokumen
+            </a>
+            @endif
+
+            {{-- Approval Barang --}}
+            <a href="{{ route('requests.index') }}" class="list-group-item {{ request()->routeIs('requests.*') ? 'active' : '' }}">
+                <i class="fas fa-check-circle menu-icon"></i> Approval Barang
+                @php
+                    $totalReq = $notifCounts['requests'] ?? ($data['totalRequests'] ?? 0);
+                @endphp
+                @if($totalReq > 0)
+                    <span class="badge-notification">{{ $totalReq }}</span>
+                @endif
+            </a>
+
+            {{-- Approval Zoom --}}
+            @php
+                $isZoomMenuActive = request()->routeIs('zoom.requests.index') || request()->routeIs('template.index');
+                $totalZoom = $notifCounts['zoom'] ?? ($data['totalZoomRequests'] ?? 0);
+            @endphp
+
+            <a href="#zoomSubmenu" data-toggle="collapse" aria-expanded="{{ $isZoomMenuActive ? 'true' : 'false' }}" class="list-group-item {{ $isZoomMenuActive ? 'active' : '' }}">
+                <i class="fas fa-video menu-icon"></i>
+                Approval Zoom
+                @if($totalZoom > 0)
+                    <span class="badge-notification">{{ $totalZoom }}</span>
+                @endif
+                <span class="ml-auto"><i class="fas fa-chevron-down dropdown-arrow ml-2"></i></span>
+            </a>
+
+            <div class="collapse submenu-collapse {{ $isZoomMenuActive ? 'show' : '' }}" id="zoomSubmenu">
+                <div class="list-group list-group-flush">
+                    <a href="{{ route('zoom.requests.index') }}" class="list-group-item {{ request()->routeIs('zoom.requests.index') ? 'active' : '' }}">
+                        Zoom Approv
+                    </a>
+                    <a href="{{ route('template.index') }}" class="list-group-item {{ request()->routeIs('template.index') ? 'active' : '' }}">
+                        Master Pesan
+                    </a>
+                </div>
             </div>
 
-            <div class="list-group list-group-flush">
-                <a href="{{ route('dashboard.index') }}" class="list-group-item {{ request()->routeIs('dashboard.index') ? 'active' : '' }}">
-                    <i class="fas fa-th-large menu-icon"></i> Dashboard
-                </a>
-
-                <a href="{{ route('barang.index') }}" class="list-group-item {{ request()->routeIs('barang.*') ? 'active' : '' }}">
-                    <i class="fas fa-box menu-icon"></i> Manajemen Barang
-                </a>
-                
-                {{-- Manajemen Dokumen --}}
-                @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
-                <a href="{{ route('documents.index') }}" class="list-group-item {{ request()->routeIs('documents.*') ? 'active' : '' }}">
-                    <i class="fas fa-file-alt menu-icon"></i> Manajemen Dokumen
-                </a>
-                @endif
-
-                {{-- Approval Barang --}}
-                <a href="{{ route('requests.index') }}" class="list-group-item {{ request()->routeIs('requests.*') ? 'active' : '' }}">
-                    <i class="fas fa-check-circle menu-icon"></i> Approval Barang
-                    @php
-                        $totalReq = $notifCounts['requests'] ?? ($data['totalRequests'] ?? 0);
-                    @endphp
-                    @if($totalReq > 0)
-                        <span class="badge-notification">{{ $totalReq }}</span>
-                    @endif
-                </a>
-
-                {{-- Approval Zoom (Dropdown) --}}
+            {{-- Approval Catering --}}
+            @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
+            <a href="{{ route('catering.index') }}" class="list-group-item {{ request()->routeIs('catering.*') ? 'active' : '' }}">
+                <i class="fas fa-utensils menu-icon"></i> Approve Catering
                 @php
-                    $isZoomMenuActive = request()->routeIs('zoom.requests.index') || request()->routeIs('template.index');
-                    $totalZoom = $notifCounts['zoom'] ?? ($data['totalZoomRequests'] ?? 0);
+                    $totalCatering = $notifCounts['catering'] ?? ($data['totalCateringRequests'] ?? 0);
                 @endphp
-                <a href="#zoomSubmenu" data-toggle="collapse" aria-expanded="{{ $isZoomMenuActive ? 'true' : 'false' }}" class="list-group-item {{ $isZoomMenuActive ? 'active' : '' }}">
-                    <i class="fas fa-video menu-icon"></i>
-                    Approval Zoom
-                    @if($totalZoom > 0)
-                        <span class="badge-notification">{{ $totalZoom }}</span>
+                @if($totalCatering > 0)
+                    <span class="badge-notification">{{ $totalCatering }}</span>
+                @endif
+            </a>
+            @endif
+
+            {{-- === APPROVAL KENDARAAN (DROPDOWN) === --}}
+            @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
+
+                @php
+                    $isKendaraanActive = request()->routeIs('kendaraan.index') || request()->routeIs('approvals.kendaraan');
+
+                    $totalKendaraan = $notifCounts['kendaraan'] ?? ($data['totalKendaraanRequests'] ?? 0);
+                @endphp
+
+                <a href="#kendaraanSubmenu" data-toggle="collapse" aria-expanded="{{ $isKendaraanActive ? 'true' : 'false' }}" class="list-group-item {{ $isKendaraanActive ? 'active' : '' }}">
+                    <i class="fas fa-car menu-icon"></i>
+                    Approve Kendaraan
+                    @if($totalKendaraan > 0)
+                        <span class="badge-notification">{{ $totalKendaraan }}</span>
                     @endif
-                    <span class="ml-auto">
-                        <i class="fas fa-chevron-down dropdown-arrow ml-2"></i>
-                    </span>
+                    <span class="ml-auto"><i class="fas fa-chevron-down dropdown-arrow ml-2"></i></span>
                 </a>
 
-                <div class="collapse submenu-collapse {{ $isZoomMenuActive ? 'show' : '' }}" id="zoomSubmenu">
+                <div class="collapse submenu-collapse {{ $isKendaraanActive ? 'show' : '' }}" id="kendaraanSubmenu">
                     <div class="list-group list-group-flush">
-                        <a href="{{ route('zoom.requests.index') }}" class="list-group-item {{ request()->routeIs('zoom.requests.index') ? 'active' : '' }}">
-                            Zoom Approv
+
+                        {{-- FIX: Active submenu approval peminjaman --}}
+                        <a href="{{ route('approvals.kendaraan') }}" class="list-group-item {{ request()->routeIs('approvals.kendaraan') ? 'active' : '' }}">
+                            Approval Peminjaman
                         </a>
-                        <a href="{{ route('template.index') }}" class="list-group-item {{ request()->routeIs('template.index') ? 'active' : '' }}">
-                            Master Pesan
+
+                        {{-- Submenu daftar kendaraan --}}
+                        <a href="{{ route('kendaraan.index') }}" class="list-group-item {{ request()->routeIs('kendaraan.index') ? 'active' : '' }}">
+                            Daftar Kendaraan
                         </a>
+
                     </div>
                 </div>
+            @endif
 
-                {{-- Approval Catering --}}
-                @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
-                <a href="{{ route('catering.index') }}" class="list-group-item {{ request()->routeIs('catering.*') ? 'active' : '' }}">
-                    <i class="fas fa-utensils menu-icon"></i> Approve Catering
-                    @php
-                        $totalCatering = $notifCounts['catering'] ?? ($data['totalCateringRequests'] ?? 0);
-                    @endphp
-                    @if($totalCatering > 0)
-                        <span class="badge-notification">{{ $totalCatering }}</span>
-                    @endif
-                </a>
-                @endif
+            <a href="{{ route('transaksi.index') }}" class="list-group-item {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
+                <i class="fas fa-history menu-icon"></i> Riwayat Transaksi
+            </a>
 
-                {{-- === APPROVAL KENDARAAN (DROPDOWN) === --}}
-                @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
-                    @php
-                        // Cek apakah menu kendaraan sedang aktif (Salah satu submenu aktif)
-                        // Kita cek 'approvals.kendaraan' (jika ada) dan 'kendaraan.index'
-                        $isKendaraanActive = request()->routeIs('kendaraan.index') || request()->routeIs('approvals.kendaraan'); 
-                        
-                        // Notifikasi
-                        $totalKendaraan = $notifCounts['kendaraan'] ?? ($data['totalKendaraanRequests'] ?? 0);
-                    @endphp
-                    
-                    {{-- MENU UTAMA (PARENT) --}}
-                    <a href="#kendaraanSubmenu" data-toggle="collapse" aria-expanded="{{ $isKendaraanActive ? 'true' : 'false' }}" class="list-group-item {{ $isKendaraanActive ? 'active' : '' }}">
-                        <i class="fas fa-car menu-icon"></i>
-                        Approve Kendaraan
-                        
-                        @if($totalKendaraan > 0)
-                            <span class="badge-notification">{{ $totalKendaraan }}</span>
-                        @endif
-
-                        <span class="ml-auto">
-                            <i class="fas fa-chevron-down dropdown-arrow ml-2"></i>
-                        </span>
-                    </a>
-
-                    {{-- SUBMENU CONTAINER --}}
-                    <div class="collapse submenu-collapse {{ $isKendaraanActive ? 'show' : '' }}" id="kendaraanSubmenu">
-                        <div class="list-group list-group-flush">
-                            
-                            {{-- 1. Submenu Approval Peminjaman (Sesuai Kode Anda) --}}
-                            {{-- Pastikan route 'approvals.kendaraan' sudah dibuat di web.php --}}
-                            <a href="{{ route('approvals.kendaraan') }}" class="list-group-item {{ request()->routeIs('kendaraan.index') ? 'active' : '' }}">
-                                Approval Peminjaman
-                            </a>
-
-                            {{-- 2. Submenu Daftar Kendaraan --}}
-                            <a href="{{ route('kendaraan.index') }}" class="list-group-item {{ request()->routeIs('kendaraan.index') ? 'active' : '' }}">
-                                Daftar Kendaraan
-                            </a>
-
-                        </div>
-                    </div>
-                @endif
-                
-                <a href="{{ route('transaksi.index') }}" class="list-group-item {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
-                    <i class="fas fa-history menu-icon"></i> Riwayat Transaksi
-                </a>
-
-                @if(Auth::user()->role === 'super_admin')
-                    <a href="{{ route('super.users.index') }}" class="list-group-item {{ request()->routeIs('super.users.*') ? 'active' : '' }}">
-                        <i class="fas fa-users menu-icon"></i> Manajemen User
-                    </a>
-                @endif
-            </div>
-
-            <form id="logout-form-sidebar" action="{{ route('logout') }}" method="POST" style="margin-top: auto;">
-                {{ csrf_field() }}
-                <button type="submit" class="logout-button">
-                    <i class="fas fa-sign-out-alt menu-icon"></i> Log Out
-                </button>
-            </form>
+            @if(Auth::user()->role === 'super_admin')
+            <a href="{{ route('super.users.index') }}" class="list-group-item {{ request()->routeIs('super.users.*') ? 'active' : '' }}">
+                <i class="fas fa-users menu-icon"></i> Manajemen User
+            </a>
+            @endif
         </div>
+
+        <form id="logout-form-sidebar" action="{{ route('logout') }}" method="POST" style="margin-top: auto;">
+            {{ csrf_field() }}
+            <button type="submit" class="logout-button">
+                <i class="fas fa-sign-out-alt menu-icon"></i> Log Out
+            </button>
+        </form>
+    </div>
+
     @endif
 
     <div id="page-content-wrapper">
