@@ -125,18 +125,15 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Nama Kendaraan / Merk <span class="text-danger">*</span></label>
-                        <input type="text" name="nama_barang" class="form-control" placeholder="Contoh: Toyota Innova Reborn" required>
+                        <input type="text" name="jenis" class="form-control" placeholder="Contoh: Toyota Innova Reborn" required>
                     </div>
                     <div class="form-group">
                         <label>Plat Nomor <span class="text-danger">*</span></label>
                         <input type="text" name="plat_no" class="form-control" placeholder="Contoh: L 1234 AB" required>
                     </div>
                     <div class="form-group">
-                        <label>Status Awal</label>
-                        <select name="status" class="form-control">
-                            <option value="tersedia">Tersedia</option>
-                            <option value="maintenance">Dalam Perbaikan</option>
-                        </select>
+                        <label>Status <span class="text-danger">*</span></label>
+                        <input type="text" name="status" class="form-control" placeholder="Contoh: L 1234 AB" required>
                     </div>
                 </div>
                 <div class="modal-footer">

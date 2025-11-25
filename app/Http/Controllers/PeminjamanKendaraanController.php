@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Kendaraan;
 use App\PeminjamanKendaraan;
 use Carbon\Carbon;
 
@@ -39,15 +40,56 @@ class PeminjamanKendaraanController extends Controller
     // Admin: list
     public function index()
     {
-        $this->middleware(['auth','role:super_admin,admin_barang']);
-        $items = PeminjamanKendaraan::latest()->paginate(20);
-        return view('admin_page.approvals.kendaraan_index', compact('items'));
+        $requests = PeminjamanKendaraan::latest()->paginate(20);
+        
+        return view('admin_page.approvals.kendaraan', compact('requests'));
     }
 
     public function show($id)
     {
-        $this->middleware(['auth','role:super_admin,admin_barang']);
         $item = PeminjamanKendaraan::findOrFail($id);
         return view('admin_page.approvals.kendaraan_show', compact('item'));
+    }
+
+    public function listKendaraan()
+    {
+        $kendaraans = Kendaraan::latest()->paginate(10);
+        return view('admin_page.kendaraan.index', compact('kendaraans'));
+    }
+
+    public function storeKendaraan(Request $request)
+    {
+        $request->validate([
+            'jenis' => 'required|string|max:100',
+            'plat_no' => 'required|string|max:50|unique:kendaraan,plat_no',
+            'status' => 'required|string|in:available,unavailable'
+        ]);
+
+        \App\Kendaraan::create($request->only(['jenis', 'plat_no', 'status']));
+
+        return redirect()->back()->with('success', 'Kendaraan berhasil ditambahkan.');
+    }
+
+    public function updateKendaraan(Request $request, $id)
+    {
+        $kendaraan = \App\Kendaraan::findOrFail($id);
+
+        $request->validate([
+            'jenis' => 'required|string|max:100',
+            'plat_no' => 'required|string|max:50|unique:kendaraan,plat_no,' . $kendaraan->id,
+            'status' => 'required|in:available,unavailable'
+        ]);
+
+        $kendaraan->update($request->only(['jenis', 'plat_no', 'status']));
+
+        return redirect()->back()->with('success', 'Kendaraan berhasil diperbarui.');
+    }
+
+    public function destroyKendaraan($id)
+    {
+        $kendaraan = \App\Kendaraan::findOrFail($id);
+        $kendaraan->delete();
+
+        return redirect()->back()->with('success', 'Kendaraan berhasil dihapus.');
     }
 }
