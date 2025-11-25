@@ -11,7 +11,8 @@ class PeminjamanKendaraanController extends Controller
 {
     public function create()
     {
-        $kendaraans = \App\Kendaraan::all();
+        $kendaraans = \App\Kendaraan::where('status', 'available')->get();
+        
         return view('requests.kendaraan_create', compact('kendaraans'));
     }
 
@@ -22,7 +23,7 @@ class PeminjamanKendaraanController extends Controller
             'nip' => 'nullable|string|max:50',
             'no_hp' => 'nullable|string|max:50',
             'urgensi' => 'nullable|string|max:500',
-            'kendaraan_id' => 'required|exists:kendaraan,id',
+            'kendaraan_id' => 'required|exists:kendaraan,id', 
             'tanggal_ambil' => 'required|date',
             'tanggal_kembali' => 'required|date|after_or_equal:tanggal_ambil'
         ]);
@@ -62,7 +63,7 @@ class PeminjamanKendaraanController extends Controller
         $request->validate([
             'jenis' => 'required|string|max:100',
             'plat_no' => 'required|string|max:50|unique:kendaraan,plat_no',
-            'status' => 'required|string|in:available,unavailable'
+            'status' => 'required|string|in:available,unavailable,maintenance'
         ]);
 
         \App\Kendaraan::create($request->only(['jenis', 'plat_no', 'status']));
@@ -77,7 +78,7 @@ class PeminjamanKendaraanController extends Controller
         $request->validate([
             'jenis' => 'required|string|max:100',
             'plat_no' => 'required|string|max:50|unique:kendaraan,plat_no,' . $kendaraan->id,
-            'status' => 'required|in:available,unavailable'
+            'status' => 'required|in:available,unavailable,maintenance'
         ]);
 
         $kendaraan->update($request->only(['jenis', 'plat_no', 'status']));

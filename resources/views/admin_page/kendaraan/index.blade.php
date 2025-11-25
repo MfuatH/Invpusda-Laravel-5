@@ -48,7 +48,7 @@
                         <thead class="thead-dark">
                             <tr>
                                 <th style="width: 50px;">NO</th>
-                                <th>NAMA KENDARAAN / MERK</th>
+                                <th>JENIS KENDARAAN / MERK</th>
                                 <th>PLAT NOMOR</th>
                                 <th>STATUS</th>
                                 <th style="width: 150px;">AKSI</th>
@@ -58,19 +58,23 @@
                             @foreach ($kendaraans as $index => $k)
                             <tr>
                                 <td>{{ $loop->iteration + $kendaraans->firstItem() - 1 }}</td>
-                                <td class="text-left font-weight-bold">{{ $k->nama_barang }}</td>
+                                {{-- PERBAIKAN: Menggunakan 'jenis' sesuai Model, bukan nama_barang --}}
+                                <td class="text-left font-weight-bold">{{ $k->jenis }}</td>
                                 <td>
                                     <span class="badge badge-light border px-3 py-2" style="font-size: 0.9rem; letter-spacing: 1px;">
                                         {{ $k->plat_no ?? '-' }}
                                     </span>
                                 </td>
                                 <td>
+                                    {{-- PERBAIKAN: Menyesuaikan value ENUM database --}}
                                     @if($k->status == 'available')
-                                        <span class="badge badge-success">Tersedia</span>
+                                        <span class="badge badge-success">Available</span>
                                     @elseif($k->status == 'unavailable')
-                                        <span class="badge badge-warning text-dark">Sedang Dipakai</span>
+                                        <span class="badge badge-warning text-dark">Unavailable</span>
+                                    @elseif($k->status == 'maintenance')
+                                        <span class="badge badge-danger">Maintenance</span>
                                     @else
-                                        <span class="badge badge-secondary">Maintenance</span>
+                                        <span class="badge badge-secondary">{{ $k->status }}</span>
                                     @endif
                                 </td>
                                 <td>
@@ -79,7 +83,7 @@
                                         <button class="btn btn-sm btn-info mr-2 edit-btn"
                                             data-toggle="modal" data-target="#editModal"
                                             data-id="{{ $k->id }}"
-                                            data-nama="{{ $k->nama_barang }}"
+                                            data-jenis="{{ $k->jenis }}" 
                                             data-plat="{{ $k->plat_no }}"
                                             data-status="{{ $k->status }}">
                                             <i class="fas fa-edit"></i>
@@ -89,7 +93,7 @@
                                         <button class="btn btn-sm btn-danger delete-btn"
                                             data-toggle="modal" data-target="#deleteModal"
                                             data-id="{{ $k->id }}"
-                                            data-nama="{{ $k->nama_barang }}">
+                                            data-jenis="{{ $k->jenis }}">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -115,7 +119,7 @@
 <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            {{-- Perhatikan: route diganti menjadi 'kendaraan.store_unit' --}}
+            {{-- Pastikan route ini sesuai dengan web.php kamu --}}
             <form action="{{ route('kendaraan.store_unit') }}" method="POST">
                 {{ csrf_field() }}
                 <div class="modal-header bg-primary text-white">
@@ -124,7 +128,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Nama Kendaraan / Merk <span class="text-danger">*</span></label>
+                        <label>Jenis Kendaraan / Merk <span class="text-danger">*</span></label>
                         <input type="text" name="jenis" class="form-control" placeholder="Contoh: Toyota Innova Reborn" required>
                     </div>
                     <div class="form-group">
@@ -133,7 +137,12 @@
                     </div>
                     <div class="form-group">
                         <label>Status <span class="text-danger">*</span></label>
-                        <input type="text" name="status" class="form-control" placeholder="Contoh: L 1234 AB" required>
+                        {{-- PERBAIKAN: Menggunakan Select agar sesuai Enum --}}
+                        <select name="status" class="form-control" required>
+                            <option value="available">Available (Tersedia)</option>
+                            <option value="unavailable">Unavailable (Tidak Tersedia)</option>
+                            <option value="maintenance">Maintenance (Perbaikan)</option>
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -160,8 +169,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Nama Kendaraan / Merk <span class="text-danger">*</span></label>
-                        <input type="text" name="nama_barang" id="edit-nama" class="form-control" required>
+                        <label>Jenis Kendaraan / Merk <span class="text-danger">*</span></label>
+                        <input type="text" name="jenis" id="edit-jenis" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label>Plat Nomor <span class="text-danger">*</span></label>
@@ -169,10 +178,11 @@
                     </div>
                     <div class="form-group">
                         <label>Status</label>
+                        {{-- PERBAIKAN: Value option disesuaikan dengan database --}}
                         <select name="status" id="edit-status" class="form-control">
-                            <option value="tersedia">Tersedia</option>
-                            <option value="dipakai">Sedang Dipakai</option>
-                            <option value="maintenance">Dalam Perbaikan</option>
+                            <option value="available">Available (Tersedia)</option>
+                            <option value="unavailable">Unavailable (Tidak Tersedia)</option>
+                            <option value="maintenance">Maintenance (Perbaikan)</option>
                         </select>
                     </div>
                 </div>
@@ -200,7 +210,7 @@
                 </div>
                 <div class="modal-body">
                     <p>Apakah Anda yakin ingin menghapus kendaraan ini?</p>
-                    <div class="alert alert-warning font-weight-bold text-center text-dark" id="delete-nama"></div>
+                    <div class="alert alert-warning font-weight-bold text-center text-dark" id="delete-jenis"></div>
                     <small class="text-danger">Tindakan ini tidak dapat dibatalkan.</small>
                 </div>
                 <div class="modal-footer">
@@ -218,13 +228,14 @@
 <script>
 $(function(){
     // Template Route
+    // Pastikan route name ini benar ada di web.php
     const updateRoute = '{{ route("kendaraan.update", ":id") }}';
     const deleteRoute = '{{ route("kendaraan.destroy", ":id") }}';
 
     // Handle Edit Button
     $('.edit-btn').on('click', function(){
         let id = $(this).data('id');
-        let nama = $(this).data('nama');
+        let jenis = $(this).data('jenis'); // Ganti nama jadi jenis
         let plat = $(this).data('plat');
         let status = $(this).data('status');
 
@@ -232,19 +243,19 @@ $(function(){
         $('#editForm').attr('action', updateRoute.replace(':id', id));
 
         // Fill Input
-        $('#edit-nama').val(nama);
+        $('#edit-jenis').val(jenis);
         $('#edit-plat').val(plat);
-        $('#edit-status').val(status);
+        $('#edit-status').val(status); // Auto select option based on value
     });
 
     // Handle Delete Button
     $('.delete-btn').on('click', function(){
         let id = $(this).data('id');
-        let nama = $(this).data('nama');
+        let jenis = $(this).data('jenis'); // Ganti nama jadi jenis
 
         // Set Form Action
         $('#deleteForm').attr('action', deleteRoute.replace(':id', id));
-        $('#delete-nama').text(nama);
+        $('#delete-jenis').text(jenis);
     });
 });
 </script>
