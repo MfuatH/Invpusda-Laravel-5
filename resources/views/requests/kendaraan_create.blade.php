@@ -33,7 +33,7 @@
         }
 
         .outer-container {
-            max-width: 950px;
+            max-width: 1250px;
             width: 100%;
             background: rgba(0, 0, 0, 0.25);
             backdrop-filter: blur(12px);
@@ -55,7 +55,8 @@
         .left-panel {
             flex: 1.1;
             background: none;
-            padding: 30px;
+            padding: x 30px;
+            min-height: 700px;
             color: white;
             display: flex;
             flex-direction: column;
@@ -64,14 +65,15 @@
             text-align: center;
         }
 
-        .left-panel .logo { max-width: 160px; margin-bottom: 20px; }
-        .left-panel h2 { font-weight: 700; font-size: 2.2rem; margin-bottom: 20px; }
+        .left-panel .logo { max-width: 160px; margin-bottom: 10px; }
+        .left-panel h2 { font-weight: 700; font-size: 2.2rem; margin-bottom: 10px; }
         .left-panel .illustration { max-width: 90%; }
 
         .right-panel {
             flex: 1.2;
             background: #fff;
             padding: 35px;
+            min-height: 630px;
             border-radius: 15px;
         }
 
