@@ -46,7 +46,7 @@
                                 <td>
                                     @if($r->kendaraan)
                                         <span class="badge badge-info p-2" style="font-size: 0.9em;">
-                                            {{ $r->kendaraan->nama_barang ?? $r->kendaraan_id }} {{-- Sesuaikan jika pakai relasi --}}
+                                            {{ $r->kendaraan->jenis }} - {{ $r->kendaraan->plat_no }}
                                         </span>
                                     @else
                                         -
@@ -75,7 +75,7 @@
                                                 data-name="{{ $r->nama }}"
                                                 data-nip="{{ $r->nip }}"
                                                 data-hp="{{ $r->no_hp }}"
-                                                data-vehicle="{{ $r->kendaraan->nama_barang ?? $r->kendaraan_id }}"
+                                                data-vehicle="{{ $r->kendaraan ? $r->kendaraan->jenis . ' - ' . $r->kendaraan->plat_no : '-' }}"
                                                 data-urgensi="{{ $r->urgensi }}"
                                                 data-start="{{ \Carbon\Carbon::parse($r->tanggal_ambil)->format('d/m/Y H:i') }}"
                                                 data-end="{{ \Carbon\Carbon::parse($r->tanggal_kembali)->format('d/m/Y H:i') }}">
@@ -86,7 +86,7 @@
                                                 data-toggle="modal" data-target="#rejectModal"
                                                 data-id="{{ $r->id }}"
                                                 data-name="{{ $r->nama }}"
-                                                data-vehicle="{{ $r->kendaraan->nama_barang ?? $r->kendaraan_id }}">
+                                                data-vehicle="{{ $r->kendaraan ? $r->kendaraan->jenis . ' - ' . $r->kendaraan->plat_no : '-' }}">
                                                 <i class="fas fa-times"></i>
                                             </button>
                                         </div>
