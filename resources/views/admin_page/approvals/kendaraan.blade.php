@@ -24,7 +24,8 @@
                 </div>
             @else
                 <div class="table-responsive">
-                    <table class="table table-striped align-middle text-center">
+                    {{-- PERUBAHAN: Ditambahkan class 'table-bordered' untuk garis --}}
+                    <table class="table table-bordered table-striped align-middle text-center">
                         <thead class="thead-dark">
                             <tr>
                                 <th>PEMOHON</th>
@@ -34,7 +35,8 @@
                                 <th>JADWAL</th>
                                 <th>KEPERLUAN</th>
                                 <th>STATUS</th>
-                                <th style="width: 150px;">AKSI</th>
+                                {{-- Lebar kolom aksi --}}
+                                <th style="min-width: 160px;">AKSI</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -45,7 +47,7 @@
                                 <td>{{ $r->no_hp ?? '-' }}</td>
                                 <td>
                                     @if($r->kendaraan)
-                                        <span class="badge badge-info p-2" style="font-size: 0.9em;">
+                                        <span style="font-size: 0.9em;">
                                             {{ $r->kendaraan->jenis }} - {{ $r->kendaraan->plat_no }}
                                         </span>
                                     @else
@@ -69,7 +71,10 @@
                                 <td>
                                     @if($r->status === 'pending')
                                         <div class="d-flex justify-content-center">
-                                            <button class="btn btn-sm btn-success mr-2 approve-btn"
+                                            {{-- PERUBAHAN: Icon dihapus, hanya TULISAN saja --}}
+                                            
+                                            {{-- TOMBOL TERIMA --}}
+                                            <button class="btn btn-sm btn-success mr-2 approve-btn font-weight"
                                                 data-toggle="modal" data-target="#approveModal"
                                                 data-id="{{ $r->id }}"
                                                 data-name="{{ $r->nama }}"
@@ -79,15 +84,16 @@
                                                 data-urgensi="{{ $r->urgensi }}"
                                                 data-start="{{ \Carbon\Carbon::parse($r->tanggal_ambil)->format('d/m/Y H:i') }}"
                                                 data-end="{{ \Carbon\Carbon::parse($r->tanggal_kembali)->format('d/m/Y H:i') }}">
-                                                <i class="fas fa-check"></i>
+                                                Terima
                                             </button>
                                             
-                                            <button class="btn btn-sm btn-danger reject-btn"
+                                            {{-- TOMBOL TOLAK --}}
+                                            <button class="btn btn-sm btn-danger reject-btn font-weight"
                                                 data-toggle="modal" data-target="#rejectModal"
                                                 data-id="{{ $r->id }}"
                                                 data-name="{{ $r->nama }}"
                                                 data-vehicle="{{ $r->kendaraan ? $r->kendaraan->jenis . ' - ' . $r->kendaraan->plat_no : '-' }}">
-                                                <i class="fas fa-times"></i>
+                                                Tolak
                                             </button>
                                         </div>
                                     @else
@@ -112,10 +118,10 @@
 </div>
 
 {{-- =================================================================== --}}
-{{-- MODAL APPROVE (DETAIL SEPERTI GAMBAR) --}}
+{{-- MODAL APPROVE (DETAIL) --}}
 {{-- =================================================================== --}}
 <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document"> {{-- Modal Besar --}}
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <form id="approveForm" method="POST">
                 {{ csrf_field() }}
@@ -127,7 +133,6 @@
                 </div>
                 
                 <div class="modal-body bg-white">
-                    {{-- Form Readonly (Tampilan seperti gambar) --}}
                     <div class="form-group">
                         <div class="input-group">
                             <div class="input-group-prepend">
@@ -200,7 +205,6 @@
                     </div>
 
                     <hr>
-                    {{-- Input Admin --}}
                     <div class="form-group">
                         <label class="font-weight-bold text-success">Catatan Persetujuan (Opsional)</label>
                         <textarea name="note" class="form-control" rows="2" placeholder="Misal: Kunci ada di pos satpam..."></textarea>
@@ -266,7 +270,7 @@ $(function(){
         // Set Action URL Form
         $('#approveForm').attr('action', approveTemplate.replace('PLACEHOLDER', id));
         
-        // Isi Data ke Modal (Readonly Inputs)
+        // Isi Data ke Modal
         $('#app-name').val($(this).data('name'));
         $('#app-nip').val($(this).data('nip'));
         $('#app-hp').val($(this).data('hp'));
@@ -293,10 +297,17 @@ $(function(){
 
 @push('styles')
 <style>
-    /* Styling Tabel */
+    /* Styling Tabel dengan Border */
     .table { font-size: 0.9rem; background: #fff; }
+    
+    /* Pastikan border terlihat jelas */
+    .table-bordered th,
+    .table-bordered td {
+        border: 1px solid #dee2e6 !important;
+    }
+
     .table thead th { 
-        background-color: #343a40; /* Dark Header */
+        background-color: #343a40; 
         color: #fff; 
         border-color: #454d55;
         vertical-align: middle;
@@ -305,7 +316,7 @@ $(function(){
         vertical-align: middle;
     }
     
-    /* Styling Modal seperti Form */
+    /* Styling Modal */
     .input-group-text {
         background-color: #f8f9fa;
         border-right: none;
@@ -315,7 +326,7 @@ $(function(){
     .form-control[readonly] {
         background-color: #f8f9fa;
         border-left: none;
-        opacity: 1; /* Agar teks tetap hitam jelas */
+        opacity: 1; 
     }
     .modal-header { border-bottom: 1px solid #dee2e6; }
     .modal-footer { border-top: 1px solid #dee2e6; }

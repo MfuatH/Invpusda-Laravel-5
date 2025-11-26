@@ -37,7 +37,8 @@
                 </div>
             @else
                 <div class="table-responsive">
-                    <table class="table table-striped align-middle text-center">
+                    {{-- PERUBAHAN: Ditambahkan 'table-bordered' --}}
+                    <table class="table table-bordered table-striped align-middle text-center">
                         <thead class="thead-dark">
                             <tr>
                                 <th style="width: 50px;">NO</th>
@@ -51,15 +52,13 @@
                             @foreach ($kendaraans as $index => $k)
                             <tr>
                                 <td>{{ $loop->iteration + $kendaraans->firstItem() - 1 }}</td>
-                                {{-- PERBAIKAN: Menggunakan 'jenis' sesuai Model, bukan nama_barang --}}
-                                <td class="text-left font-weight-bold">{{ $k->jenis }}</td>
+                                <td class="text-left font-weight">{{ $k->jenis }}</td>
                                 <td>
                                     <span class="badge badge-light border px-3 py-2" style="font-size: 0.9rem; letter-spacing: 1px;">
                                         {{ $k->plat_no ?? '-' }}
                                     </span>
                                 </td>
                                 <td>
-                                    {{-- PERBAIKAN: Menyesuaikan value ENUM database --}}
                                     @if($k->status == 'available')
                                         <span class="badge badge-success">Available</span>
                                     @elseif($k->status == 'unavailable')
@@ -112,7 +111,6 @@
 <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            {{-- Pastikan route ini sesuai dengan web.php kamu --}}
             <form action="{{ route('kendaraan.store_unit') }}" method="POST">
                 {{ csrf_field() }}
                 <div class="modal-header bg-primary text-white">
@@ -130,7 +128,6 @@
                     </div>
                     <div class="form-group">
                         <label>Status <span class="text-danger">*</span></label>
-                        {{-- PERBAIKAN: Menggunakan Select agar sesuai Enum --}}
                         <select name="status" class="form-control" required>
                             <option value="available">Available (Tersedia)</option>
                             <option value="unavailable">Unavailable (Tidak Tersedia)</option>
@@ -171,7 +168,6 @@
                     </div>
                     <div class="form-group">
                         <label>Status</label>
-                        {{-- PERBAIKAN: Value option disesuaikan dengan database --}}
                         <select name="status" id="edit-status" class="form-control">
                             <option value="available">Available (Tersedia)</option>
                             <option value="unavailable">Unavailable (Tidak Tersedia)</option>
@@ -221,14 +217,13 @@
 <script>
 $(function(){
     // Template Route
-    // Pastikan route name ini benar ada di web.php
     const updateRoute = '{{ route("kendaraan.update", ":id") }}';
     const deleteRoute = '{{ route("kendaraan.destroy", ":id") }}';
 
     // Handle Edit Button
     $('.edit-btn').on('click', function(){
         let id = $(this).data('id');
-        let jenis = $(this).data('jenis'); // Ganti nama jadi jenis
+        let jenis = $(this).data('jenis');
         let plat = $(this).data('plat');
         let status = $(this).data('status');
 
@@ -238,13 +233,13 @@ $(function(){
         // Fill Input
         $('#edit-jenis').val(jenis);
         $('#edit-plat').val(plat);
-        $('#edit-status').val(status); // Auto select option based on value
+        $('#edit-status').val(status);
     });
 
     // Handle Delete Button
     $('.delete-btn').on('click', function(){
         let id = $(this).data('id');
-        let jenis = $(this).data('jenis'); // Ganti nama jadi jenis
+        let jenis = $(this).data('jenis');
 
         // Set Form Action
         $('#deleteForm').attr('action', deleteRoute.replace(':id', id));
@@ -256,6 +251,12 @@ $(function(){
 
 @push('styles')
 <style>
+    /* Custom CSS untuk memastikan garis per kolom terlihat jelas */
+    .table-bordered th,
+    .table-bordered td {
+        border: 1px solid #dee2e6 !important;
+    }
+
     .table thead th { 
         background-color: #343a40; 
         color: #fff; 
