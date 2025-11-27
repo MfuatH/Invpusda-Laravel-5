@@ -24,53 +24,58 @@ class PeminjamanKendaraanController extends Controller
 
     public function store(Request $request)
     {
-        // 1. VALIDASI INPUT
         $request->validate([
-            'nama' => 'required|string|max:150',
-            'nip' => 'nullable|string|max:50',
-            'no_hp' => 'nullable|string|max:50',
-            'urgensi' => 'nullable|string|max:500',
-            'kendaraan_id' => 'required|exists:kendaraan,id', 
-            'tanggal_ambil' => 'required|date',
-            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_ambil'
+        'nama' => 'required|string|max:150',
+        'nip' => 'nullable|string|max:50',
+        'no_hp' => 'required|string|max:50', // Disarankan required untuk pelacakan tamu
+        'urgensi' => 'nullable|string|max:500',
+        'kendaraan_id' => 'required|exists:kendaraan,id', 
+        'tanggal_ambil' => 'required|date',
+        'tanggal_kembali' => 'required|date|after_or_equal:tanggal_ambil'
         ]);
-
-        // =====================================================================
-        // [PERBAIKAN] CEK STATUS FISIK KENDARAAN (LOGIKA TAMBAHAN)
-        // =====================================================================
-        $kendaraan = Kendaraan::findOrFail($request->kendaraan_id);
-        
-        // Jika status mobil bukan 'available' (misal: unavailable/maintenance)
-        if ($kendaraan->status !== 'available') {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', "Gagal! Kendaraan {$kendaraan->jenis} ({$kendaraan->plat_no}) saat ini TIDAK TERSEDIA (Status: {$kendaraan->status}).");
-        }
 
         $start = Carbon::parse($request->input('tanggal_ambil'));
         $end = Carbon::parse($request->input('tanggal_kembali'));
 
-        // 2. CEK JADWAL BENTROK
+        // -------------------------------------------------------------
+        // LOGIKA PEMBATASAN 2 HARI (48 JAM)
+        // -------------------------------------------------------------
+        if ($start->diffInHours($end) > 48) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal! Durasi peminjaman melebihi batas. Maksimal hanya boleh 2 Hari (48 Jam).');
+        }
+        // -------------------------------------------------------------
+
+        // 2. CEK STATUS FISIK KENDARAAN (Sesuai request klien: saklar)
+        $kendaraan = Kendaraan::findOrFail($request->kendaraan_id);
+        if ($kendaraan->status !== 'available') {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', "Gagal! Kendaraan {$kendaraan->jenis} sedang TIDAK TERSEDIA (Status: {$kendaraan->status}).");
+        }
+
+        // 3. CEK JADWAL BENTROK
         $bentrok = PeminjamanKendaraan::where('kendaraan_id', $request->kendaraan_id)
             ->where('status', '!=', 'rejected')
             ->where('status', '!=', 'completed') 
             ->where(function($query) use ($start, $end) {
                 $query->whereBetween('tanggal_ambil', [$start, $end])
-                      ->orWhereBetween('tanggal_kembali', [$start, $end])
-                      ->orWhere(function($q) use ($start, $end) {
-                          $q->where('tanggal_ambil', '<=', $start)
+                    ->orWhereBetween('tanggal_kembali', [$start, $end])
+                    ->orWhere(function($q) use ($start, $end) {
+                        $q->where('tanggal_ambil', '<=', $start)
                             ->where('tanggal_kembali', '>=', $end);
-                      });
+                    });
             })
             ->exists();
 
         if ($bentrok) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', "Maaf, jadwal kendaraan {$kendaraan->jenis} ({$kendaraan->plat_no}) BENTROK/SUDAH DIPINJAM pada tanggal tersebut.");
+                ->with('error', "Maaf, jadwal kendaraan bentrok dengan peminjaman lain.");
         }
 
-        // 3. SIMPAN DATA
+        // 4. SIMPAN DATA
         $data = $request->only(['nama','nip','no_hp','urgensi','kendaraan_id']);
         $data['tanggal_ambil'] = $start;
         $data['tanggal_kembali'] = $end;
@@ -78,10 +83,10 @@ class PeminjamanKendaraanController extends Controller
 
         $peminjaman = PeminjamanKendaraan::create($data);
 
-        // 4. KIRIM NOTIFIKASI WA KE ADMIN
+        // Kirim Notif WA
         $admin = \App\User::whereIn('role', ['super_admin', 'admin_barang'])
-                          ->whereNotNull('no_hp')
-                          ->first();
+                        ->whereNotNull('no_hp')
+                        ->first();
 
         if ($admin && $admin->no_hp) {
             try {
@@ -107,17 +112,17 @@ class PeminjamanKendaraanController extends Controller
     public function approve(Request $request, $id)
     {
         $peminjaman = PeminjamanKendaraan::findOrFail($id);
-        
-        // Cek status mobil sebelum approve
-        if ($peminjaman->kendaraan && $peminjaman->kendaraan->status !== 'available') {
-            return redirect()->back()->with('error', 'Gagal Approve! Kendaraan ini statusnya sudah UNAVAILABLE.');
+        $kendaraan = $peminjaman->kendaraan;
+
+        if ($kendaraan && $kendaraan->status !== 'available') {
+            return redirect()->back()->with('error', 
+                "Gagal Approve! Kendaraan ini statusnya sedang {$kendaraan->status}. Harap selesaikan peminjaman sebelumnya atau ubah statusnya menjadi available terlebih dahulu.");
         }
 
         $peminjaman->update(['status' => 'approved']);
 
-        // Update Status Kendaraan Jadi UNAVAILABLE
-        if ($peminjaman->kendaraan) {
-            $peminjaman->kendaraan->update(['status' => 'unavailable']);
+        if ($kendaraan) {
+            $kendaraan->update(['status' => 'unavailable']);
         }
 
         if ($peminjaman->no_hp) {
@@ -128,7 +133,7 @@ class PeminjamanKendaraanController extends Controller
             }
         }
 
-        return redirect()->back()->with('success', 'Permintaan disetujui. Status kendaraan berubah menjadi UNAVAILABLE.');
+        return redirect()->back()->with('success', 'Permintaan disetujui. Status kendaraan sekarang UNAVAILABLE.');
     }
 
     public function reject(Request $request, $id)

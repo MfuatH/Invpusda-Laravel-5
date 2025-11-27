@@ -229,13 +229,9 @@
                     </div>
                 @endif
 
-                @if ($errors->any())
+                @if (session('error'))
                     <div class="alert alert-danger fade show" role="alert">
-                        <ul class="mb-0 pl-3">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+                        {{ session('error') }}
                     </div>
                 @endif
 
@@ -257,7 +253,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <i class="fas fa-phone form-icon"></i>
-                                <input type="text" class="form-control" name="no_hp" placeholder="Nomor HP / WA" value="{{ old('no_hp') }}" required>
+                                <input type="text" class="form-control" name="no_hp" placeholder="Nomor HP / WA (Wajib)" required>
                             </div>
                         </div>
                     </div>
