@@ -26,7 +26,7 @@ Route::get('/template-doc', 'CateringController@templateDoc')->name('documents.t
 // Route Hapus Catering (Publik - Agar tamu bisa hapus data sendiri jika salah input)
 Route::delete('/request-konsumsi/{id}', 'CateringController@destroy')->name('catering.destroy');
 
-// --- Request Kendaraan
+// --- Request Kendaraan (FITUR BARU)
 Route::get('/request-kendaraan', 'PeminjamanKendaraanController@create')->name('request.kendaraan.create');
 Route::post('/request-kendaraan', 'PeminjamanKendaraanController@store')->name('request.kendaraan.store');
 
@@ -80,15 +80,14 @@ Route::group([
         Route::post('catering/{catering}/reject', 'CateringController@reject')->name('catering.reject');
         Route::post('catering/{catering}/approve', 'CateringController@approve')->name('catering.approve');
         
-        // Approval Kendaraan
+        // Approval Kendaraan (FITUR BARU)
         Route::get('kendaraan', 'PeminjamanKendaraanController@index')->name('approvals.kendaraan');
         Route::get('kendaraan/{id}', 'PeminjamanKendaraanController@show')->name('kendaraan.show');
-        Route::post('kendaraan/{id}/approve', 'PeminjamanKendaraanController@approve')->name('kendaraan.approve');
-        Route::post('kendaraan/{id}/reject', 'PeminjamanKendaraanController@reject')->name('kendaraan.reject');
+        Route::post('kendaraan/approve/{id}', 'PeminjamanKendaraanController@approve')->name('kendaraan.approve');
+        Route::post('kendaraan/reject/{id}', 'PeminjamanKendaraanController@reject')->name('kendaraan.reject');
     });
 
-    // === MASTER DATA KENDARAAN (CRUD MOBIL) ===
-    // Ini yang mengatasi error 'kendaraan.list' sebelumnya
+    // === MASTER DATA KENDARAAN (CRUD MOBIL - FITUR BARU) ===
     Route::get('data-kendaraan', 'PeminjamanKendaraanController@listKendaraan')->name('kendaraan.index');
     Route::post('data-kendaraan', 'PeminjamanKendaraanController@storeKendaraan')->name('kendaraan.store_unit');
     Route::put('data-kendaraan/{id}', 'PeminjamanKendaraanController@updateKendaraan')->name('kendaraan.update');

@@ -12,6 +12,14 @@
         </h4>
     </div>
 
+    {{-- Alert Success/Error --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle mr-1"></i> {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+        </div>
+    @endif
+
     {{-- Card Table --}}
     <div class="card shadow-sm w-100">
         <div class="card-body">
@@ -24,31 +32,31 @@
                 </div>
             @else
                 <div class="table-responsive">
-                    {{-- PERUBAHAN: Ditambahkan class 'table-bordered' untuk garis --}}
                     <table class="table table-bordered table-striped align-middle text-center">
                         <thead class="thead-dark">
                             <tr>
                                 <th>PEMOHON</th>
-                                <th>NIP</th>
-                                <th>NO HP</th>
+                                <th>KONTAK</th>
                                 <th>KENDARAAN</th>
                                 <th>JADWAL</th>
                                 <th>KEPERLUAN</th>
                                 <th>STATUS</th>
-                                {{-- Lebar kolom aksi --}}
                                 <th style="min-width: 160px;">AKSI</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($requests as $r)
                             <tr>
-                                <td class="font-weight-bold">{{ $r->nama }}</td>
-                                <td>{{ $r->nip ?? '-' }}</td>
+                                <td class="text-left">
+                                    <strong>{{ $r->nama }}</strong><br>
+                                    <small class="text-muted">NIP: {{ $r->nip ?? '-' }}</small>
+                                </td>
                                 <td>{{ $r->no_hp ?? '-' }}</td>
                                 <td>
                                     @if($r->kendaraan)
-                                        <span style="font-size: 0.9em;">
-                                            {{ $r->kendaraan->jenis }} - {{ $r->kendaraan->plat_no }}
+                                        <span class="badge badge-light border">
+                                            {{ $r->kendaraan->jenis }} <br> 
+                                            <small>{{ $r->kendaraan->plat_no }}</small>
                                         </span>
                                     @else
                                         -
@@ -58,7 +66,9 @@
                                     <div class="text-nowrap"><i class="fas fa-arrow-circle-right text-success mr-1"></i> {{ \Carbon\Carbon::parse($r->tanggal_ambil)->format('d/m/Y H:i') }}</div>
                                     <div class="text-nowrap"><i class="fas fa-arrow-circle-left text-danger mr-1"></i> {{ \Carbon\Carbon::parse($r->tanggal_kembali)->format('d/m/Y H:i') }}</div>
                                 </td>
-                                <td class="text-left" style="max-width: 200px;">{{ \Illuminate\Support\Str::limit($r->urgensi, 50) }}</td>
+                                <td class="text-left" style="max-width: 200px;">
+                                    {{ \Illuminate\Support\Str::limit($r->urgensi, 50) }}
+                                </td>
                                 <td>
                                     @if($r->status === 'approved') 
                                         <span class="badge badge-success">Approved</span>
@@ -71,10 +81,8 @@
                                 <td>
                                     @if($r->status === 'pending')
                                         <div class="d-flex justify-content-center">
-                                            {{-- PERUBAHAN: Icon dihapus, hanya TULISAN saja --}}
-                                            
                                             {{-- TOMBOL TERIMA --}}
-                                            <button class="btn btn-sm btn-success mr-2 approve-btn font-weight"
+                                            <button class="btn btn-sm btn-success mr-2 approve-btn font-weight-bold"
                                                 data-toggle="modal" data-target="#approveModal"
                                                 data-id="{{ $r->id }}"
                                                 data-name="{{ $r->nama }}"
@@ -88,7 +96,7 @@
                                             </button>
                                             
                                             {{-- TOMBOL TOLAK --}}
-                                            <button class="btn btn-sm btn-danger reject-btn font-weight"
+                                            <button class="btn btn-sm btn-danger reject-btn font-weight-bold"
                                                 data-toggle="modal" data-target="#rejectModal"
                                                 data-id="{{ $r->id }}"
                                                 data-name="{{ $r->nama }}"
@@ -118,7 +126,7 @@
 </div>
 
 {{-- =================================================================== --}}
-{{-- MODAL APPROVE (DETAIL) --}}
+{{-- MODAL APPROVE --}}
 {{-- =================================================================== --}}
 <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -127,94 +135,52 @@
                 {{ csrf_field() }}
                 <div class="modal-header bg-light">
                     <h5 class="modal-title font-weight-bold text-dark">
-                        <i class="fas fa-file-alt mr-2"></i> Detail Peminjaman
+                        <i class="fas fa-check-circle text-success mr-2"></i> Setujui Peminjaman
                     </h5>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 
                 <div class="modal-body bg-white">
-                    <div class="form-group">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text bg-light"><i class="fas fa-user"></i></span>
-                            </div>
-                            <input type="text" class="form-control bg-light" id="app-name" readonly>
+                    {{-- Detail Readonly --}}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="small text-muted">Pemohon</label>
+                            <input type="text" class="form-control bg-light mb-2" id="app-name" readonly>
                         </div>
+                        <div class="col-md-6">
+                            <label class="small text-muted">No HP (WA)</label>
+                            <input type="text" class="form-control bg-light mb-2" id="app-hp" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-2">
+                        <label class="small text-muted">Kendaraan</label>
+                        <input type="text" class="form-control bg-light font-weight-bold" id="app-vehicle" readonly>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text bg-light"><i class="fas fa-id-badge"></i></span>
-                                    </div>
-                                    <input type="text" class="form-control bg-light" id="app-nip" readonly>
-                                </div>
-                            </div>
+                            <label class="small text-muted">Tanggal Ambil</label>
+                            <input type="text" class="form-control bg-light" id="app-start" readonly>
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text bg-light"><i class="fas fa-phone"></i></span>
-                                    </div>
-                                    <input type="text" class="form-control bg-light" id="app-hp" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text bg-light"><i class="fas fa-exclamation-circle"></i></span>
-                            </div>
-                            <input type="text" class="form-control bg-light" id="app-urgensi" readonly>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text bg-light"><i class="fas fa-car"></i></span>
-                            </div>
-                            <input type="text" class="form-control bg-light font-weight-bold" id="app-vehicle" readonly>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label class="small text-muted mb-0">Tanggal Ambil</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text bg-light"><i class="fas fa-calendar-check"></i></span>
-                                </div>
-                                <input type="text" class="form-control bg-light" id="app-start" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="small text-muted mb-0">Tanggal Kembali</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text bg-light"><i class="fas fa-calendar-times"></i></span>
-                                </div>
-                                <input type="text" class="form-control bg-light" id="app-end" readonly>
-                            </div>
+                            <label class="small text-muted">Tanggal Kembali</label>
+                            <input type="text" class="form-control bg-light" id="app-end" readonly>
                         </div>
                     </div>
 
                     <hr>
                     <div class="form-group">
-                        <label class="font-weight-bold text-success">Catatan Persetujuan (Opsional)</label>
-                        <textarea name="note" class="form-control" rows="2" placeholder="Misal: Kunci ada di pos satpam..."></textarea>
+                        <label class="font-weight-bold text-success">Catatan Admin (Untuk WA)</label>
+                        <textarea name="note" class="form-control" rows="2" placeholder="Contoh: Silakan ambil kunci di pos satpam."></textarea>
+                        <small class="text-muted">Pesan ini akan dikirim ke WhatsApp pemohon.</small>
                     </div>
                 </div>
 
                 <div class="modal-footer bg-light">
-                    <button class="btn btn-secondary" data-dismiss="modal">Kembali</button>
-                    <button class="btn btn-primary font-weight-bold" type="submit">
-                        <i class="fas fa-paper-plane mr-1"></i> Kirim Request (Setujui)
+                    <button class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button class="btn btn-success font-weight-bold" type="submit">
+                        <i class="fab fa-whatsapp mr-1"></i> Setujui & Kirim WA
                     </button>
                 </div>
             </form>
@@ -243,11 +209,14 @@
                     <div class="form-group">
                         <label class="font-weight-bold text-danger">Alasan Penolakan <span class="text-danger">*</span></label>
                         <textarea name="note" class="form-control" rows="3" required placeholder="Contoh: Kendaraan sedang dalam perawatan..."></textarea>
+                        <small class="text-muted">Alasan ini akan dikirim ke WhatsApp pemohon.</small>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button class="btn btn-danger" type="submit">Tolak Permintaan</button>
+                    <button class="btn btn-danger" type="submit">
+                        <i class="fab fa-whatsapp mr-1"></i> Tolak & Kirim WA
+                    </button>
                 </div>
             </form>
         </div>
@@ -260,6 +229,7 @@
 <script>
 $(function(){
     // Template Route
+    // Pastikan route ini ada di web.php
     const approveTemplate = '{{ route("kendaraan.approve", ["id" => "PLACEHOLDER"]) }}';
     const rejectTemplate = '{{ route("kendaraan.reject", ["id" => "PLACEHOLDER"]) }}';
 
@@ -267,8 +237,9 @@ $(function(){
     $('.approve-btn').on('click', function(){
         var id = $(this).data('id');
         
-        // Set Action URL Form
-        $('#approveForm').attr('action', approveTemplate.replace('PLACEHOLDER', id));
+        // Ganti PLACEHOLDER dengan ID asli
+        var url = approveTemplate.replace('PLACEHOLDER', id);
+        $('#approveForm').attr('action', url);
         
         // Isi Data ke Modal
         $('#app-name').val($(this).data('name'));
@@ -284,10 +255,9 @@ $(function(){
     $('.reject-btn').on('click', function(){
         var id = $(this).data('id');
         
-        // Set Action URL Form
-        $('#rejectForm').attr('action', rejectTemplate.replace('PLACEHOLDER', id));
+        var url = rejectTemplate.replace('PLACEHOLDER', id);
+        $('#rejectForm').attr('action', url);
         
-        // Isi Data Ringkas
         $('#rej-name').text($(this).data('name'));
         $('#rej-vehicle').text($(this).data('vehicle'));
     });
@@ -297,38 +267,8 @@ $(function(){
 
 @push('styles')
 <style>
-    /* Styling Tabel dengan Border */
-    .table { font-size: 0.9rem; background: #fff; }
-    
-    /* Pastikan border terlihat jelas */
-    .table-bordered th,
-    .table-bordered td {
-        border: 1px solid #dee2e6 !important;
-    }
-
-    .table thead th { 
-        background-color: #343a40; 
-        color: #fff; 
-        border-color: #454d55;
-        vertical-align: middle;
-    }
-    .table tbody tr td {
-        vertical-align: middle;
-    }
-    
-    /* Styling Modal */
-    .input-group-text {
-        background-color: #f8f9fa;
-        border-right: none;
-        width: 45px;
-        justify-content: center;
-    }
-    .form-control[readonly] {
-        background-color: #f8f9fa;
-        border-left: none;
-        opacity: 1; 
-    }
-    .modal-header { border-bottom: 1px solid #dee2e6; }
-    .modal-footer { border-top: 1px solid #dee2e6; }
+    .table-bordered th, .table-bordered td { border: 1px solid #dee2e6 !important; }
+    .table thead th { background-color: #343a40; color: #fff; border-color: #454d55; }
+    .btn-sm { padding: 0.25rem 0.5rem; }
 </style>
 @endpush
