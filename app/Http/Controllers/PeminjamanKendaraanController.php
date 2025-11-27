@@ -17,55 +17,105 @@ class PeminjamanKendaraanController extends Controller
     // =========================================================================
     public function create()
     {
-        // Hanya tampilkan kendaraan yang statusnya 'available'
+        $this->cekOtomatisKembali();
+        
         $kendaraans = \App\Kendaraan::where('status', 'available')->get();
         return view('requests.kendaraan_create', compact('kendaraans'));
     }
 
+    private function cekOtomatisKembali()
+    {
+        $expiredLoans = PeminjamanKendaraan::where('status', 'approved')
+                        ->where('tanggal_kembali', '<=', Carbon::now())
+                        ->with('kendaraan')
+                        ->get();
+
+        if ($expiredLoans->count() > 0) {
+            foreach ($expiredLoans as $loan) {
+                $loan->update(['status' => 'completed']);
+
+                if ($loan->kendaraan) {
+                    $loan->kendaraan->update(['status' => 'available']);
+                }
+            }
+        }
+    }
+
     public function store(Request $request)
     {
+        // 1. VALIDASI INPUT
         $request->validate([
-        'nama' => 'required|string|max:150',
-        'nip' => 'nullable|string|max:50',
-        'no_hp' => 'required|string|max:50', // Disarankan required untuk pelacakan tamu
-        'urgensi' => 'nullable|string|max:500',
-        'kendaraan_id' => 'required|exists:kendaraan,id', 
-        'tanggal_ambil' => 'required|date',
-        'tanggal_kembali' => 'required|date|after_or_equal:tanggal_ambil'
+            'nama' => 'required|string|max:150',
+            'nip' => 'nullable|string|max:50',
+            'no_hp' => 'required|string|max:50',
+            'urgensi' => 'nullable|string|max:500',
+            'kendaraan_id' => 'required|exists:kendaraan,id', 
+            'tanggal_ambil' => 'required|date',
+            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_ambil'
         ]);
 
         $start = Carbon::parse($request->input('tanggal_ambil'));
         $end = Carbon::parse($request->input('tanggal_kembali'));
 
-        // -------------------------------------------------------------
-        // LOGIKA PEMBATASAN 2 HARI (48 JAM)
-        // -------------------------------------------------------------
+        // ---------------------------------------------------------------------
+        // [FITUR 1] CEK BATAS MAKSIMAL DURASI PEMINJAMAN (2 HARI / 48 JAM)
+        // ---------------------------------------------------------------------
         if ($start->diffInHours($end) > 48) {
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Gagal! Durasi peminjaman melebihi batas. Maksimal hanya boleh 2 Hari (48 Jam).');
         }
-        // -------------------------------------------------------------
 
-        // 2. CEK STATUS FISIK KENDARAAN (Sesuai request klien: saklar)
+        // ---------------------------------------------------------------------
+        // [FITUR 2] CEK JEDA / COOLDOWN 2 HARI (Identifikasi via NIP/HP)
+        // ---------------------------------------------------------------------
+        $identifierColumn = $request->filled('nip') ? 'nip' : 'no_hp';
+        $identifierValue  = $request->filled('nip') ? $request->nip : $request->no_hp;
+
+        // Cari peminjaman terakhir user ini yang TIDAK DITOLAK
+        $lastLoan = PeminjamanKendaraan::where($identifierColumn, $identifierValue)
+            ->where('status', '!=', 'rejected') 
+            ->orderBy('tanggal_kembali', 'desc') // Ambil yang paling terakhir
+            ->first();
+
+        if ($lastLoan) {
+            $lastReturnDate = Carbon::parse($lastLoan->tanggal_kembali);
+            
+            // ATURAN JEDA: Harus menunggu 2 HARI setelah peminjaman terakhir selesai
+            // Ubah addDay() menjadi addDays(2)
+            $allowedDate = $lastReturnDate->copy()->addDays(2); 
+
+            // Jika dia mau pinjam lagi SEBELUM masa jeda selesai -> TOLAK
+            if ($start->lt($allowedDate)) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', "Gagal! Anda harus menunggu jeda (cooldown) 2 hari setelah peminjaman terakhir. Anda baru bisa meminjam lagi mulai tanggal: " . $allowedDate->format('d/m/Y H:i'));
+            }
+        }
+
+        // ---------------------------------------------------------------------
+        // [FITUR 3] CEK STATUS FISIK KENDARAAN (SAKLAR)
+        // ---------------------------------------------------------------------
         $kendaraan = Kendaraan::findOrFail($request->kendaraan_id);
         if ($kendaraan->status !== 'available') {
             return redirect()->back()
                 ->withInput()
-                ->with('error', "Gagal! Kendaraan {$kendaraan->jenis} sedang TIDAK TERSEDIA (Status: {$kendaraan->status}).");
+                ->with('error', "Gagal! Kendaraan {$kendaraan->jenis} ({$kendaraan->plat_no}) saat ini TIDAK TERSEDIA (Status: {$kendaraan->status}).");
         }
 
-        // 3. CEK JADWAL BENTROK
+        // ---------------------------------------------------------------------
+        // 4. CEK JADWAL BENTROK
+        // ---------------------------------------------------------------------
         $bentrok = PeminjamanKendaraan::where('kendaraan_id', $request->kendaraan_id)
             ->where('status', '!=', 'rejected')
             ->where('status', '!=', 'completed') 
             ->where(function($query) use ($start, $end) {
                 $query->whereBetween('tanggal_ambil', [$start, $end])
-                    ->orWhereBetween('tanggal_kembali', [$start, $end])
-                    ->orWhere(function($q) use ($start, $end) {
-                        $q->where('tanggal_ambil', '<=', $start)
+                      ->orWhereBetween('tanggal_kembali', [$start, $end])
+                      ->orWhere(function($q) use ($start, $end) {
+                          $q->where('tanggal_ambil', '<=', $start)
                             ->where('tanggal_kembali', '>=', $end);
-                    });
+                      });
             })
             ->exists();
 
@@ -75,7 +125,7 @@ class PeminjamanKendaraanController extends Controller
                 ->with('error', "Maaf, jadwal kendaraan bentrok dengan peminjaman lain.");
         }
 
-        // 4. SIMPAN DATA
+        // 5. SIMPAN DATA
         $data = $request->only(['nama','nip','no_hp','urgensi','kendaraan_id']);
         $data['tanggal_ambil'] = $start;
         $data['tanggal_kembali'] = $end;
@@ -83,10 +133,10 @@ class PeminjamanKendaraanController extends Controller
 
         $peminjaman = PeminjamanKendaraan::create($data);
 
-        // Kirim Notif WA
+        // 6. KIRIM NOTIFIKASI WA KE ADMIN
         $admin = \App\User::whereIn('role', ['super_admin', 'admin_barang'])
-                        ->whereNotNull('no_hp')
-                        ->first();
+                          ->whereNotNull('no_hp')
+                          ->first();
 
         if ($admin && $admin->no_hp) {
             try {
@@ -105,6 +155,8 @@ class PeminjamanKendaraanController extends Controller
     
     public function index()
     {
+        $this->cekOtomatisKembali();
+
         $requests = PeminjamanKendaraan::with('kendaraan')->latest()->paginate(20);
         return view('admin_page.approvals.kendaraan', compact('requests'));
     }
@@ -203,6 +255,8 @@ class PeminjamanKendaraanController extends Controller
 
     public function listKendaraan()
     {
+        $this->cekOtomatisKembali();
+
         $kendaraans = Kendaraan::latest()->paginate(10);
         return view('admin_page.kendaraan.index', compact('kendaraans'));
     }
