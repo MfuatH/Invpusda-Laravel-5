@@ -37,36 +37,76 @@
         }
 
         .left-panel {
-            background: transparent;
-            padding: 30px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 25px 20px;
             text-align: center;
             color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-right: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .left-panel h4 {
+            font-weight: 700;
+            font-size: 1.3rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.5px;
         }
 
         /* --- STYLING TABEL --- */
         .table-custom {
             background-color: white;
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         .table-custom thead th {
-            background-color: #f8f9fa;
-            color: #333;
+            background: linear-gradient(135deg, #4163fe 0%, #4163fe 100%);
+            color: white;
             font-weight: 600;
-            border-bottom: 2px solid #dee2e6;
+            border-bottom: none;
             vertical-align: middle;
+            padding: 12px 10px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        .table-custom tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        .table-custom tbody tr:hover {
+            background-color: #f8f9fa;
         }
         .table-custom td, .table-custom th {
-            border: 1px solid #dee2e6;
+            border: 1px solid #e9ecef;
             vertical-align: middle;
-            padding: 10px;
+            padding: 12px 10px;
+            font-size: 0.9rem;
+        }
+        .table-custom tbody td {
+            color: #333;
+        }
+        .table-responsive {
+            max-height: 450px;
+            overflow-y: auto;
         }
 
         /* --- STYLING KANAN --- */
         .right-panel {
             background: #fff;
-            padding: 30px;
+            padding: 35px;
             border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .right-panel h4 {
+            color: #333;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
         }
 
         .form-group {
@@ -133,8 +173,8 @@
 <div class="outer-container">
     <div class="row g-0">
 
-        <div class="col-md-7 left-panel">
-            <div class="p-3">
+        <div class="col-lg-6 left-panel">
+            <div class="p-0">
                 <h4 class="text-white font-weight-bold mb-4">Permintaan Catering Terbaru</h4>
                 @php
                     $caterings = isset($caterings) ? $caterings : \App\Catering::latest()->limit(6)->get();
@@ -195,7 +235,7 @@
             </div>
         </div>
 
-        <div class="col-md-4 p-3 offset-lg-1">
+        <div class="col-lg-6 p-2">
             <div class="right-panel">
 
                 <h4 class="mb-4 fw-bold">Pemesanan Makanan</h4>

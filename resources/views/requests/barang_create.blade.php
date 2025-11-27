@@ -73,6 +73,8 @@
             background: #fff;
             padding: 25px;
             border-radius: 15px;
+            min-height: 530px;
+            align-content: center
         }
 
         .right-panel h3 {

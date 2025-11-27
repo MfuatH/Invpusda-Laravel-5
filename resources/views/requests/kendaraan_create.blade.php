@@ -75,13 +75,14 @@
             padding: 35px;
             min-height: 630px;
             border-radius: 15px;
+            align-content: center;
         }
 
         .right-panel h3 {
             text-align: left;
-            font-weight: 600;
+            font-weight: 700;
             color: #333;
-            font-size: 1.25rem;
+            font-size: 2.25rem;
             margin-bottom: 25px;
             border-bottom: 2px solid #f4f7f6;
             padding-bottom: 10px;
