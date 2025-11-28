@@ -74,6 +74,8 @@
                                         <span class="badge badge-success">Approved</span>
                                     @elseif($r->status === 'rejected') 
                                         <span class="badge badge-danger">Rejected</span>
+                                    @elseif($r->status === 'completed') 
+                                        <span class="badge badge-info">Completed</span>
                                     @else 
                                         <span class="badge badge-warning text-dark">Pending</span> 
                                     @endif

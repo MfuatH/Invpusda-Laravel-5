@@ -74,22 +74,26 @@ class PeminjamanKendaraanController extends Controller
 
         // Cari peminjaman terakhir user ini yang TIDAK DITOLAK
         $lastLoan = PeminjamanKendaraan::where($identifierColumn, $identifierValue)
-            ->where('status', '!=', 'rejected') 
+            ->where('status', '!=', 'rejected')
             ->orderBy('tanggal_kembali', 'desc') // Ambil yang paling terakhir
             ->first();
 
         if ($lastLoan) {
             $lastReturnDate = Carbon::parse($lastLoan->tanggal_kembali);
-            
-            // ATURAN JEDA: Harus menunggu 2 HARI setelah peminjaman terakhir selesai
-            // Ubah addDay() menjadi addDays(2)
-            $allowedDate = $lastReturnDate->copy()->addDays(2); 
 
-            // Jika dia mau pinjam lagi SEBELUM masa jeda selesai -> TOLAK
-            if ($start->lt($allowedDate)) {
+            // ATURAN JEDA: Cooldown 2 hari berdasarkan TANGGAL (ignore time-of-day)
+            // Contoh: jika pengembalian terakhir ber-tanggal 2025-11-01 (jam berapapun),
+            // maka peminjam baru boleh meminjam lagi mulai tanggal 2025-11-03.
+            $allowedDateString = $lastReturnDate->copy()->addDays(2)->toDateString(); // 'YYYY-MM-DD'
+
+            // Ambil tanggal yang diminta (date-only)
+            $requestedDateString = $start->toDateString();
+
+            // Jika tanggal permintaan masih kurang dari tanggal yang diizinkan -> tolak
+            if ($requestedDateString < $allowedDateString) {
                 return redirect()->back()
                     ->withInput()
-                    ->with('error', "Gagal! Anda harus menunggu jeda (cooldown) 2 hari setelah peminjaman terakhir. Anda baru bisa meminjam lagi mulai tanggal: " . $allowedDate->format('d/m/Y H:i'));
+                    ->with('error', "Gagal! Anda harus menunggu jeda (cooldown) 2 hari setelah peminjaman terakhir. Anda baru bisa meminjam lagi mulai tanggal: " . Carbon::parse($allowedDateString)->format('d/m/Y'));
             }
         }
 
