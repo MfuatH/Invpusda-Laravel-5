@@ -8,6 +8,7 @@ use App\ItemRequest;
 use App\Transaction;
 use App\RequestLinkZoom;
 use App\LaporanRapat;
+use App\Catering;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -303,10 +304,9 @@ class RequestController extends Controller
         return view('requests.konsumsi_create');
     }
 
-    public function dashboardDoc($id)
+    public function dashboardDoc(Catering $catering)
     {
-        $catering = \App\Catering::findOrFail($id);
-        
+        // Route-model binding will resolve the Catering model or return 404.
         return view('documents.dashboard_doc', compact('catering'));
     }
 

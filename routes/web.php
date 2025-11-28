@@ -31,7 +31,13 @@ Route::get('/request-kendaraan', 'PeminjamanKendaraanController@create')->name('
 Route::post('/request-kendaraan', 'PeminjamanKendaraanController@store')->name('request.kendaraan.store');
 
 // --- Route Dokumen Lain
-Route::get('/dashboard-doc', 'RequestController@dashboardDoc')->name('documents.dashboard_doc');
+// Friendly fallback when no ID provided: redirect back with message
+Route::get('/dashboard-doc', function() {
+    return redirect()->route('landing-page')->with('error', 'ID dokumen tidak diberikan. Silakan pilih dokumen yang ingin dilihat.');
+});
+
+// Route with model binding: accepts `{catering}` and injects the Catering model
+Route::get('/dashboard-doc/{catering}', 'RequestController@dashboardDoc')->name('documents.dashboard_doc');
 Route::get('/undangan-upload', 'RequestController@createUndangan')->name('request.undangan.create');
 Route::get('/download-presensi', 'RequestController@downloadPresensi')->name('request.download.presensi');
 Route::get('/download-notulensi', 'RequestController@downloadNotulensi')->name('request.download.notulensi');
