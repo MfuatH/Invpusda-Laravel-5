@@ -56,21 +56,28 @@ class RequestController extends Controller
     {
         $validated = $request->validate([
             'nama_pemohon' => 'required|string|max:255',
-            'nip' => 'nullable|string|max:255',
-            'no_hp' => 'required|string|max:25',
-            'bidang_id' => 'required|exists:bidang,id',
-            'items' => 'required|array|min:1',
+            'nip'          => 'nullable|string|max:255',
+            'no_hp'        => 'required|string|max:25',
+            'bidang_id'    => 'required|exists:bidang,id',
+            'items'        => 'required|array|min:1',
             'items.*.item_id' => 'required|exists:items,id',
             'items.*.jumlah_request' => 'required|integer|min:1',
         ]);
 
         try {
             DB::transaction(function () use ($validated) {
+                // Array penampung untuk teks WA
+                $summaryItems = []; 
+
                 foreach ($validated['items'] as $reqItem) {
+                    // Ambil data item + lock agar aman (opsional)
                     $item = Item::findOrFail($reqItem['item_id']);
+
                     if ($reqItem['jumlah_request'] > $item->jumlah) {
                         throw new Exception('Stok untuk barang "' . $item->nama_barang . '" tidak mencukupi.');
                     }
+
+                    // Simpan ke database
                     ItemRequest::create([
                         'nama_pemohon'   => $validated['nama_pemohon'],
                         'nip'            => $validated['nip'],
@@ -80,24 +87,55 @@ class RequestController extends Controller
                         'jumlah_request' => $reqItem['jumlah_request'],
                         'status'         => 'pending',
                     ]);
+
+                    // Simpan nama barang dan jumlah ke array untuk pesan WA
+                    // Contoh format: "- Kertas A4 (2 rim)"
+                    $satuan = $item->satuan ?? 'pcs'; // jaga-jaga kalau kolom satuan null
+                    $summaryItems[] = "• {$item->nama_barang} ({$reqItem['jumlah_request']} {$satuan})";
                 }
-                // Notifikasi ke admin barang sesuai bidang
-                $admin = \App\User::where('role', 'admin_barang')
+
+                // --- LOGIKA NOTIFIKASI WA DIMULAI ---
+                
+                // 1. Ambil Nama Bidang (agar di WA muncul nama, bukan angka ID)
+                $namaBidang = \App\Bidang::find($validated['bidang_id'])->nama_bidang ?? 'Bidang ID ' . $validated['bidang_id'];
+
+                // 2. Susun Pesan WA yang Menarik
+                $listBarangString = implode("\n", $summaryItems);
+                $message  = "*🔔 PERMINTAAN BARANG BARU*\n\n";
+                $message .= "👤 *Pemohon:* {$validated['nama_pemohon']}\n";
+                $message .= "🏢 *Bidang:* {$namaBidang}\n";
+                $message .= "📞 *Kontak:* {$validated['no_hp']}\n\n";
+                $message .= "*📦 Detail Permintaan:*\n";
+                $message .= "{$listBarangString}\n\n";
+                $message .= "👉 _Silakan login aplikasi untuk menyetujui._";
+
+                // 3. Cari Admin (Gunakan get() agar semua admin di bidang itu dapat info)
+                $admins = \App\User::where('role', 'admin_barang')
                     ->where('bidang_id', $validated['bidang_id'])
-                    ->first();
-                if ($admin && $admin->no_hp) {
+                    ->get();
+
+                // 4. Kirim WA ke semua admin yang ditemukan
+                if ($admins->count() > 0) {
                     $fontte = app(\App\Services\FontteService::class);
-                    $msg = "[Permintaan Barang Baru]\nAda permintaan barang baru dari {$validated['nama_pemohon']} (Bidang ID: {$validated['bidang_id']}). Silakan cek aplikasi.";
-                    $fontte->sendMessage($admin->no_hp, $msg);
+                    foreach ($admins as $admin) {
+                        if ($admin->no_hp) {
+                            try {
+                                // Bungkus try-catch agar jika WA gagal, transaksi DB tidak rollback
+                                $fontte->sendMessage($admin->no_hp, $message);
+                            } catch (\Exception $e) {
+                                // Opsional: Log error jika WA gagal
+                                \Log::error("Gagal kirim WA ke admin {$admin->name}: " . $e->getMessage());
+                            }
+                        }
+                    }
                 }
             });
+
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
 
-        return redirect()->route('landing-page')->with('success', 'Permintaan barang berhasil dikirim.');
-        
-        // --- BLOK KODE DUPLIKAT DIHAPUS DARI SINI ---
+        return redirect()->route('landing-page')->with('success', 'Permintaan barang berhasil dikirim dan admin telah dinotifikasi.');
     }
     
     // --- ZOOM REQUEST METHODS ---
