@@ -82,7 +82,7 @@
                                     @if($r->status === 'pending')
                                         <div class="d-flex justify-content-center">
                                             {{-- TOMBOL TERIMA --}}
-                                            <button class="btn btn-sm btn-success mr-2 approve-btn font-weight-bold"
+                                            <button class="btn btn-sm btn-success mr-2 approve-btn font-weight"
                                                 data-toggle="modal" data-target="#approveModal"
                                                 data-id="{{ $r->id }}"
                                                 data-name="{{ $r->nama }}"
@@ -96,7 +96,7 @@
                                             </button>
                                             
                                             {{-- TOMBOL TOLAK --}}
-                                            <button class="btn btn-sm btn-danger reject-btn font-weight-bold"
+                                            <button class="btn btn-sm btn-danger reject-btn font-weight"
                                                 data-toggle="modal" data-target="#rejectModal"
                                                 data-id="{{ $r->id }}"
                                                 data-name="{{ $r->nama }}"
