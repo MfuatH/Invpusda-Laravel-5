@@ -207,19 +207,19 @@
                                 </td>
                                 <td class="text-center">
                                     <button type="button" 
-                                        class="btn btn-sm btn-outline-dark lihat-btn"
-                                        data-bs-toggle="modal" data-bs-target="#viewCateringModal"
-                                        data-id="{{ $c->id }}"
-                                        data-name="{{ e($c->nama_pemesan) }}"
-                                        data-nip="{{ e($c->nip) }}"
-                                        data-keperluan="{{ e($c->keperluan) }}"
-                                        data-tanggal="{{ \Carbon\Carbon::parse($c->tanggal_kegiatan)->format('d-m-Y H:i') }}"
-                                        data-tempat="{{ e($c->tempat) }}"
-                                        data-peserta="{{ $c->jumlah_peserta }}"
-                                        data-konsumsi="{{ e($c->jenis_konsumsi_string) }}"
-                                        data-nota_url="{{ $c->nota_dinas_url ?? '#' }}"
-                                        data-keterangan="{{ e($c->keterangan ?? '-') }}"
-                                        data-status="{{ $c->status }}"
+                                            class="btn btn-sm btn-outline-dark lihat-btn"
+                                            data-bs-toggle="modal" data-bs-target="#viewCateringModal"
+                                            data-id="{{ $c->id }}"
+                                            data-name="{{ e($c->nama_pemesan) }}"
+                                            data-nip="{{ e($c->nip) }}"
+                                            data-keperluan="{{ e($c->keperluan) }}"
+                                            data-tanggal="{{ \Carbon\Carbon::parse($c->tanggal_kegiatan)->format('d-m-Y H:i') }}"
+                                            data-tempat="{{ e($c->tempat) }}"
+                                            data-peserta="{{ $c->jumlah_peserta }}"
+                                            data-konsumsi="{{ e($c->jenis_konsumsi_string) }}"
+                                            data-nota_url="{{ $c->nota_dinas_url ?? '#' }}"
+                                            data-keterangan="{{ e($c->keterangan ?? '-') }}"
+                                            data-status="{{ $c->status }}"
                                     >Lihat</button>
                                 </td>
                             </tr>
@@ -340,16 +340,20 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <p><small class="text-muted">Pemesan</small><br><strong id="view-name"></strong></p>
-                        <p><small class="text-muted">NIP</small><br><strong id="view-nip"></strong></p>
-                        <p><small class="text-muted">Keperluan</small><br><strong id="view-keperluan"></strong></p>
-                        <p><small class="text-muted">Tanggal Kegiatan</small><br><strong id="view-tanggal"></strong></p>
+                        <p class="mb-2"><small class="text-muted d-block">Pemesan</small><strong id="view-name" class="text-break"></strong></p>
+                        <p class="mb-2"><small class="text-muted d-block">NIP</small><strong id="view-nip" class="text-break"></strong></p>
+                        <p class="mb-2"><small class="text-muted d-block">Keperluan</small><strong id="view-keperluan" class="text-break"></strong></p>
+                        <p class="mb-2"><small class="text-muted d-block">Tanggal Kegiatan</small><strong id="view-tanggal"></strong></p>
                     </div>
                     <div class="col-md-6">
-                        <p><small class="text-muted">Tempat</small><br><strong id="view-tempat"></strong></p>
-                        <p><small class="text-muted">Jumlah Peserta</small><br><strong id="view-peserta"></strong></p>
-                        <p><small class="text-muted">Jenis Konsumsi</small><br><strong id="view-konsumsi"></strong></p>
-                        <p><small class="text-muted">Keterangan</small><br><strong id="view-keterangan"></strong></p>
+                        <p class="mb-2"><small class="text-muted d-block">Tempat</small><strong id="view-tempat" class="text-break"></strong></p>
+                        <p class="mb-2"><small class="text-muted d-block">Jumlah Peserta</small><strong id="view-peserta"></strong></p>
+                        <p class="mb-2"><small class="text-muted d-block">Jenis Konsumsi</small><strong id="view-konsumsi" class="text-break"></strong></p>
+                        {{-- PERBAIKAN DI SINI: Menambahkan text-break dan style white-space: pre-wrap --}}
+                        <p class="mb-2">
+                            <small class="text-muted d-block">Keterangan</small>
+                            <strong id="view-keterangan" class="text-break d-block" style="white-space: pre-wrap;"></strong>
+                        </p>
                     </div>
                 </div>
                 
