@@ -15,7 +15,7 @@
         </button>
     </div>
 
-
+    {{-- Pesan Error Validasi --}}
     @if($errors->any())
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <ul class="mb-0">
@@ -37,7 +37,6 @@
                 </div>
             @else
                 <div class="table-responsive">
-                    {{-- PERUBAHAN: Ditambahkan 'table-bordered' --}}
                     <table class="table table-bordered table-striped align-middle text-center">
                         <thead class="thead-dark">
                             <tr>
@@ -51,14 +50,14 @@
                         <tbody>
                             @foreach ($kendaraans as $index => $k)
                             <tr>
-                                <td>{{ $loop->iteration + $kendaraans->firstItem() - 1 }}</td>
-                                <td class="text-left font-weight">{{ $k->jenis }}</td>
-                                <td>
+                                <td class="align-middle">{{ $loop->iteration + $kendaraans->firstItem() - 1 }}</td>
+                                <td class="text-left font-weight align-middle">{{ $k->jenis }}</td>
+                                <td class="align-middle">
                                     <span class="badge badge-light border px-3 py-2" style="font-size: 0.9rem; letter-spacing: 1px;">
                                         {{ $k->plat_no ?? '-' }}
                                     </span>
                                 </td>
-                                <td>
+                                <td class="align-middle">
                                     @if($k->status == 'available')
                                         <span class="badge badge-success">Available</span>
                                     @elseif($k->status == 'unavailable')
@@ -69,25 +68,27 @@
                                         <span class="badge badge-secondary">{{ $k->status }}</span>
                                     @endif
                                 </td>
-                                <td>
-                                    <div class="d-flex justify-content-center">
-                                        {{-- Tombol Edit --}}
-                                        <button class="btn btn-sm btn-info mr-2 edit-btn"
-                                            data-toggle="modal" data-target="#editModal"
-                                            data-id="{{ $k->id }}"
-                                            data-jenis="{{ $k->jenis }}" 
-                                            data-plat="{{ $k->plat_no }}"
-                                            data-status="{{ $k->status }}">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
+                                <td class="align-middle">
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        {{-- Link Edit (Teks Kuning) --}}
+                                        <a href="javascript:void(0)" class="text-warning font-weight mr-3 edit-btn" 
+                                           style="text-decoration: none; cursor: pointer;"
+                                           data-toggle="modal" data-target="#editModal"
+                                           data-id="{{ $k->id }}"
+                                           data-jenis="{{ $k->jenis }}" 
+                                           data-plat="{{ $k->plat_no }}"
+                                           data-status="{{ $k->status }}">
+                                            Edit
+                                        </a>
                                         
-                                        {{-- Tombol Hapus --}}
-                                        <button class="btn btn-sm btn-danger delete-btn"
-                                            data-toggle="modal" data-target="#deleteModal"
-                                            data-id="{{ $k->id }}"
-                                            data-jenis="{{ $k->jenis }}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        {{-- Link Hapus (Teks Merah) --}}
+                                        <a href="javascript:void(0)" class="text-danger font-weight delete-btn" 
+                                           style="text-decoration: none; cursor: pointer;"
+                                           data-toggle="modal" data-target="#deleteModal"
+                                           data-id="{{ $k->id }}"
+                                           data-jenis="{{ $k->jenis }}">
+                                            Hapus
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
@@ -251,7 +252,7 @@ $(function(){
 
 @push('styles')
 <style>
-    /* Custom CSS untuk memastikan garis per kolom terlihat jelas */
+    /* Custom CSS untuk tabel */
     .table-bordered th,
     .table-bordered td {
         border: 1px solid #dee2e6 !important;
@@ -262,6 +263,5 @@ $(function(){
         color: #fff; 
         border-color: #454d55;
     }
-    .btn-sm { padding: 0.25rem 0.5rem; }
 </style>
 @endpush

@@ -23,15 +23,16 @@
         body {
             background-color: #f8f9fa;
             font-family: 'Poppins', sans-serif;
-            overflow-x: hidden; /* Mencegah scroll horizontal pada body */
+            overflow-x: hidden;
         }
 
-        /* --- SIDEBAR WRAPPER (DIPERBARUI AGAR BISA SCROLL) --- */
+        /* --- SIDEBAR WRAPPER --- */
         #sidebar-wrapper {
-            height: 100vh; /* Full height viewport */
+            height: 100vh;
             width: var(--sidebar-width);
             margin-left: -var(--sidebar-width);
             transition: margin 0.25s ease-out;
+            /* Gradient Background Biru */
             background: linear-gradient(180deg, rgb(58, 174, 237) 0%, rgb(37, 107, 215) 100%);
             position: fixed;
             top: 0;
@@ -39,30 +40,21 @@
             z-index: 1000;
             display: flex;
             flex-direction: column;
-            overflow-y: auto; /* ✅ Mengizinkan scroll vertikal */
+            overflow-y: auto;
         }
 
-        /* Custom Scrollbar untuk Sidebar (Optional, agar lebih rapi) */
-        #sidebar-wrapper::-webkit-scrollbar {
-            width: 6px;
-        }
-        #sidebar-wrapper::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        #sidebar-wrapper::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-        }
-        #sidebar-wrapper::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
+        /* Custom Scrollbar Sidebar */
+        #sidebar-wrapper::-webkit-scrollbar { width: 6px; }
+        #sidebar-wrapper::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
+        #sidebar-wrapper::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 3px; }
+        #sidebar-wrapper::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.5); }
 
         .sidebar-header {
             padding: 1.5rem 1.5rem 1rem 1.5rem;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             background: transparent;
-            flex-shrink: 0; /* Agar header tidak mengecil saat di-scroll */
+            flex-shrink: 0;
         }
 
         .sidebar-logo {
@@ -83,6 +75,7 @@
             flex-grow: 1;
         }
 
+        /* STYLE MENU UTAMA */
         #sidebar-wrapper .list-group-item {
             border: none;
             padding: 0.9rem 1.5rem;
@@ -94,14 +87,15 @@
             align-items: center;
             transition: background-color 0.2s ease, color 0.2s ease;
             margin: 0.2rem 0;
+            text-decoration: none;
         }
 
         #sidebar-wrapper .list-group-item:hover {
             color: #fff;
             background: rgba(255, 255, 255, 0.1);
-            text-decoration: none;
         }
 
+        /* Menu Utama Aktif */
         #sidebar-wrapper .list-group-item.active {
             color: #fff;
             background-color: #3C80E0;
@@ -109,10 +103,7 @@
             margin-left: 0.75rem;
             margin-right: 0.75rem;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        #sidebar-wrapper .list-group-item.active {
-            padding-left: calc(1.5rem - 0.75rem);
+            padding-left: 1.5rem; 
         }
 
         #sidebar-wrapper .list-group-item i.menu-icon {
@@ -127,6 +118,7 @@
             color: #fff;
         }
 
+        /* BADGE NOTIFIKASI */
         .badge-notification {
             background-color: #e74a3b;
             color: white;
@@ -143,12 +135,14 @@
             align-items: center;
         }
 
+        /* Panah Dropdown Parent (Sebelah Kanan) */
         .dropdown-arrow {
             margin-left: 5px;
             font-size: 0.7rem;
             transition: transform 0.2s ease;
         }
 
+        /* Tombol Logout */
         .logout-button {
             border: none;
             padding: 0.9rem 1.5rem;
@@ -166,7 +160,7 @@
             margin-right: 0.75rem;
             text-align: left;
             cursor: pointer;
-            flex-shrink: 0; /* Agar tombol logout tidak gepeng */
+            flex-shrink: 0;
         }
 
         .logout-button:hover {
@@ -174,7 +168,7 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* CSS Submenu */
+        /* CSS Submenu Handling - Rotasi Panah Parent */
         #sidebar-wrapper .list-group-item[data-toggle="collapse"] {
             justify-content: space-between;
         }
@@ -183,31 +177,55 @@
             transform: rotate(180deg);
         }
 
+        /* ========================================================== */
+        /* --- STYLE SUBMENU (DROPDOWN) --- */
+        /* ========================================================== */
         .submenu-collapse {
-            background: rgba(0, 0, 0, 0.15);
+            background: rgba(0, 0, 0, 0.15); /* Background sedikit lebih gelap */
+            margin-bottom: 5px;
         }
 
         .submenu-collapse .list-group-item {
-            padding-left: 3.5rem;
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
-            font-size: 0.8rem;
+            padding-left: 3.5rem; /* INDENTASI: Masuk ke dalam */
+            padding-top: 0.6rem;
+            padding-bottom: 0.6rem;
             margin: 0;
+            border-radius: 0;
+            
+            font-size: 0.85rem; /* Font lebih kecil */
+            color: rgba(255, 255, 255, 0.5) !important; /* Warna Abu-abu (Transparan) saat diam */
+            background: transparent !important;
             font-weight: 400;
+            box-shadow: none !important;
+            border-left: none !important;
         }
 
-        .submenu-collapse .list-group-item.active {
-            background: none;
-            color: #fff;
-            font-weight: 600;
-            margin: 0;
-            box-shadow: none;
-            padding-left: 3.5rem;
-        }
-
+        /* Efek Hover Submenu */
         .submenu-collapse .list-group-item:hover {
-            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff !important; /* Jadi putih saat di-hover */
+            background: rgba(255, 255, 255, 0.05) !important;
+            text-decoration: none;
         }
+
+        /* Submenu Aktif (Setelah Dipencet) */
+        .submenu-collapse .list-group-item.active {
+            color: #ffffff !important; /* Putih Terang Solid */
+            font-weight: 600;          /* Sedikit tebal */
+            background: transparent !important;
+        }
+        
+        /* Ikon Panah Kecil di Submenu */
+        .submenu-icon {
+            font-size: 0.75rem;
+            margin-right: 10px;
+            opacity: 0.7;
+        }
+        .submenu-collapse .list-group-item:hover .submenu-icon,
+        .submenu-collapse .list-group-item.active .submenu-icon {
+            opacity: 1;
+        }
+
+        /* ========================================================== */
 
         #page-content-wrapper {
             min-width: 100vw;
@@ -259,14 +277,12 @@
                 <i class="fas fa-box menu-icon"></i> Manajemen Barang
             </a>
             
-            {{-- Manajemen Dokumen --}}
             @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
             <a href="{{ route('documents.index') }}" class="list-group-item {{ request()->routeIs('documents.*') ? 'active' : '' }}">
                 <i class="fas fa-file-alt menu-icon"></i> Manajemen Dokumen
             </a>
             @endif
 
-            {{-- Approval Barang --}}
             <a href="{{ route('requests.index') }}" class="list-group-item {{ request()->routeIs('requests.*') ? 'active' : '' }}">
                 <i class="fas fa-check-circle menu-icon"></i> Approval Barang
                 @php
@@ -277,7 +293,6 @@
                 @endif
             </a>
 
-            {{-- Approval Zoom --}}
             @php
                 $isZoomMenuActive = request()->routeIs('zoom.requests.index') || request()->routeIs('template.index');
                 $totalZoom = $notifCounts['zoom'] ?? ($data['totalZoomRequests'] ?? 0);
@@ -295,15 +310,14 @@
             <div class="collapse submenu-collapse {{ $isZoomMenuActive ? 'show' : '' }}" id="zoomSubmenu">
                 <div class="list-group list-group-flush">
                     <a href="{{ route('zoom.requests.index') }}" class="list-group-item {{ request()->routeIs('zoom.requests.index') ? 'active' : '' }}">
-                        Zoom Approv
+                        <i class="fas fa-caret-right submenu-icon"></i> Zoom Approv
                     </a>
                     <a href="{{ route('template.index') }}" class="list-group-item {{ request()->routeIs('template.index') ? 'active' : '' }}">
-                        Master Pesan
+                        <i class="fas fa-caret-right submenu-icon"></i> Master Pesan
                     </a>
                 </div>
             </div>
 
-            {{-- Approval Catering --}}
             @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
             <a href="{{ route('catering.index') }}" class="list-group-item {{ request()->routeIs('catering.*') ? 'active' : '' }}">
                 <i class="fas fa-utensils menu-icon"></i> Approve Catering
@@ -316,12 +330,10 @@
             </a>
             @endif
 
-            {{-- === APPROVAL KENDARAAN (DROPDOWN) === --}}
-            @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
+            @if(Auth::user()->role === 'super_admin' || Auth::user()->role === 'admin_barang')
 
                 @php
                     $isKendaraanActive = request()->routeIs('kendaraan.index') || request()->routeIs('approvals.kendaraan');
-
                     $totalKendaraan = $notifCounts['kendaraan'] ?? ($data['totalKendaraanRequests'] ?? 0);
                 @endphp
 
@@ -337,14 +349,12 @@
                 <div class="collapse submenu-collapse {{ $isKendaraanActive ? 'show' : '' }}" id="kendaraanSubmenu">
                     <div class="list-group list-group-flush">
 
-                        {{-- FIX: Active submenu approval peminjaman --}}
                         <a href="{{ route('approvals.kendaraan') }}" class="list-group-item {{ request()->routeIs('approvals.kendaraan') ? 'active' : '' }}">
-                            Approval Peminjaman
+                            <i class="fas fa-caret-right submenu-icon"></i> Approval Peminjaman
                         </a>
 
-                        {{-- Submenu daftar kendaraan --}}
                         <a href="{{ route('kendaraan.index') }}" class="list-group-item {{ request()->routeIs('kendaraan.index') ? 'active' : '' }}">
-                            Daftar Kendaraan
+                            <i class="fas fa-caret-right submenu-icon"></i> Daftar Kendaraan
                         </a>
 
                     </div>
@@ -369,7 +379,6 @@
             </button>
         </form>
     </div>
-
     @endif
 
     <div id="page-content-wrapper">
