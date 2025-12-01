@@ -179,7 +179,7 @@
                                     <th width="20%">Tanggal</th>
                                     <th width="30%">Nama Barang</th>
                                     <th width="20%">Peminjam</th>
-                                    <th width="10%">Jml</th>
+                                    <th width="10%">Jumlah</th>
                                     <th width="15%">Status</th>
                                 </tr>
                             </thead>
