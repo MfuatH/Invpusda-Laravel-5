@@ -330,7 +330,7 @@
             </a>
             @endif
 
-            @if(Auth::user()->role === 'super_admin' || Auth::user()->role === 'admin_barang')
+            @if(Auth::user()->role === 'super_admin' || (Auth::user()->role === 'admin_barang' && Auth::user()->bidang && strtolower(Auth::user()->bidang->nama) === 'sekretariat'))
 
                 @php
                     $isKendaraanActive = request()->routeIs('kendaraan.index') || request()->routeIs('approvals.kendaraan');
