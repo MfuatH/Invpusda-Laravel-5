@@ -76,7 +76,7 @@
     }
 
     .logo {
-      max-width: 250px;
+      max-width: 450px;
       margin-bottom: 25px;
       z-index: 1;
     }
