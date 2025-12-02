@@ -310,7 +310,7 @@
             <div class="collapse submenu-collapse {{ $isZoomMenuActive ? 'show' : '' }}" id="zoomSubmenu">
                 <div class="list-group list-group-flush">
                     <a href="{{ route('zoom.requests.index') }}" class="list-group-item {{ request()->routeIs('zoom.requests.index') ? 'active' : '' }}">
-                        <i class="fas fa-caret-right submenu-icon"></i> Zoom Approv
+                        <i class="fas fa-caret-right submenu-icon"></i> Zoom Approve
                     </a>
                     <a href="{{ route('template.index') }}" class="list-group-item {{ request()->routeIs('template.index') ? 'active' : '' }}">
                         <i class="fas fa-caret-right submenu-icon"></i> Master Pesan

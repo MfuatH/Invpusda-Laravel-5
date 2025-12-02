@@ -81,14 +81,17 @@
 <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="approveModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
+            {{-- Form utama pembungkus (Action di-handle oleh JS) --}}
             <form id="approveForm" method="POST">
                 {{ csrf_field() }}
+                
                 <div class="modal-header">
                     <h5 class="modal-title" id="approveModalLabel">Konfirmasi Persetujuan</h5>
                     <button type="button" class="close" data-dismiss="modal">
                         <span>&times;</span>
                     </button>
                 </div>
+                
                 <div class="modal-body">
                     <p>Anda akan menyetujui permintaan barang berikut:</p>
                     <div class="alert alert-info">
@@ -96,14 +99,19 @@
                         Jumlah: <span id="approve-item-qty"></span><br>
                         Peminta: <span id="approve-requester-name"></span>
                     </div>
+
+                    {{-- KEMBALI KE TEXTAREA AGAR LEBIH BESAR --}}
                     <div class="form-group">
-                        <label>Catatan (Opsional)</label>
-                        <textarea name="note" class="form-control" rows="3"></textarea>
+                        <label for="approve-note">Catatan (Opsional)</label>
+                        <textarea name="note" id="approve-note" rows="3" 
+                                  class="form-control" 
+                                  placeholder="Contoh: Silakan ambil barang di loket 2..."></textarea>
                     </div>
                 </div>
+                
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button class="btn btn-success" type="submit">Setujui Permintaan</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">Setujui Permintaan</button>
                 </div>
             </form>
         </div>

@@ -98,7 +98,7 @@ class RequestController extends Controller
                 // --- LOGIKA NOTIFIKASI WA DIMULAI ---
                 
                 // 1. Ambil Nama Bidang (agar di WA muncul nama, bukan angka ID)
-                $namaBidang = \App\Bidang::find($validated['bidang_id'])->nama_bidang ?? 'Bidang ID ' . $validated['bidang_id'];
+                $namaBidang = \App\Bidang::find($validated['bidang_id'])->nama ?? 'Bidang ID ' . $validated['bidang_id'];
 
                 // 2. Susun Pesan WA yang Menarik
                 $listBarangString = implode("\n", $summaryItems);
@@ -190,52 +190,67 @@ class RequestController extends Controller
     }
     
     // --- END ZOOM REQUEST METHODS ---
-
-    public function approve(ItemRequest $reqBarang)
+    
+    public function approve(ItemRequest $reqBarang, Request $request) // 1. Tambahkan Request $request
     {
-        $request = $reqBarang; 
+        $reqModel = $reqBarang; // Rename variabel lokal biar tidak bentrok dengan $request input
         $admin = Auth::user();
 
         if ($admin->role === 'admin_barang') {
-            if (!$request->bidang_id || $admin->bidang_id !== $request->bidang_id) {
+            if (!$reqModel->bidang_id || $admin->bidang_id !== $reqModel->bidang_id) {
                 abort(403, 'Anda tidak berhak menyetujui request dari bidang ini.');
             }
         }
 
+        // 2. Tambahkan Validasi untuk catatan (note)
+        $request->validate([
+            'note' => 'nullable|string|max:255',
+        ]);
+
         try {
-            DB::transaction(function () use ($request) {
-                $item = $request->item;
-                if ($request->jumlah_request > $item->jumlah) {
+            DB::transaction(function () use ($reqModel) {
+                $item = $reqModel->item;
+                if ($reqModel->jumlah_request > $item->jumlah) {
                     throw new \Exception('Stok tidak mencukupi untuk menyetujui permintaan ini.');
                 }
-                $item->decrement('jumlah', $request->jumlah_request);
-                $request->update(['status' => 'approved']);
+                $item->decrement('jumlah', $reqModel->jumlah_request);
+                $reqModel->update(['status' => 'approved']);
+                
                 Transaction::create([
-                    'request_id' => $request->id,
+                    'request_id' => $reqModel->id,
                     'item_id'    => $item->id,
-                    'jumlah'     => $request->jumlah_request,
+                    'jumlah'     => $reqModel->jumlah_request,
                     'tipe'       => 'keluar',
                     'tanggal'    => Carbon::now(),
                     'user_id'    => Auth::id(),
                 ]);
             });
 
-            if (!empty($request->no_hp)) {
+            if (!empty($reqModel->no_hp)) {
                 try {
-                    $noHp = preg_replace('/[^0-9]/', '', trim($request->no_hp));
+                    $noHp = preg_replace('/[^0-9]/', '', trim($reqModel->no_hp));
                     if (substr($noHp, 0, 1) === '0') { $noHp = '62' . substr($noHp, 1); }
                     elseif (substr($noHp, 0, 3) === '+62') { $noHp = substr($noHp, 1); }
                     elseif (substr($noHp, 0, 2) !== '62') { $noHp = '62' . $noHp; }
                     
                     setlocale(LC_TIME, 'id_ID.UTF-8');
-                    $tanggal = $request->created_at->formatLocalized('%d %B %Y %H:%M');
+                    $tanggal = $reqModel->created_at->formatLocalized('%d %B %Y %H:%M');
+
+                    // 3. Modifikasi Pesan WA
                     $pesan = "[Request Barang Disetujui]\n\n"
-                        . "Halo {$request->nama_pemohon},\n"
+                        . "Halo {$reqModel->nama_pemohon},\n"
                         . "Request barang Anda telah *DISETUJUI*.\n\n"
-                        . "Barang: {$request->item->nama_barang}\n"
-                        . "Jumlah: {$request->jumlah_request}\n"
-                        . "Tanggal: {$tanggal}\n\n"
-                        . "Silakan ambil barang di bagian terkait. Terima kasih.";
+                        . "Barang: {$reqModel->item->nama_barang}\n"
+                        . "Jumlah: {$reqModel->jumlah_request}\n"
+                        . "Tanggal: {$tanggal}";
+
+                    // Cek apakah ada input 'note' dari admin
+                    if ($request->note) {
+                        $pesan .= "\nCatatan: _{$request->note}_";
+                    }
+
+                    $pesan .= "\n\nSilakan ambil barang di bagian terkait. Terima kasih.";
+                    
                     $wa = app(\App\Services\FontteService::class);
                     $wa->sendMessage($noHp, $pesan);
                 } catch (\Exception $wae) {
