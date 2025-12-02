@@ -86,6 +86,7 @@
             border-radius: 15px;
             max-height: none; /* biarkan tinggi menyesuaikan isi */
             overflow: visible; /* biar form tidak terpotong */
+            align-content: center;
         }
         .right-panel h3 {
             text-align: left;
