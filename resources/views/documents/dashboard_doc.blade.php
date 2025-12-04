@@ -345,8 +345,8 @@
                             <ul>
                                 <li>Presensi</li>
                                 <li>Notulen</li>
-                                <li>Nodin</li>
-                                <li>Lampiran pendukung</li>
+                                <li>Nota Dinas</li>
+                                <li>Lampiran pendukung seperti (scan, foto, dll.)</li>
                             </ul>
                             <small class="form-text text-muted d-block mb-1">
                                 <strong>Penting:</strong> Nama file tidak boleh pakai spasi/karakter spesial (!@#$).
