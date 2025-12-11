@@ -1,4 +1,6 @@
 # Invpusda - Sistem Inventory Management
+<!-- README updated to reflect current features (Dec 2025) -->
+# Invpusda - Sistem Inventory & Request Management
 
 ![Invpusda Banner](docs/banner.png)
 
@@ -8,317 +10,151 @@
 [![PHP Version](https://img.shields.io/badge/PHP-7.0+-blue.svg)](https://php.net)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**Sistem Manajemen Inventory berbasis web menggunakan Laravel 5**
-
-[Fitur](#fitur) • [Instalasi](#instalasi) • [Dokumentasi](#dokumentasi) • [Screenshot](#screenshot)
+**Aplikasi manajemen inventaris dan permintaan dinas berbasis Laravel 5**
 
 </div>
 
 ---
 
-## 📋 Tentang Project
+## 📋 Sekilas
 
-**Invpusda** adalah aplikasi manajemen inventory (inventaris) yang dibangun menggunakan framework Laravel 5. Aplikasi ini dirancang untuk memudahkan pengelolaan data barang, stok, transaksi masuk/keluar, dan pelaporan inventory secara real-time.
+Invpusda adalah aplikasi untuk mengelola inventaris, permintaan barang, layanan pendukung (catering, link Zoom), serta peminjaman kendaraan dinas. Aplikasi sudah dilengkapi alur permintaan — persetujuan admin — pelaporan, dan notifikasi WA (via FontteService).
 
-## ✨ Fitur
+## ✨ Fitur Utama (saat ini)
 
-- 📦 **Manajemen Barang**
-  - CRUD data barang
-  - Kategori barang
-  - Upload foto barang
-  - Barcode/QR Code generation
+- **Manajemen Barang**: CRUD barang, penyesuaian stok, dan riwayat transaksi.
+- **Permintaan Barang**: Form permintaan, approval oleh admin bidang, pengurangan stok otomatis saat disetujui.
+- **Permintaan Catering (Konsumsi)**: Form pengajuan, upload nota, modal preview, status approval, dan fitur laporan.
+- **Permintaan Link Zoom**: Form request Zoom dengan jadwal dan notifikasi ke admin bidang.
+- **Peminjaman Kendaraan Dinas**: Form publik untuk meminjam kendaraan, daftar unit kendaraan, admin approve/reject/complete, cek bentrok jadwal, dan cooldown 2 hari berbasis tanggal.
+- **Manajemen Kendaraan**: CRUD unit kendaraan (jenis, plat no, status).
+- **Dokumen & Laporan**: Upload laporan rapat (file), preview/download, admin verification, export sederhana.
+- **Notifikasi WA**: Integrasi via `FontteService` untuk notifikasi request/approval/reject ke user atau admin.
+- **Role-based Access**: Perbedaan tampilan/aksi untuk `super_admin` dan `admin_barang` (dengan filter bidang).
+- **UI/UX**: Dashboard statistik, responsive views, modals, and 24-hour time inputs (flatpickr) for time fields.
 
-- 📊 **Manajemen Stok**
-  - Monitoring stok real-time
-  - Notifikasi stok minimum
-  - History pergerakan stok
-  - Adjustment stok
-
-- 📥 **Transaksi Masuk**
-  - Pencatatan barang masuk
-  - Supplier management
-  - Print bukti transaksi
-
-- 📤 **Transaksi Keluar**
-  - Pencatatan barang keluar
-  - Permintaan barang
-  - Approval workflow
-
-- 📈 **Laporan**
-  - Laporan stok barang
-  - Laporan transaksi masuk/keluar
-  - Laporan per periode
-  - Export Excel
-
-- 👥 **Manajemen User**
-  - Multi-level user (Admin, Staff, Viewer)
-  - Role & Permission management
-  - User activity log
-
-- 🎨 **Dashboard**
-  - Dashboard interaktif
-  - Grafik & Statistik
-  - Quick access menu
-
-## 🛠️ Teknologi yang Digunakan
+## 🛠️ Teknologi
 
 - **Backend:** Laravel 5.x
-- **Frontend:** Bootstrap, jQuery, DataTables
+- **Frontend:** Bootstrap, flatpickr (time picker), FontAwesome, jQuery
 - **Database:** MySQL
-- **Server:** Apache/Nginx
-- **PHP Version:** 7.0+
+- **WA Integration:** `App\Services\FontteService` (requires `FONTTE_API_KEY` in `.env`)
 
 ## 📦 Requirement
-
-Pastikan sistem Anda memenuhi requirement berikut:
 
 - PHP >= 7.0
 - MySQL >= 5.7
 - Composer
-- Apache/Nginx Web Server
-- PHP Extensions:
-  - OpenSSL
-  - PDO
-  - Mbstring
-  - Tokenizer
-  - XML
-  - GD Library
+- PHP Extensions: OpenSSL, PDO, Mbstring, Tokenizer, XML, GD
 
-## 🚀 Instalasi
+## 🚀 Instalasi & Setup Singkat
 
-### 1. Clone Repository
+1. Clone dan masuk ke repo:
 
-```bash
+```powershell
 git clone https://github.com/MfuatH/Invpusda-Laravel-5.git
 cd Invpusda-Laravel-5
 ```
 
-### 2. Install Dependencies
+2. Install dependency:
 
-```bash
+```powershell
 composer install
 ```
 
-### 3. Konfigurasi Environment
+3. Salin environment dan sesuaikan database serta `FONTTE_API_KEY`:
 
-```bash
-cp .env.example .env
+```powershell
+copy .env.example .env
 ```
 
-Edit file `.env` dan sesuaikan konfigurasi database dan Token Wa-Blast:
+4. Generate app key:
 
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=invpusda
-DB_USERNAME=root
-DB_PASSWORD=
-
-FONTTE_API_KEY=
-```
-
-### 4. Generate Application Key
-
-```bash
+```powershell
 php artisan key:generate
 ```
 
-### 5. Jalankan Migration & Seeder
+5. Jalankan migrasi dan seeder:
 
-```bash
+```powershell
 php artisan migrate
 php artisan db:seed
 ```
 
-### 6. Create Storage Link
+6. Buat symbolic link storage (jika diperlukan):
 
-```bash
+```powershell
 php artisan storage:link
 ```
 
-### 7. Set Permission (Linux/Mac)
+7. Jalankan server pengembangan:
 
-```bash
-chmod -R 777 storage bootstrap/cache
-```
-
-### 8. Jalankan Aplikasi
-
-```bash
+```powershell
 php artisan serve
 ```
 
-Aplikasi akan berjalan di `http://localhost:8000`
+## 🔐 Akun Default (Jika Seeder disertakan)
 
-## 🔐 Default Login
+- **Admin**: `admin@invpusda.com` / `password`
+- **Staff Sekretariat**: `sekretariat@invpusda.com` / `password`
 
-Setelah instalasi, gunakan kredensial berikut untuk login:
+Jika kredensial tidak tersedia di seeders Anda, buat user lewat seeder atau lewat panel admin.
 
-**Admin:**
-- Email: `admin@invpusda.com`
-- Password: `password`
+## ✅ Tips Pengujian Fitur Kendaraan
 
-**Staff:**
-- Email: `sekretariat@invpusda.com`
-- Password: `password`
+- Menambahkan unit kendaraan via tinker (contoh):
 
-> ⚠️ **Penting:** Segera ubah password default setelah login pertama kali!
-
-## 📸 Screenshot
-
-### Dashboard
-![Dashboard](/docs/Dashboard_admin.png)
-*Dashboard utama *
-
-### Data Barang
-![Data Barang](/docs/Halaman_manajemen_barang.png)
-*Halaman manajemen data barang*
-
-### Transaksi Masuk
-![Transaksi Masuk](/docs/Form_req_barang.png)
-*Form pencatatan barang masuk*
-
-### Transaksi Keluar
-![Transaksi Keluar](/docs/Halaman_riwayat%20transaksi.png)
-*Form pencatatan barang keluar*
-
-### Request Zoom Masuk
-![Request Zoom](/docs/Form_req_link_zoom.png)
-*Halaman Pencatatan Request zoom*
-
-## 📖 Dokumentasi
-
-### Struktur Folder
-
-```
-Invpusda-Laravel-5/
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   └── Middleware/
-│   └── Models/
-├── config/
-├── database/
-│   ├── migrations/
-│   └── seeds/
-├── docs/              
-├── public/
-│   ├── css/
-│   ├── js/
-│   └── images/
-├── resources/
-│   └── views/
-├── routes/
-│   └── web.php
-└── storage/
+```powershell
+php artisan tinker
+App\Kendaraan::create(['jenis' => 'Innova Reborn', 'plat_no' => 'L 1234 AB', 'status' => 'available']);
+exit
 ```
 
+- Akses formulir publik: `/request-kendaraan` — kirim request, lalu cek admin `/dashboard/approvals/kendaraan` untuk approve/reject.
 
-## 🎯 Penggunaan
+## 📸 Screenshots (Tampilkan di README)
 
-### Menambah Barang Baru
+Untuk menampilkan tampilan aplikasi di README, letakkan file gambar di folder `docs/screenshots/`.
+Contoh nama file yang sering dipakai:
 
-1. Login ke sistem
-2. Navigasi ke menu **Barang** > **Tambah Barang**
-3. Isi form data barang
-4. Upload foto (opsional)
-5. Klik **Simpan**
+- `dashboard.png` — tampilan dashboard admin
+- `konsumsi_form.png` — form pemesanan catering
+- `kendaraan_form.png` — form request kendaraan
+- `approvals_kendaraan.png` — daftar approval kendaraan
 
-### Transaksi Barang Masuk
+Setelah menaruh file gambar, Anda bisa menambahkan di README seperti contoh di bawah (Markdown):
 
-1. Menu **Transaksi** > **Barang Masuk**
-2. Pilih supplier
-3. Tambah item barang dan jumlah
-4. Klik **Proses Transaksi**
-5. Print bukti transaksi
+```markdown
+## Screenshot
 
-### Transaksi Barang Keluar
-
-1. Menu **Transaksi** > **Barang Keluar**
-2. Pilih tujuan/pemohon
-3. Tambah item barang dan jumlah
-4. Klik **Proses Transaksi**
-5. Print bukti pengeluaran
-
-### Generate Laporan
-
-1. Menu **Laporan**
-2. Pilih jenis laporan
-3. Set periode tanggal
-4. Klik **Tampilkan**
-5. Export Excel
-
-## 🔧 Troubleshooting
-
-### Error "Class not found"
-
-```bash
-composer dump-autoload
+![Dashboard](/docs/screenshots/dashboard.png)
+![Form Konsumsi](/docs/screenshots/konsumsi_form.png)
+![Form Kendaraan](/docs/screenshots/kendaraan_form.png)
 ```
 
-### Error Permission Denied
+Rekomendasi ukuran: gunakan gambar lebar sekitar 1200px atau kurang agar tampil rapi di GitHub. Jika ingin menggunakan versi kecil, buat juga versi `-small.png`.
 
-```bash
-sudo chmod -R 777 storage bootstrap/cache
-```
+## ⚙️ Catatan Khusus & Perilaku
 
-### Error Database Connection
+- Cooldown Peminjaman Kendaraan: 2 hari berdasarkan tanggal (date-only). Jika pengembalian terakhir ber-tanggal `2025-11-01`, peminjam berikutnya hanya diperbolehkan meminjam mulai `2025-11-03` — jam tidak diperhitungkan.
+- Validasi bentrok jadwal mencegah overlapping peminjaman pada unit yang sama.
+- Upload file laporan: disimpan di `storage/app/public/uploads/laporan_rapat` (pastikan `storage:link` sudah dijalankan).
 
-- Pastikan MySQL service running
-- Cek kredensial database di file `.env`
-- Pastikan database sudah dibuat
+## 🔧 Troubleshooting umum
 
-### Cache Issue
+- Jika muncul error migration "Duplicate column": periksa file migrations di `database/migrations/` dan pastikan tidak ada migration ganda menambahkan kolom yang sama.
+- Jika notifikasi WA gagal, periksa `FONTTE_API_KEY` dan konfigurasi di `App\Services\FontteService`.
 
-```bash
-php artisan cache:clear
-php artisan config:clear
-php artisan view:clear
-```
+## 📝 Contributing
 
-## 🤝 Kontribusi
-
-Kontribusi selalu diterima! Berikut cara berkontribusi:
-
-1. Fork repository ini
-2. Buat branch fitur baru (`git checkout -b fitur-baru`)
-3. Commit perubahan (`git commit -am 'Menambah fitur baru'`)
-4. Push ke branch (`git push origin fitur-baru`)
-5. Buat Pull Request
-
-## 📝 Changelog
-
-### Version 1.0.0 (Current)
-- ✅ CRUD Barang
-- ✅ Transaksi Masuk/Keluar
-- ✅ Laporan Excel
-- ✅ Multi-user management
-- ✅ Dashboard analytics
-
-
+1. Fork repository
+2. Buat branch fitur: `git checkout -b fitur-baru`
+3. Commit & push
+4. Buat Pull Request
 
 ## 👨‍💻 Author
 
-**Mfuat H**
-
-- GitHub: [@MfuatH](https://github.com/MfuatH)
-- Email: [h4asanfu4at@gmail.com](mailto:h4asanfu4at@gmail.com)
-
-## 🙏 Acknowledgments
-
-- Laravel Framework
-- Bootstrap
-- DataTables
-- Chart.js
-- Dan semua open source libraries yang digunakan
-
-## 📞 Support
-
-Jika Anda memiliki pertanyaan atau membutuhkan bantuan:
-
-- 🐛 [Report Bug](https://github.com/MfuatH/Invpusda-Laravel-5/issues)
-- 💡 [Request Feature](https://github.com/MfuatH/Invpusda-Laravel-5/issues)
-- 📧 Email: h4asanfu4at@gmail.com
+- **Mfuat H** — h4asanfu4at@gmail.com
 
 ---
+
