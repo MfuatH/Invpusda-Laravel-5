@@ -112,7 +112,7 @@ exit
 
 - Akses formulir publik: `/request-kendaraan` — kirim request, lalu cek admin `/dashboard/approvals/kendaraan` untuk approve/reject.
 
-## 📸 Screenshots (Tampilkan di README)
+<!-- ## 📸 Screenshots (Tampilkan di README)
 
 Untuk menampilkan tampilan aplikasi di README, letakkan file gambar di folder `docs/screenshots/`.
 Contoh nama file yang sering dipakai:
@@ -132,7 +132,7 @@ Setelah menaruh file gambar, Anda bisa menambahkan di README seperti contoh di b
 ![Form Kendaraan](/docs/screenshots/kendaraan_form.png)
 ```
 
-Rekomendasi ukuran: gunakan gambar lebar sekitar 1200px atau kurang agar tampil rapi di GitHub. Jika ingin menggunakan versi kecil, buat juga versi `-small.png`.
+Rekomendasi ukuran: gunakan gambar lebar sekitar 1200px atau kurang agar tampil rapi di GitHub. Jika ingin menggunakan versi kecil, buat juga versi `-small.png`. -->
 
 ## ⚙️ Catatan Khusus & Perilaku
 
