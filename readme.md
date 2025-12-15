@@ -95,8 +95,8 @@ php artisan serve
 
 ## 🔐 Akun Default (Jika Seeder disertakan)
 
-- **Admin**: `admin@invpusda.com` / `password`
-- **Staff Sekretariat**: `sekretariat@invpusda.com` / `password`
+- **Admin**: `admin@pusda.com` / `password`
+- **Staff Sekretariat**: `sekretariat@pusda.com` / `password`
 
 Jika kredensial tidak tersedia di seeders Anda, buat user lewat seeder atau lewat panel admin.
 
